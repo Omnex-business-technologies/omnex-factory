@@ -208,3 +208,26 @@ def test_the_committed_ledger_records_a_prediction_made_before_its_outcome() -> 
     assert rows, "the ledger has no writer again"
     assert all(r.expected_outcome for r in rows)
     assert ledger.revised_predictions(rows) == []
+
+
+def test_the_next_run_id_is_the_next_free_one_not_a_row_count() -> None:
+    """`len(runs) + 1` was wrong twice: observation rows are entries too, so the
+    second run came out R-0003 — a gap that reads like a deletion in an
+    append-only file — and once a gap exists the count can land on an id already
+    taken. `append` is idempotent on run_id, so that collision would not raise:
+    it would return the earlier row and silently drop the new one."""
+    rows = [_run(run_id="R-0001"), _run(run_id="R-0001-observed"), _run(run_id="R-0003")]
+    assert ledger.next_run_id(rows) == "R-0004"
+    assert ledger.next_run_id([]) == "R-0001"
+
+
+def test_a_colliding_run_id_would_be_silently_dropped(tmp_path: Path) -> None:
+    """The reason the generator must never produce a used id. This documents the
+    behaviour rather than changing it — idempotency on retry is deliberate."""
+    path = tmp_path / "runs.jsonl"
+    ledger.append(_run(run_id="R-0001", objective="the real one"), path)
+    ledger.append(_run(run_id="R-0001", objective="a different unit of work"), path)
+
+    rows = ledger.load(path)
+    assert len(rows) == 1
+    assert rows[0].objective == "the real one", "the second was dropped, not merged"

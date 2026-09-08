@@ -49,7 +49,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,222 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,224 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
@@ -281,6 +281,17 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   conversational memory. The chain is tamper-**evident**, not tamper-proof, and
   says so. Every run carries `expected_outcome` from the start because an
   expectation recorded after the result is a description, not a prediction.
+- `docs/TRANSFER.md` — **the runbook for moving this repo into an organization,
+  written and not performed.** Seven ordered steps, each naming what breaks if
+  skipped; granting the Claude GitHub App access to the new org comes *before*
+  the transfer, or the session loses the repository the moment its path changes,
+  and reconnecting Vercel comes after, or previews stop *quietly*. It opens with
+  the honest accounting: `omnex-factory` is public, so attestation, required
+  checks, secret scanning and environment gates are already reachable — the case
+  for moving is a portfolio argument, one ruleset and one token over three repos,
+  not a capability one. Every step is `CREDENTIAL`- or `DESTRUCTIVE`-class under
+  `policy.py` and cleared by no autonomy level alone, which is why it is a
+  runbook rather than a script.
 - `docs/EXECUTION_DECISIONS.md` — why something was built, what evidence forced
   it, what else was considered, whether it can be undone. `D-001` records the
   finding that a detailed execution report described fifteen artifacts of which
