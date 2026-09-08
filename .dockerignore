@@ -1,0 +1,44 @@
+# deploy/local's engine image now builds from the repository root (D-012:
+# a context of engine/ alone left ~90 of the engine's own tests unable to
+# find the repo-root files they read by design). This file is what keeps
+# that build from also copying in everything the .gitignore excludes plus
+# the local caches nothing in a fresh checkout should have anyway.
+#
+# .git alone is committed history, never a build input, and node_modules /
+# .next are the two heaviest directories in this repository (519 MB and
+# 17 MB measured here) — neither the engine image nor its test suite
+# touches either.
+
+.git/
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Python — every interpreter's own venv and bytecode cache, never a build
+# input. engine/.venv/ was 91 MB measured here and was never excluded by
+# name before this file existed.
+**/.venv/
+**/__pycache__/
+*.pyc
+
+# Secrets and local generated output — mirrors .gitignore. A build input
+# is not the place a credential should be reachable from even if it never
+# ends up in a layer; refusing to look is cheaper than checking after.
+.env
+.env.local
+.env*.local
+.n8n/
+.searxng/
+.hfcache/
+.insightface/
+packs/*/images/
+packs/ambassador-out/
+packs/flux-out/
+packs/flux-v2/
+packs/flux-faces/
+packs/*.zip
+packs/*.log
+
+.DS_Store
+.vercel
