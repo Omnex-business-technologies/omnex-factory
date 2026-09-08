@@ -101,6 +101,14 @@
       "checker": "bindings_carry_no_credentials",
       "allowlist": [],
       "note": "Two rules in one predicate because they fail together. compile/n8n.py scans the document it emits, but that document is momentary; this scans engine/ontology/n8n_bindings.json, which is the file that gets pushed. The confirmation half matters because `require_confirmed=True` is what stands between an unattended workflow and a shape nobody has seen work — a confirmation with nobody behind it is the only way that gate opens by accident."
+    },
+    {
+      "id": "every_extra_declares_what_it_delivers",
+      "rule": "Every extra in pyproject.toml declares whether it is supported, partial, unsupported or tooling, and the declaration matches what the code imports. Prose may not name an adapter file that does not exist.",
+      "paid_for": "six of twelve extras had ZERO of their declared dependencies imported anywhere - api, memory, worker, agents, evals, finetune - so `pip install omnex-engine[agents]` installed langgraph and crewai and delivered no capability; two docstrings named adapter modules (langgraph_adapter.py, celery_adapter.py) that have never existed",
+      "checker": "every_extra_declares_what_it_delivers",
+      "allowlist": [],
+      "note": "Deliberately NOT 'every extra must have an adapter'. A declaration is evidence of an intended interface, not proof the interface should exist, so `unsupported` with a stated reason passes and silence does not - writing six adapters so twelve declarations look complete is decorative architecture. Checked per DEPENDENCY rather than per extra, because `vectors` imports qdrant-client and not sqlite-vec or numpy: calling it backed hides two unused pins, calling it unbacked erases a real adapter. A backticked *_adapter.py is treated as a claim the file exists; prose about an adapter that does not exist uses plain words, so the check never has to parse negation."
     }
   ]
 }

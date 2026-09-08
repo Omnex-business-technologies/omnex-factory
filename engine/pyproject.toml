@@ -73,6 +73,82 @@ dev = [
   "mypy>=1.13",
 ]
 
+[tool.omnex.extras]
+# What each extra above actually delivers, checked by scripts/extras_check.py.
+#
+# `pip install omnex-engine[agents]` installs langgraph and crewai and gives you
+# nothing: no module imports either. That is the same class of defect this
+# repository has already paid for — n8n_bindings.json named
+# `omnex.pipeline.verify_webhook`, a module that did not exist — and the same one
+# `live_listings_are_covered` guards from the other side: a promise with nothing
+# behind it.
+#
+# A declaration is evidence of an INTENDED interface, not proof the interface
+# should exist. So the question per extra is "is the promise still intended?",
+# and the answer is one of three states, never a silent absence:
+#
+#   supported     every declared dependency is imported by a module here
+#   partial       some are; the unused ones must be named with a reason
+#   unsupported   none are; `why` says what it would take, and the extra is a
+#                 documented placeholder rather than a working install
+#   tooling       not a capability (dev), exempt from the adapter rule
+#
+# Measured 2026-09-08 by grepping every import in src/omnex. Six of twelve
+# extras had zero of their dependencies imported anywhere.
+
+[tool.omnex.extras.api]
+status = "unsupported"
+why = "There is no HTTP surface in the engine. fastapi appears only as a STRING in intel/sources.py, which scans public sources for framework names — text, not an import. Serving P7/P15/P16 over HTTP would need routers that do not exist."
+
+[tool.omnex.extras.otel]
+status = "partial"
+backed_by = ["omnex.obs.export"]
+unused = ["prometheus-client"]
+why = "obs/export.py imports opentelemetry. The Prometheus path is rendered as exposition text by obs/metrics.py without the client library, so the dependency buys nothing today."
+
+[tool.omnex.extras.llm]
+status = "supported"
+backed_by = ["omnex.llm.litellm_adapter"]
+
+[tool.omnex.extras.vectors]
+status = "partial"
+backed_by = ["omnex.vectors.qdrant_store"]
+unused = ["sqlite-vec", "numpy"]
+why = "qdrant_store.py imports qdrant-client. sqlite_store.py uses the standard library's sqlite3 rather than the sqlite-vec extension, and fusion/embed compute in pure Python — so both remaining pins are aspirational."
+
+[tool.omnex.extras.rag]
+status = "supported"
+backed_by = ["omnex.rag.ingest", "omnex.rag.rerank"]
+
+[tool.omnex.extras.figures]
+status = "partial"
+backed_by = ["omnex.rag.figures"]
+unused = ["pypdfium2", "pytesseract", "imagehash"]
+why = "figures.py imports pdfplumber for vector objects and coordinates. Region re-rendering, OCR and perceptual hashing are declared as Protocols with in-repo implementations, and no module imports those three libraries."
+
+[tool.omnex.extras.memory]
+status = "unsupported"
+why = "No module imports redis. `memory` is ShortTermBuffer plus LongTermMemory in process; cross-session sync would need memory/redis_store.py, which does not exist."
+
+[tool.omnex.extras.worker]
+status = "unsupported"
+why = "No module imports celery. pipeline/queue.py's docstring named `celery_adapter.py` as the production path and that file has never existed; the in-repo InMemoryBroker is the only broker. pipeline.Claims covers the durable case the n8n path actually needs."
+
+[tool.omnex.extras.agents]
+status = "unsupported"
+why = "No module imports langgraph or crewai. graph/runtime.py's docstring named `langgraph_adapter.py` and that file has never existed. The in-repo Graph is not an adapter over either library, it is a separate runtime."
+
+[tool.omnex.extras.evals]
+status = "unsupported"
+why = "No module imports deepeval, ragas or langsmith. omnex.evals computes its own metrics and gates on newly-failing cases; nothing routes to an external backend."
+
+[tool.omnex.extras.finetune]
+status = "unsupported"
+why = "No module imports torch, transformers, peft, trl or datasets. omnex.finetune is deliberately the parts AROUND the training loop — decontamination, dedup, preference validation, forgetting checks — all pure Python. The four lines that need a GPU are not in this repository."
+
+[tool.omnex.extras.dev]
+status = "tooling"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/omnex"]
 

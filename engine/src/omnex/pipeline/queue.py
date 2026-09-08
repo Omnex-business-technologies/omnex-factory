@@ -141,11 +141,14 @@ Handler = Callable[[Job], Any]
 
 @dataclass
 class InMemoryBroker:
-    """A broker that needs no Redis. The default, and what the tests use.
+    """A broker that needs no Redis. The default, and the ONLY one that exists.
 
-    Celery is the production path (`celery_adapter.py`); this exists so the
-    whole retry / DLQ / idempotency behaviour is testable without a service,
-    which is the only way those paths get exercised on every commit.
+    It exists so the whole retry / DLQ / idempotency behaviour is testable
+    without a service, which is the only way those paths get exercised on every
+    commit. An earlier version of this docstring called Celery the production
+    path and named a celery adapter module — that file has never existed, the
+    `worker` extra is declared `unsupported`, and `pipeline.Claims` is what
+    actually covers the durable case the n8n workflow needs.
     """
 
     jobs: list[Job] = field(default_factory=list)

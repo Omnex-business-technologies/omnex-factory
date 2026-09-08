@@ -369,6 +369,32 @@ def bindings_carry_no_credentials() -> list[Violation]:
     return []
 
 
+# ── 9. an install delivers what it declares, or says it does not ──────────
+def every_extra_declares_what_it_delivers() -> list[Violation]:
+    """`pip install omnex-engine[agents]` installed two libraries and did nothing.
+
+    Six of twelve extras had zero of their declared dependencies imported
+    anywhere when this was written. The install succeeds, so the promise looks
+    kept, and the user gets a dependency instead of a capability — the same shape
+    as a listing selling 170 images against 80, which `live_listings_are_covered`
+    already guards from the other side.
+
+    The rule is deliberately NOT "every extra must have an adapter". A
+    declaration is evidence of an intended interface, not proof the interface
+    should exist, so `unsupported` with a stated reason passes and silence does
+    not. Writing six adapters to make twelve declarations look complete would be
+    decorative architecture, which is the failure this registry exists against.
+    """
+    sys.path.insert(0, str(ENGINE / "scripts"))
+    import extras_check
+
+    manifest = tomllib.loads((ENGINE / "pyproject.toml").read_text(encoding="utf-8"))
+    report = extras_check.check(manifest, extras_check.importers())
+    return [Violation("engine/pyproject.toml", problem) for problem in report.problems] + [
+        Violation("engine/src/omnex", problem) for problem in extras_check.prose_adapters()
+    ]
+
+
 #: Every checker this module offers, by the name `invariants.json` refers to.
 CHECKERS = {
     "money_never_float": money_never_float,
@@ -379,6 +405,7 @@ CHECKERS = {
     "no_required_dependencies": no_required_dependencies,
     "live_listings_are_covered": live_listings_are_covered,
     "bindings_carry_no_credentials": bindings_carry_no_credentials,
+    "every_extra_declares_what_it_delivers": every_extra_declares_what_it_delivers,
 }
 
 

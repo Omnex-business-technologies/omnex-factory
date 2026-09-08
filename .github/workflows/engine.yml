@@ -90,6 +90,13 @@ jobs:
         # the registry becoming a second copy of CLAUDE.md.
         run: uv run python scripts/invariant_map.py
 
+      - name: Promise integrity
+        # What `pip install omnex-engine[x]` actually delivers, measured per
+        # dependency. Six of twelve extras once installed libraries no module
+        # imported. An `unsupported` extra with a stated reason passes: the rule
+        # is promise integrity, not adapter count.
+        run: uv run python scripts/extras_check.py
+
       - name: Environment manifest
         # Compares deploy/env.json with every `process.env` the app reads, in
         # both directions. It does NOT look at this machine's environment: none

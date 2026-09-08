@@ -199,6 +199,14 @@ CATALOGUE: tuple[Mutation, ...] = (
         ),
         rule="both storefronts retry; one order delivered twice is two GPU-built packs",
     ),
+    Mutation(
+        ident="an_extra_may_claim_what_nothing_backs",
+        path="engine/scripts/extras_check.py",
+        find='    if status == "supported" and unbacked:',
+        replace="    if False:",
+        caught_by=("tests/test_extras_check.py::test_supported_with_nothing_importing_it_fails",),
+        rule="an install that delivers a dependency and no capability is a promise with nothing behind it",
+    ),
 )
 
 

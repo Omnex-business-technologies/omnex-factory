@@ -1,8 +1,15 @@
 """A small state-machine runtime for agent workflows.
 
 Written rather than imported, for reasons that are about testability rather than
-not-invented-here. LangGraph is a good library and there is an adapter for it in
-`langgraph_adapter.py`; what this gives that pulling it in as a hard dependency
+not-invented-here. LangGraph is a good library and this is **not** an adapter
+over it: the `agents` extra installs langgraph and crewai, nothing here imports
+either, and the extra is declared `unsupported` in `pyproject.toml` with that
+reason. An earlier version of this docstring pointed at a langgraph adapter
+module that has never existed — prose that resolves to nothing reads exactly like
+prose that resolves to something, which is why `scripts/extras_check.py` now
+refuses a backticked adapter filename with no file behind it.
+
+What writing the runtime gives that pulling LangGraph in as a hard dependency
 does not:
 
 - The whole engine's test suite stays dependency-free and runs in seconds.

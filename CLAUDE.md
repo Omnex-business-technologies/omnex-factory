@@ -16,6 +16,7 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/mypy \
   && .venv/bin/python scripts/invariant_map.py \
   && .venv/bin/python scripts/env_check.py \
+  && .venv/bin/python scripts/extras_check.py \
   && .venv/bin/python -m pytest tests/ -q \
   && .venv/bin/python scripts/mutate.py
 
@@ -36,8 +37,8 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,038 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **15 of 15 mutations killed**.
+Current state: **1,057 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **16 of 16 mutations killed**.
 All 68 TypeScript tests now run in CI; until this commit, seven of them did.
 
 ## engine/src/omnex/ — what each module is for
@@ -104,6 +105,14 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   confirmation without a person's name and a date. The emitted workflow JSON is
   committed and shared; a key in it is an incident, not a configuration.
   → `bindings_carry_no_credentials`
+- **An extra delivers what it declares, or says it does not.** `pip install
+  omnex-engine[agents]` installed langgraph and crewai and gave you nothing —
+  six of twelve extras had **zero** of their dependencies imported anywhere.
+  Deliberately not "every extra needs an adapter": a declaration is evidence of
+  an intended interface, not proof one should exist, so `unsupported` with a
+  reason passes and silence does not. Checked per **dependency**, because
+  `vectors` imports qdrant-client and not sqlite-vec or numpy.
+  → `every_extra_declares_what_it_delivers`
 - **Suite fingerprints refuse cross-suite comparison.** Editing an expected
   answer and re-running is otherwise indistinguishable from an improvement.
 
@@ -145,10 +154,27 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   `scripts/invariant_map.py` runs every checker, renders `INVARIANTS.md`, and
   exits non-zero on a breach. **A rule with no checker AND no written reason one
   is impossible fails the script** — the mechanism that stops the registry
-  becoming a second copy of this file. Currently **8 of 11 enforced**, 3 declared
+  becoming a second copy of this file. Currently **9 of 12 enforced**, 3 declared
   unenforceable with reasons, 2 allowlisted exceptions that each name a working
   injection point. Each bullet in "Non-obvious invariants" above cites its id,
   and a test requires that link in both directions.
+- `LICENSE` (`/`, `engine/`, `oss/citegate/`) — MIT. Both `pyproject.toml` files
+  declared `license = { text = "MIT" }` with **no licence file anywhere in the
+  repository**, which is the same shape `build_pack.py` already refuses in a
+  pack: a claim with no file behind it. No release was possible until this.
+- `engine/scripts/extras_check.py` + `[tool.omnex.extras]` — **what
+  `pip install omnex-engine[x]` actually delivers, measured per dependency.**
+  Six of twelve extras had **zero** of their dependencies imported anywhere
+  (`api`, `memory`, `worker`, `agents`, `evals`, `finetune`), and two docstrings
+  named adapter modules that have never existed. Statuses:
+  **2 supported · 3 partial · 6 unsupported · 1 tooling**. Per dependency, not
+  per extra — `vectors` imports qdrant-client and not sqlite-vec or numpy, so
+  "backed" hides two unused pins and "unbacked" erases a real adapter.
+  Decisions live in `docs/EXECUTION_DECISIONS.md`.
+- `docs/EXECUTION_DECISIONS.md` — why something was built, what evidence forced
+  it, what else was considered, whether it can be undone. `D-001` records the
+  finding that a detailed execution report described fifteen artifacts of which
+  **none existed** — the whole exchange had run in plan mode.
 - `packs/publish.py` — **the last step before money: the request that creates a
   listing.** It builds the request and, by default, does not send it. No
   endpoint is written into this repository — the storefront API shapes were not
@@ -239,9 +265,9 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: fifteen hand-written mutations against rules the
+  actually held by its tests*: sixteen hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **15 of 15 killed**. On its first run it was 11 — the survivor showed that
+  **16 of 16 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate
