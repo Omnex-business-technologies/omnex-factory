@@ -207,6 +207,14 @@ CATALOGUE: tuple[Mutation, ...] = (
         caught_by=("tests/test_extras_check.py::test_supported_with_nothing_importing_it_fails",),
         rule="an install that delivers a dependency and no capability is a promise with nothing behind it",
     ),
+    Mutation(
+        ident="derived_state_stops_being_checked",
+        path="engine/scripts/state_map.py",
+        find='    walk(committed, measured, "state")\n    return problems',
+        replace='    walk(committed, measured, "state")\n    return []',
+        caught_by=("tests/test_state_map.py::test_drift_is_caught_in_both_directions",),
+        rule="machine state that can drift from the repository is worse than none",
+    ),
 )
 
 

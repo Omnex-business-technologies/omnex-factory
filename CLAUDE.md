@@ -17,6 +17,7 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/python scripts/invariant_map.py \
   && .venv/bin/python scripts/env_check.py \
   && .venv/bin/python scripts/extras_check.py \
+  && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python -m pytest tests/ -q \
   && .venv/bin/python scripts/mutate.py
 
@@ -37,8 +38,8 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,057 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **16 of 16 mutations killed**.
+Current state: **1,070 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **17 of 17 mutations killed**.
 All 68 TypeScript tests now run in CI; until this commit, seven of them did.
 
 ## engine/src/omnex/ — what each module is for
@@ -158,6 +159,25 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   unenforceable with reasons, 2 allowlisted exceptions that each name a working
   injection point. Each bullet in "Non-obvious invariants" above cites its id,
   and a test requires that link in both directions.
+- `CONSTITUTION.md` — what holds regardless of phase: the authority hierarchy
+  (**repository truth outranks every plan**), the lifecycle states that are never
+  collapsed, the three layers of truth, *machine proposes / person confirms*, and
+  **money changes priority, never reality**. Changes rarely; each change carries
+  its reason in `docs/EXECUTION_DECISIONS.md`.
+- `EXECUTION_CONTRACT.md` — how work is chosen and verified: autonomy levels and
+  side-effect classes, promise integrity, evidence rules, the four adversaries,
+  definition of done, the twelve maturity gates, and **what is currently blocked
+  with a named resolution for each**.
+- `execution_state.json` + `engine/scripts/state_map.py` — **where execution
+  actually is, derived not typed.** `state_map.py --check` fails when the file
+  and the repository disagree **in either direction**. Machine state is the most
+  dangerous artifact here because it is the thing an agent reads *instead of
+  looking*, and unlike prose it drifts authoritatively. **No timestamp**, on
+  purpose: a generation time changes every run, so the file would differ from
+  itself and the validator would have to learn to ignore a field — it is keyed on
+  `source_commit` instead. Today: **1 gate PASS, 12 UNKNOWN, 0 FAIL**, and every
+  UNKNOWN names the evidence it waits for, because `UNKNOWN` is a state and
+  `false` is a claim.
 - `LICENSE` (`/`, `engine/`, `oss/citegate/`) — MIT. Both `pyproject.toml` files
   declared `license = { text = "MIT" }` with **no licence file anywhere in the
   repository**, which is the same shape `build_pack.py` already refuses in a
@@ -265,9 +285,9 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: sixteen hand-written mutations against rules the
+  actually held by its tests*: seventeen hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **16 of 16 killed**. On its first run it was 11 — the survivor showed that
+  **17 of 17 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate

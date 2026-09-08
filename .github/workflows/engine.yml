@@ -97,6 +97,13 @@ jobs:
         # is promise integrity, not adapter count.
         run: uv run python scripts/extras_check.py
 
+      - name: Derived execution state
+        # execution_state.json is derived, never authored. This fails when the
+        # committed file and the repository disagree in either direction —
+        # machine state that can lie is worse than none, because it is the one
+        # thing an agent reads instead of looking.
+        run: uv run python scripts/state_map.py --check
+
       - name: Environment manifest
         # Compares deploy/env.json with every `process.env` the app reads, in
         # both directions. It does NOT look at this machine's environment: none
