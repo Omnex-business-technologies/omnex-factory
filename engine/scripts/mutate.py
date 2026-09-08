@@ -228,9 +228,7 @@ CATALOGUE: tuple[Mutation, ...] = (
         path="engine/scripts/apply_decisions.py",
         find="        elif ruling.reviewer.strip().lower() in NOT_A_PERSON:",
         replace="        elif False:",
-        caught_by=(
-            "tests/test_apply_decisions.py::test_a_machine_shaped_reviewer_is_refused",
-        ),
+        caught_by=("tests/test_apply_decisions.py::test_a_machine_shaped_reviewer_is_refused",),
         rule="the one count a machine may not raise stops meaning anything if it can",
     ),
 )
