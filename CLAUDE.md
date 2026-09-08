@@ -360,7 +360,7 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   recorded, which is not 0 earned" — never €0.00.** It reads the repository and
   cannot see Stripe, Supabase, Etsy or Lemon Squeezy, and says so in its own
   last section; printing an unobservable as zero is the mistake `3766976`
-  already paid for. Today: **day 37, 80 commits, 80 of 170 images through QC,
+  already paid for. Today: **day 41, 94 commits, 80 of 170 images through QC,
   0 listings live, 1 module enabled, no revenue log.**
 - `packs/build_pack.py` — QC-passed images → a file Etsy can deliver. Four
   ratios **cropped from the centre, never padded**: a background scene with bars
@@ -373,9 +373,9 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: nineteen hand-written mutations against rules the
+  actually held by its tests*: twenty-seven hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **19 of 19 killed**. On its first run it was 11 — the survivor showed that
+  **27 of 27 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate
@@ -394,7 +394,7 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   implementation (`MCP` → `McpClient`), one broader cannot — `omnex.factory.Tool`
   was proposed for fourteen different "Tool X" nodes at once before that rule
   landed. Pruning that noise raised the gap count from 447 to 464, which is the
-  honest direction. Currently **464 gap · 43 proposed · 0 rejected · 0
+  honest direction. Currently **461 gap · 46 proposed · 0 rejected · 0
   implemented**.
 - `corpus/universal-ai-os/BUILD_ORDER.md` — the join, from
   `scripts/build_order.py`: every node with no code, ranked by how many figures
@@ -499,6 +499,16 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   damage looks like a tidy-up in the diff. `git checkout` on the files that had
   no other changes was the recovery. Fix a specific rule by hand, or run
   `--fix` with the project's own configuration and no `--select`.
+- **This file hand-quotes figures that scripts derive, and they drift.** Four
+  were stale when PR #1 was prepared for landing: `day 37, 80 commits` (measured:
+  day 41, 94), `19 of 19 killed` (27), `464 gap · 43 proposed` (461 · 46). Each
+  is produced by a script — `business_map.py`, `mutate.py`, `node_map` — and
+  copied here by hand, which is the drift this repository builds gates against,
+  in the document that describes those gates. **Re-measure before quoting**, and
+  treat a figure in this file as a claim with a date rather than a fact. A
+  checker comparing quoted figures against their scripts is the obvious fix and
+  is not built: it needs the figures tagged first, and an untagged regex over
+  prose fails in the direction of passing.
 - **A package with no lint config is not "passing lint", it is unlinted.**
   `oss/citegate` had no `[tool.ruff]` and there is no config at the repository
   root either, so ruff fell back to its defaults (line-length 88, a narrower
