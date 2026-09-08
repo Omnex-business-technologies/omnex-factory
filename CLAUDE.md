@@ -19,6 +19,8 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/python scripts/extras_check.py \
   && .venv/bin/python scripts/release_check.py --target citegate \
   && .venv/bin/python scripts/release_check.py --target engine \
+  && .venv/bin/python scripts/claims.py --check \
+  && .venv/bin/python scripts/runs.py --check \
   && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
@@ -46,8 +48,8 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,143 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **22 of 22 mutations killed**.
+Current state: **1,194 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **27 of 27 mutations killed**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
@@ -248,6 +250,35 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   and PyPI publish sits behind a `pypi` environment needing both the operator's
   token and their approval. **It has never run**, and `execution_state.json` says
   UNKNOWN rather than PASS for exactly that reason.
+- `state/` + `engine/scripts/claims.py` · `policy.py` · `next_action.py` ·
+  `runs.py` — **the execution spine: what is asserted, what backs it, what may
+  act on it, and how a fresh session continues.** `claims.jsonl` and
+  `evidence.jsonl` are separate on purpose — evidence is a first-class entity
+  with a method, a version, an environment and an expiry, and **negative
+  evidence is first-class too**. A claim's **status is derived, never stored**:
+  a stored status is a typeable one, and that is the single thing that must not
+  be typeable. Eight states, never collapsed — `CONTRADICTED` and `STALE` are
+  the two most systems lack and the two that matter. **A claim is not SUPPORTED
+  because evidence exists**: `VERIFIES` maps each claim type to the methods that
+  can settle it, so `person` cannot settle whether a symbol imports. Contradiction
+  is **superseded, never deleted** — `E-004`, "citegate's tests never ran in CI",
+  is still on file under `E-005`. Absence is `UNKNOWN`, and **being unable to
+  check is not evidence against**: the Etsy shape is `C-012` CONTRADICTED
+  (measured: 403 at the proxy) while whether the API would accept the request is
+  `C-009` UNKNOWN. `policy.py` maps eleven side-effect classes to autonomy
+  levels; `PUBLISH`, `DEPLOY`, `CREDENTIAL`, `FINANCIAL` and `DESTRUCTIVE` are
+  cleared by **no level alone**, even L5. **Money changes priority, never
+  reality** — `economic_weight` reaches `order()` and nothing else, and two tests
+  hold that line. `next_action.py` derives the queue from the registry rather
+  than a maintained list, so a claim that becomes SUPPORTED leaves it without
+  anybody crossing it off; its score is printed **as a heuristic** and the policy
+  check runs after it and can refuse the top-ranked item. `runs.py` is the
+  hash-chained, append-only ledger plus checkpoint and recovery: `--recover`
+  answers WHERE WE ARE · WHAT IS TRUE · WHAT IS UNKNOWN · WHAT WAS DONE · WHAT
+  FAILED · WHAT IS BLOCKED · WHAT NEXT from the repository, with no
+  conversational memory. The chain is tamper-**evident**, not tamper-proof, and
+  says so. Every run carries `expected_outcome` from the start because an
+  expectation recorded after the result is a description, not a prediction.
 - `docs/EXECUTION_DECISIONS.md` — why something was built, what evidence forced
   it, what else was considered, whether it can be undone. `D-001` records the
   finding that a detailed execution report described fifteen artifacts of which

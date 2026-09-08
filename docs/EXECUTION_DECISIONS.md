@@ -246,3 +246,102 @@ it asks *declared → imported* and **cannot see this direction by construction*
 `release_check.py` asks *imported → declared*. Neither subsumes the other, and
 that asymmetry is why the second checker earns its place rather than duplicating
 the first.
+
+---
+
+## D-007 · `state_check.py` was folded into `state_map.py --check`, and never recorded
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** The plan named `state_map.py` and `state_check.py` as two artifacts.
+Only one exists.
+
+**evidence.** A reconciliation of every artifact the plan names found 15 PRESENT
+and 7 ABSENT. `state_check.py` was among the absent — not because it was skipped
+but because its behaviour lives in `state_map.py --check`.
+
+**chosen.** Keep the fold. Record the deviation, which is the part that was
+missing: an absent artifact that is absent *on purpose* is indistinguishable
+from one that was forgotten unless somebody writes down which it is.
+
+**reason.** The generator and the validator share one derivation. Splitting them
+gives two files that must agree about the shape of the state — the drift this
+repository keeps paying for, and the reason `one_symbol_resolver` exists.
+`env_check.py` and `release_check.py` use the same `--mode` shape.
+
+**tradeoffs.** The plan's artifact list no longer matches the filesystem
+one-for-one, which is why this entry exists.
+
+**risk.** Low. The same argument applies to `runs.py`, which absorbs the planned
+`checkpoint.py` and `recover.py` for the same reason and is recorded in D-008.
+
+---
+
+## D-008 · The execution spine, and what was deliberately not built
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** The hardening contract requires the spine to exist before broad
+adapter, deployment or commercialization work. It did not exist: `claims.jsonl`,
+`evidence.jsonl`, `runs.jsonl`, `next_action.py`, `checkpoint.py` and
+`recover.py` were all ABSENT while PHASE 3 was reported complete.
+
+**evidence.** A file-by-file reconciliation, run before writing anything:
+15 PRESENT, 7 ABSENT, and the seven absent were the whole spine.
+
+**chosen.** `claims.py` (registry + derived status), `policy.py` (side-effect
+classes, autonomy, authorisation), `next_action.py` (derived graph +
+recommendation), `runs.py` (ledger + checkpoint + recovery). 51 tests, 5
+mutations, both `--check` modes in CI and in the documented gate.
+
+**reason, decision by decision:**
+
+- **Status is derived, not stored.** The contract lists `status` as a claim
+  field. Storing it makes it typeable, and a typeable status lets anybody write
+  SUPPORTED without producing what the word means. `evidence.jsonl → status()`.
+- **A claim is not SUPPORTED because evidence exists.** `VERIFIES` maps claim
+  type to the methods that can settle it. Without it, writing a row and proving
+  a thing are the same act.
+- **Contradiction is superseded, never deleted.** `E-004` (citegate's tests
+  never ran in CI) is still on file under `E-005`, because a registry that drops
+  what disagreed with it cannot say what would change its mind.
+- **Money orders; money does not decide.** `economic_weight` reaches `order()`
+  and nothing else. `test_an_economic_score_cannot_change_a_claim_status` and
+  `test_economic_weight_is_not_an_input_to_authorisation` are the executable
+  form — the prose version is what every system that failed this way also had.
+- **`runs.py` absorbs `checkpoint.py` and `recover.py`.** Three files, one data
+  model, three places to drift. Same argument as D-007.
+
+**what was deliberately NOT built, and why:**
+
+- **Full invalidation propagation** (dependency change → staleness → claim
+  invalidation → graph recomputation). The metadata it needs is in place —
+  `source_version`, `reverify_after`, `dependencies` — but nothing in the
+  repository yet has a dependency whose change would trigger it. Building the
+  propagation now would be a mechanism with no input. The contract explicitly
+  permits this: implement the minimum metadata that makes future propagation
+  safe. That metadata cannot be backfilled; the mechanism can.
+- **The OUTCOME → LEARNING → GRAPH UPDATE loop.** `expected_outcome` and
+  `observed_outcome` are on every run from the first one, because an expectation
+  recorded after the result is a description rather than a prediction and cannot
+  be added later. The loop itself needs runs to learn from and there are zero.
+- **A proof manifest.** No invariant requires it and no capability depends on it.
+
+**tradeoffs.** The registry has 12 claims. That is small, and deliberately so:
+every one is a claim this session actually made and can point at evidence for.
+A registry seeded with plausible-looking rows would have exactly the property
+the whole design refuses.
+
+**risk.** The registry becoming a second copy of `nodes.json` or `invariants.json`.
+Mitigated by scope: those answer "does this symbol exist" and "is this rule
+held". This answers "how do we know, when did we last look, and what argues
+against it" — and `C-012` (the Etsy shape is unreadable here) is a claim neither
+of the others could hold.
+
+**a correction made during the work.** The first seed filed the egress-proxy 403
+as evidence *contradicting* "the Etsy API accepts this request", which made the
+registry report CONTRADICTED — asserting as false something the evidence text
+itself called unverifiable. Being unable to check is not evidence against.
+Split into `C-012` (readability, CONTRADICTED, measured) and `C-009`
+(acceptance, UNKNOWN, no evidence), and `test_being_unable_to_check_is_not_
+evidence_against` now holds that line.

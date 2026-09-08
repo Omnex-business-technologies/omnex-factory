@@ -264,6 +264,50 @@ CATALOGUE: tuple[Mutation, ...] = (
         ),
         rule="a suite that only runs on a tag covers no push and no pull request",
     ),
+    Mutation(
+        ident="evidence_settles_a_claim_it_cannot_settle",
+        path="engine/scripts/claims.py",
+        find="        usable = [e for e in live if e.method in VERIFIES.get(claim.type, frozenset())]",
+        replace="        usable = live",
+        caught_by=(
+            "tests/test_claims.py::test_a_claim_is_not_supported_merely_because_evidence_exists",
+        ),
+        rule="writing a row and proving a thing stop being different acts",
+    ),
+    Mutation(
+        ident="live_contradiction_stops_outranking_support",
+        path="engine/scripts/claims.py",
+        find="        if any(not e.stale_on(now) for e in against):",
+        replace="        if False:",
+        caught_by=("tests/test_claims.py::test_live_contradiction_outranks_support",),
+        rule="a claim with something arguing against it would read as mostly true",
+    ),
+    Mutation(
+        ident="a_claim_outruns_what_it_rests_on",
+        path="engine/scripts/claims.py",
+        find="        if any(self.status(d, today=now) is not Status.SUPPORTED for d in self._depends(claim)):",
+        replace="        if False:",
+        caught_by=("tests/test_claims.py::test_a_claim_is_never_firmer_than_what_it_rests_on",),
+        rule="a conclusion cannot be firmer than the thing it stands on",
+    ),
+    Mutation(
+        ident="an_irreversible_class_is_cleared_by_a_level_alone",
+        path="engine/scripts/policy.py",
+        find="    for effect in sorted(action.effects & ALWAYS_ASKS, key=lambda e: e.value):",
+        replace="    for effect in sorted(frozenset() & ALWAYS_ASKS, key=lambda e: e.value):",
+        caught_by=(
+            "tests/test_next_action.py::test_the_five_irreversible_classes_are_never_cleared_by_a_level_alone",
+        ),
+        rule="PUBLISH, DEPLOY, FINANCIAL, CREDENTIAL and DESTRUCTIVE would need no person",
+    ),
+    Mutation(
+        ident="the_run_ledger_stops_being_chained",
+        path="engine/scripts/runs.py",
+        find='    run.prev_hash = existing[-1].digest() if existing else ""',
+        replace='    run.prev_hash = ""',
+        caught_by=("tests/test_runs.py::test_editing_an_earlier_entry_breaks_every_link_after_it",),
+        rule="append-only becomes a convention people are asked to respect, not a property",
+    ),
 )
 
 
