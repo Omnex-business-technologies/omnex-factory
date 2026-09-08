@@ -425,9 +425,7 @@ class Grounder:
                 best_overlap, best_missing = overlap, missing
 
         if best_missing:
-            return SentenceCheck(
-                sentence, Verdict.UNSUPPORTED, cited, best_overlap, best_missing
-            )
+            return SentenceCheck(sentence, Verdict.UNSUPPORTED, cited, best_overlap, best_missing)
         if best_overlap < self.min_overlap:
             return SentenceCheck(sentence, Verdict.UNSUPPORTED, cited, best_overlap)
         return SentenceCheck(sentence, Verdict.SUPPORTED, cited, best_overlap)

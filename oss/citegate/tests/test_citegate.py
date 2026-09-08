@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import time
 
-import pytest
-
 from citegate import Grounder, Source, Verdict, split_sentences
 
 POOL = [Source(page=12, text="The connection pool defaults to twenty connections.")]
@@ -98,7 +96,9 @@ def test_abbreviations_do_not_fragment_a_sentence():
 def test_the_documented_limitation_is_real():
     """A swapped polarity word passes. Stated in the README, asserted here."""
     source = [Source(page=1, text="Latency increases when the pool is exhausted.")]
-    assert not Grounder().check("Latency decreases when the pool is exhausted. [p. 1]", source).refused
+    assert (
+        not Grounder().check("Latency decreases when the pool is exhausted. [p. 1]", source).refused
+    )
     # An invented entity, by contrast, is caught.
     assert Grounder().check("Latency is governed by the shard router. [p. 1]", source).refused
 

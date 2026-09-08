@@ -468,6 +468,15 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   damage looks like a tidy-up in the diff. `git checkout` on the files that had
   no other changes was the recovery. Fix a specific rule by hand, or run
   `--fix` with the project's own configuration and no `--select`.
+- **A package with no lint config is not "passing lint", it is unlinted.**
+  `oss/citegate` had no `[tool.ruff]` and there is no config at the repository
+  root either, so ruff fell back to its defaults (line-length 88, a narrower
+  rule set) while the code was written under the engine's 100. Nothing noticed
+  because nothing had ever linted it — the same `working-directory: engine`
+  inheritance that hid the tests. The first CI run of the new job found an
+  unused `import pytest` and two files needing reformatting. citegate now
+  carries its own config, deliberately identical to the engine's so the twin
+  splitters stay readable side by side.
 - **A tag-only workflow is not continuous integration.** `release.yml` runs the
   whole suite, and only when somebody pushes a tag; counting it would let "CI
   runs this package's tests" pass while no push and no pull request ran

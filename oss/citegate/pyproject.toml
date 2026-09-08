@@ -41,6 +41,26 @@ Issues = "https://github.com/RaveZona/omnex-factory/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["src/citegate"]
 
+# Its own, and deliberately identical to engine/pyproject.toml's.
+#
+# citegate had no ruff configuration and there is no config at the repository
+# root either, so it silently fell back to ruff's defaults — line-length 88 and
+# a narrower rule set — while its code was written under the engine's 100. That
+# went unnoticed because nothing had ever linted this package: every workflow
+# job inherited `working-directory: engine`.
+#
+# Mirrored rather than defaulted because `grounding.py`'s sentence splitter is a
+# deliberate twin of `omnex/rag/ingest.py`'s. They have diverged twice, and the
+# lab note's instruction is to read them side by side. Two different line
+# lengths would rewrap one of them and make that reading harder for no gain.
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
