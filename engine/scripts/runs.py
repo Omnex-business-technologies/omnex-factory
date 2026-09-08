@@ -223,6 +223,25 @@ def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
+def next_run_id(runs: list[Run]) -> str:
+    """The next free `R-NNNN`, from the highest already used.
+
+    Not `len(runs) + 1`, which was the first version and wrong twice over.
+    Observation rows are entries too, so counting them made the second run
+    R-0003 — a gap that reads like a deleted row in an append-only file. Worse,
+    once a gap existed the count could land on an id already taken, and `append`
+    is idempotent on `run_id`: the collision would not raise, it would silently
+    return the earlier row and drop the new one. A ledger that quietly discards
+    an entry is the one failure an audit trail cannot survive.
+    """
+    used = [
+        int(r.run_id.removeprefix("R-").split("-")[0])
+        for r in runs
+        if r.run_id.startswith("R-") and r.run_id.removeprefix("R-").split("-")[0].isdigit()
+    ]
+    return f"R-{max(used, default=0) + 1:04d}"
+
+
 def broken_links(runs: list[Run]) -> list[str]:
     """Every place the chain does not hold, which is every place it was edited."""
     problems: list[str] = []
@@ -360,7 +379,7 @@ def main() -> int:
             return 1
         opened = append(
             Run(
-                run_id=f"R-{len(runs) + 1:04d}",
+                run_id=next_run_id(runs),
                 session_id=os.environ.get("OMNEX_SESSION_ID", "local"),
                 agent_id=os.environ.get("OMNEX_AGENT_ID", "unattributed"),
                 timestamp=_now(),
