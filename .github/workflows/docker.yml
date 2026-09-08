@@ -36,6 +36,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Shallow (depth 1) is the default and is insufficient here: the
+          # image bakes in engine/scripts/business_map.py, which counts days
+          # since the repository's first commit, and a depth-1 checkout has
+          # no commit before HEAD to count from. release.yml's gate job hit
+          # the same thing first; same fix.
+          fetch-depth: 0
 
       - name: Build, exactly the way the compose file documents it
         # `RUN python -m pytest tests/ -q` is baked into the Dockerfile itself —

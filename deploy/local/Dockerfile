@@ -13,9 +13,9 @@
 # No CUDA base image, no torch, no model weights: the local tier runs
 # inference in the Ollama container next door, and this one only needs to be
 # able to run the engine and its actual test suite. .dockerignore at the
-# repository root keeps the copy from also including node_modules/, .next/
-# and .git/ — by far the three heaviest directories here — so this still
-# lands far closer to "a stack someone tries" than "one they abandon at the
+# repository root keeps the copy from also including node_modules/ and
+# .next/ — by far the two heaviest directories here — so this still lands
+# far closer to "a stack someone tries" than "one they abandon at the
 # download," even though the exact number that comparison names was never
 # measured against a full-repo context and is not repeated here.
 
@@ -24,6 +24,14 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
+
+# git itself, not just .git/: business_map.py, release_check.py, runs.py and
+# state_map.py all shell out to it (business_map.py's day-count-since-
+# first-commit needs real history, which is why the checkout that seeds this
+# build context must also be unshallowed — see docker.yml's fetch-depth).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /repo
 COPY . .
