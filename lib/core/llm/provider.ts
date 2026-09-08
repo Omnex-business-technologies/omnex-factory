@@ -35,6 +35,27 @@ export interface LlmResult {
   text: string
   provider: string
   model: string
+  /**
+   * Tokens the provider says it billed. Optional because not every provider
+   * reports it — and absent is the honest value when one does not.
+   *
+   * Without this the number never leaves the provider, so nothing downstream
+   * can price a call: `estimateCostEur()` in lib/core/agents/budget.ts has a
+   * rate table and had nothing to feed it, and the copilot's live cost panel
+   * read €0.00 on every real run. A caller that needs a figure anyway must
+   * estimate from length and say that it estimated.
+   */
+  usage?: { promptTokens: number; completionTokens: number }
+}
+
+/** Read an OpenAI- or Anthropic-shaped usage block. Absent stays absent. */
+function readUsage(raw: unknown): LlmResult['usage'] {
+  if (!raw || typeof raw !== 'object') return undefined
+  const u = raw as Record<string, unknown>
+  const prompt = u.prompt_tokens ?? u.input_tokens
+  const completion = u.completion_tokens ?? u.output_tokens
+  if (typeof prompt !== 'number' || typeof completion !== 'number') return undefined
+  return { promptTokens: prompt, completionTokens: completion }
 }
 export type TaskProfile = 'reasoning' | 'coding' | 'fast' | 'cheap'
 
@@ -195,10 +216,14 @@ async function callOpenAICompat(p: ProviderCfg, messages: LlmMessage[], opts: Ll
     const body = await res.text()
     throw new Error(`${p.name} ${res.status}: ${body.slice(0, 200)}`)
   }
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }
+  const data = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>
+    usage?: unknown
+  }
   const text = data.choices?.[0]?.message?.content
   if (!text) throw new Error(`${p.name}: empty response`)
-  return { text, provider: p.name, model: p.model }
+  const usage = readUsage(data.usage)
+  return { text, provider: p.name, model: p.model, ...(usage ? { usage } : {}) }
 }
 
 /** Convert an image reference (https URL or data URI) to an Anthropic source block. */
@@ -240,11 +265,15 @@ async function callAnthropic(p: ProviderCfg, messages: LlmMessage[], opts: LlmOp
     const body = await res.text()
     throw new Error(`anthropic ${res.status}: ${body.slice(0, 200)}`)
   }
-  const data = (await res.json()) as { content?: Array<{ type?: string; text?: string }> }
+  const data = (await res.json()) as {
+    content?: Array<{ type?: string; text?: string }>
+    usage?: unknown
+  }
   const first = data.content?.[0]
   const text = first && first.type === 'text' ? first.text : undefined
   if (!text) throw new Error('anthropic: empty response')
-  return { text, provider: p.name, model: p.model }
+  const usage = readUsage(data.usage)
+  return { text, provider: p.name, model: p.model, ...(usage ? { usage } : {}) }
 }
 
 /** Diagnostic: try each configured provider with a tiny prompt; report ok/error per provider. */

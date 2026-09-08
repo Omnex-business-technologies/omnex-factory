@@ -1,0 +1,14 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: DS_PROMETHEUS
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      # Must match prometheus.yml's scrape_interval. When it does not, Grafana
+      # picks step sizes that make rate() windows straddle scrapes, and panels
+      # show sawtooth artefacts that get mistaken for real load spikes.
+      timeInterval: 15s

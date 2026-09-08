@@ -1,0 +1,62 @@
+# The observability stack, runnable locally with one command.
+#
+#     docker compose -f deploy/observability/compose.yaml up -d
+#
+# It exists so the dashboards and alert rules in this directory are something
+# you can look at rather than something you have to trust. The engine's own
+# in-process collector needs none of it — this is the export path.
+#
+#   Prometheus  :9090   scrapes the engine's /metrics, evaluates the rules
+#   Grafana     :3001   dashboard provisioned from this directory, no login
+#   Collector   :4318   OTLP/HTTP receiver for traces
+#
+# Grafana is on 3001 rather than 3000 because 3000 is the Next.js app in this
+# same repo, and a port collision that only appears when both are running is a
+# tedious ten minutes to diagnose.
+
+name: omnex-observability
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus-rules.yml:/etc/prometheus/rules/omnex.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    extra_hosts:
+      # The engine usually runs on the host during development, not in this
+      # network. Without this, the scrape target silently never comes up and
+      # every panel reads "No data" for a reason that looks like a code bug.
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    ports: ["3001:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_USERS_DEFAULT_THEME: dark
+    volumes:
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+      - ./grafana-dashboard.json:/var/lib/grafana/dashboards/omnex-engine.json:ro
+      - grafana-data:/var/lib/grafana
+    depends_on: [prometheus]
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.117.0
+    ports:
+      - "4318:4318" # OTLP/HTTP — what OtlpTraceExporter targets
+      - "4317:4317" # OTLP/gRPC
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+
+volumes:
+  prometheus-data:
+  grafana-data:

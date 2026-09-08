@@ -47,14 +47,25 @@ export const MODULES: ModuleManifest[] = [
     enabled: true,
     order: 1,
   },
-  { id: 'landing',  name: 'AI Landing Pages',   blurb: 'Turn one product into a converting landing page.', route: '/landing',  icon: 'LayoutTemplate', creditCost: 15, enabled: false, order: 2 },
-  { id: 'product',  name: 'AI Product Pages',   blurb: 'Full product pages with copy, specs and imagery.',  route: '/product',  icon: 'Package',        creditCost: 15, enabled: false, order: 3 },
-  { id: 'sales',    name: 'AI Sales Assets',    blurb: 'Proposals, one-pagers and pitch decks that close.', route: '/sales',    icon: 'FileText',       creditCost: 12, enabled: false, order: 4 },
-  { id: 'email',    name: 'AI Email Campaigns', blurb: 'Sequences written from your real product data.',    route: '/email',    icon: 'Mail',           creditCost: 8,  enabled: false, order: 5 },
-  { id: 'video',    name: 'AI Video Ads',       blurb: 'Short-form video ads generated from your product.', route: '/video',    icon: 'Video',          creditCost: 40, enabled: false, order: 6 },
-  { id: 'brand',    name: 'AI Brand Kit',       blurb: 'Logo, palette, type and voice as one system.',      route: '/brand',    icon: 'Palette',        creditCost: 20, enabled: false, order: 7 },
-  { id: 'marketing',name: 'AI Marketing Agent', blurb: 'An agent that plans and runs your campaigns.',      route: '/marketing',icon: 'Megaphone',      creditCost: 25, enabled: false, order: 8 },
-  { id: 'growth',   name: 'AI Growth Agent',    blurb: 'Finds channels, tests them, reports what works.',   route: '/growth',   icon: 'TrendingUp',     creditCost: 25, enabled: false, order: 9 },
+  // BUILT, and deliberately not enabled. The rule above is that module #2 does
+  // not open until module #1 has taken a real payment, and shipping this one
+  // early because it happens to be finished is exactly how that rule dies.
+  //
+  // Metered rather than fixed-price: a streamed run has no price until it ends,
+  // so `creditCost` is the FLOOR a completed run bills and the real charge is
+  // proportional to measured provider spend (lib/core/agents/metering.ts). It is
+  // listed rather than omitted because a module with no manifest entry has no
+  // price, no tile and no way to be found — which is how finished work goes
+  // unsold.
+  { id: 'copilot',  name: 'AI Copilot',         blurb: 'Ask anything; watch every step and what it costs, live.', route: '/copilot', icon: 'MessageSquare', creditCost: 1, enabled: false, order: 2 },
+  { id: 'landing',  name: 'AI Landing Pages',   blurb: 'Turn one product into a converting landing page.', route: '/landing',  icon: 'LayoutTemplate', creditCost: 15, enabled: false, order: 3 },
+  { id: 'product',  name: 'AI Product Pages',   blurb: 'Full product pages with copy, specs and imagery.',  route: '/product',  icon: 'Package',        creditCost: 15, enabled: false, order: 4 },
+  { id: 'sales',    name: 'AI Sales Assets',    blurb: 'Proposals, one-pagers and pitch decks that close.', route: '/sales',    icon: 'FileText',       creditCost: 12, enabled: false, order: 5 },
+  { id: 'email',    name: 'AI Email Campaigns', blurb: 'Sequences written from your real product data.',    route: '/email',    icon: 'Mail',           creditCost: 8,  enabled: false, order: 6 },
+  { id: 'video',    name: 'AI Video Ads',       blurb: 'Short-form video ads generated from your product.', route: '/video',    icon: 'Video',          creditCost: 40, enabled: false, order: 7 },
+  { id: 'brand',    name: 'AI Brand Kit',       blurb: 'Logo, palette, type and voice as one system.',      route: '/brand',    icon: 'Palette',        creditCost: 20, enabled: false, order: 8 },
+  { id: 'marketing',name: 'AI Marketing Agent', blurb: 'An agent that plans and runs your campaigns.',      route: '/marketing',icon: 'Megaphone',      creditCost: 25, enabled: false, order: 9 },
+  { id: 'growth',   name: 'AI Growth Agent',    blurb: 'Finds channels, tests them, reports what works.',   route: '/growth',   icon: 'TrendingUp',     creditCost: 25, enabled: false, order: 10 },
 ]
 
 /** Modules a customer can actually use right now. */

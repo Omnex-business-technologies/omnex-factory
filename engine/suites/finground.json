@@ -1,0 +1,1662 @@
+{
+  "name": "finground",
+  "version": "1",
+  "cases": [
+    {
+      "id": "figure-revenue-NWL-Q12025",
+      "question": "What was NWL revenue in Q1 2025?",
+      "expected": "NWL revenue in Q1 2025 was 253.0 million euros.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-NWL-Q12025",
+      "question": "What was the gross margin for NWL in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-NWL-Q22025",
+      "question": "What was NWL revenue in Q2 2025?",
+      "expected": "NWL revenue in Q2 2025 was 266.0 million euros.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-NWL-Q22025",
+      "question": "What was the gross margin for NWL in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-NWL-Q32025",
+      "question": "What was NWL revenue in Q3 2025?",
+      "expected": "NWL revenue in Q3 2025 was 279.0 million euros.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-NWL-Q32025",
+      "question": "What was the gross margin for NWL in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-NWL-Q42025",
+      "question": "What was NWL revenue in Q4 2025?",
+      "expected": "NWL revenue in Q4 2025 was 292.0 million euros.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-NWL-Q42025",
+      "question": "What was the gross margin for NWL in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-CBS-Q12025",
+      "question": "What was CBS revenue in Q1 2025?",
+      "expected": "CBS revenue in Q1 2025 was 218.0 million euros.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-CBS-Q12025",
+      "question": "What was the gross margin for CBS in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-CBS-Q22025",
+      "question": "What was CBS revenue in Q2 2025?",
+      "expected": "CBS revenue in Q2 2025 was 231.0 million euros.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-CBS-Q22025",
+      "question": "What was the gross margin for CBS in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-CBS-Q32025",
+      "question": "What was CBS revenue in Q3 2025?",
+      "expected": "CBS revenue in Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-CBS-Q32025",
+      "question": "What was the gross margin for CBS in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-CBS-Q42025",
+      "question": "What was CBS revenue in Q4 2025?",
+      "expected": "CBS revenue in Q4 2025 was 257.0 million euros.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-CBS-Q42025",
+      "question": "What was the gross margin for CBS in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-HBA-Q12025",
+      "question": "What was HBA revenue in Q1 2025?",
+      "expected": "HBA revenue in Q1 2025 was 239.0 million euros.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-HBA-Q12025",
+      "question": "What was the gross margin for HBA in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-HBA-Q22025",
+      "question": "What was HBA revenue in Q2 2025?",
+      "expected": "HBA revenue in Q2 2025 was 252.0 million euros.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-HBA-Q22025",
+      "question": "What was the gross margin for HBA in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-HBA-Q32025",
+      "question": "What was HBA revenue in Q3 2025?",
+      "expected": "HBA revenue in Q3 2025 was 265.0 million euros.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-HBA-Q32025",
+      "question": "What was the gross margin for HBA in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-HBA-Q42025",
+      "question": "What was HBA revenue in Q4 2025?",
+      "expected": "HBA revenue in Q4 2025 was 278.0 million euros.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-HBA-Q42025",
+      "question": "What was the gross margin for HBA in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-MRF-Q12025",
+      "question": "What was MRF revenue in Q1 2025?",
+      "expected": "MRF revenue in Q1 2025 was 218.0 million euros.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-MRF-Q12025",
+      "question": "What was the gross margin for MRF in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-MRF-Q22025",
+      "question": "What was MRF revenue in Q2 2025?",
+      "expected": "MRF revenue in Q2 2025 was 231.0 million euros.",
+      "must_cite": [
+        14
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-MRF-Q22025",
+      "question": "What was the gross margin for MRF in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        14
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-MRF-Q32025",
+      "question": "What was MRF revenue in Q3 2025?",
+      "expected": "MRF revenue in Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-MRF-Q32025",
+      "question": "What was the gross margin for MRF in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-MRF-Q42025",
+      "question": "What was MRF revenue in Q4 2025?",
+      "expected": "MRF revenue in Q4 2025 was 257.0 million euros.",
+      "must_cite": [
+        16
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-MRF-Q42025",
+      "question": "What was the gross margin for MRF in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        16
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-VGR-Q12025",
+      "question": "What was VGR revenue in Q1 2025?",
+      "expected": "VGR revenue in Q1 2025 was 232.0 million euros.",
+      "must_cite": [
+        17
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-VGR-Q12025",
+      "question": "What was the gross margin for VGR in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        17
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-VGR-Q22025",
+      "question": "What was VGR revenue in Q2 2025?",
+      "expected": "VGR revenue in Q2 2025 was 245.0 million euros.",
+      "must_cite": [
+        18
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-VGR-Q22025",
+      "question": "What was the gross margin for VGR in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        18
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-VGR-Q32025",
+      "question": "What was VGR revenue in Q3 2025?",
+      "expected": "VGR revenue in Q3 2025 was 258.0 million euros.",
+      "must_cite": [
+        19
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-VGR-Q32025",
+      "question": "What was the gross margin for VGR in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        19
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-VGR-Q42025",
+      "question": "What was VGR revenue in Q4 2025?",
+      "expected": "VGR revenue in Q4 2025 was 271.0 million euros.",
+      "must_cite": [
+        20
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-VGR-Q42025",
+      "question": "What was the gross margin for VGR in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        20
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-AFE-Q12025",
+      "question": "What was AFE revenue in Q1 2025?",
+      "expected": "AFE revenue in Q1 2025 was 218.0 million euros.",
+      "must_cite": [
+        21
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-AFE-Q12025",
+      "question": "What was the gross margin for AFE in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        21
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-AFE-Q22025",
+      "question": "What was AFE revenue in Q2 2025?",
+      "expected": "AFE revenue in Q2 2025 was 231.0 million euros.",
+      "must_cite": [
+        22
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-AFE-Q22025",
+      "question": "What was the gross margin for AFE in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        22
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-AFE-Q32025",
+      "question": "What was AFE revenue in Q3 2025?",
+      "expected": "AFE revenue in Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        23
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-AFE-Q32025",
+      "question": "What was the gross margin for AFE in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        23
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-AFE-Q42025",
+      "question": "What was AFE revenue in Q4 2025?",
+      "expected": "AFE revenue in Q4 2025 was 257.0 million euros.",
+      "must_cite": [
+        24
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-AFE-Q42025",
+      "question": "What was the gross margin for AFE in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        24
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-LYH-Q12025",
+      "question": "What was LYH revenue in Q1 2025?",
+      "expected": "LYH revenue in Q1 2025 was 204.0 million euros.",
+      "must_cite": [
+        25
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-LYH-Q12025",
+      "question": "What was the gross margin for LYH in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        25
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-LYH-Q22025",
+      "question": "What was LYH revenue in Q2 2025?",
+      "expected": "LYH revenue in Q2 2025 was 217.0 million euros.",
+      "must_cite": [
+        26
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-LYH-Q22025",
+      "question": "What was the gross margin for LYH in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        26
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-LYH-Q32025",
+      "question": "What was LYH revenue in Q3 2025?",
+      "expected": "LYH revenue in Q3 2025 was 230.0 million euros.",
+      "must_cite": [
+        27
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-LYH-Q32025",
+      "question": "What was the gross margin for LYH in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        27
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-LYH-Q42025",
+      "question": "What was LYH revenue in Q4 2025?",
+      "expected": "LYH revenue in Q4 2025 was 243.0 million euros.",
+      "must_cite": [
+        28
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-LYH-Q42025",
+      "question": "What was the gross margin for LYH in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        28
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-IVM-Q12025",
+      "question": "What was IVM revenue in Q1 2025?",
+      "expected": "IVM revenue in Q1 2025 was 225.0 million euros.",
+      "must_cite": [
+        29
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-IVM-Q12025",
+      "question": "What was the gross margin for IVM in Q1 2025?",
+      "expected": "Gross margin for Q1 2025 was 18.4 percent.",
+      "must_cite": [
+        29
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-IVM-Q22025",
+      "question": "What was IVM revenue in Q2 2025?",
+      "expected": "IVM revenue in Q2 2025 was 238.0 million euros.",
+      "must_cite": [
+        30
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-IVM-Q22025",
+      "question": "What was the gross margin for IVM in Q2 2025?",
+      "expected": "Gross margin for Q2 2025 was 19.7 percent.",
+      "must_cite": [
+        30
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-IVM-Q32025",
+      "question": "What was IVM revenue in Q3 2025?",
+      "expected": "IVM revenue in Q3 2025 was 251.0 million euros.",
+      "must_cite": [
+        31
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-IVM-Q32025",
+      "question": "What was the gross margin for IVM in Q3 2025?",
+      "expected": "Gross margin for Q3 2025 was 21.0 percent.",
+      "must_cite": [
+        31
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "figure-revenue-IVM-Q42025",
+      "question": "What was IVM revenue in Q4 2025?",
+      "expected": "IVM revenue in Q4 2025 was 264.0 million euros.",
+      "must_cite": [
+        32
+      ],
+      "tags": [
+        "exact_figure",
+        "revenue"
+      ]
+    },
+    {
+      "id": "figure-margin-IVM-Q42025",
+      "question": "What was the gross margin for IVM in Q4 2025?",
+      "expected": "Gross margin for Q4 2025 was 22.3 percent.",
+      "must_cite": [
+        32
+      ],
+      "tags": [
+        "exact_figure",
+        "margin"
+      ]
+    },
+    {
+      "id": "period-NWL-q3-not-q4",
+      "question": "What was NWL revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 279.0 million euros.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-CBS-q3-not-q4",
+      "question": "What was CBS revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-HBA-q3-not-q4",
+      "question": "What was HBA revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 265.0 million euros.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-MRF-q3-not-q4",
+      "question": "What was MRF revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-VGR-q3-not-q4",
+      "question": "What was VGR revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 258.0 million euros.",
+      "must_cite": [
+        19
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-AFE-q3-not-q4",
+      "question": "What was AFE revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 244.0 million euros.",
+      "must_cite": [
+        23
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-LYH-q3-not-q4",
+      "question": "What was LYH revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 230.0 million euros.",
+      "must_cite": [
+        27
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "period-IVM-q3-not-q4",
+      "question": "What was IVM revenue in Q3 2025, not Q4?",
+      "expected": "Revenue for Q3 2025 was 251.0 million euros.",
+      "must_cite": [
+        31
+      ],
+      "tags": [
+        "period",
+        "revenue"
+      ]
+    },
+    {
+      "id": "unit-guidance-NWL-Q12025",
+      "question": "What is the revenue guidance for NWL after Q1 2025?",
+      "expected": "Guidance is a range of 261.0 to 274.0 million euros.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-NWL-Q22025",
+      "question": "What is the revenue guidance for NWL after Q2 2025?",
+      "expected": "Guidance is a range of 274.0 to 287.0 million euros.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-NWL-Q32025",
+      "question": "What is the revenue guidance for NWL after Q3 2025?",
+      "expected": "Guidance is a range of 287.0 to 300.0 million euros.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-NWL-Q42025",
+      "question": "What is the revenue guidance for NWL after Q4 2025?",
+      "expected": "Guidance is a range of 300.0 to 313.0 million euros.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-CBS-Q12025",
+      "question": "What is the revenue guidance for CBS after Q1 2025?",
+      "expected": "Guidance is a range of 226.0 to 239.0 million euros.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-CBS-Q22025",
+      "question": "What is the revenue guidance for CBS after Q2 2025?",
+      "expected": "Guidance is a range of 239.0 to 252.0 million euros.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-CBS-Q32025",
+      "question": "What is the revenue guidance for CBS after Q3 2025?",
+      "expected": "Guidance is a range of 252.0 to 265.0 million euros.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-CBS-Q42025",
+      "question": "What is the revenue guidance for CBS after Q4 2025?",
+      "expected": "Guidance is a range of 265.0 to 278.0 million euros.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-HBA-Q12025",
+      "question": "What is the revenue guidance for HBA after Q1 2025?",
+      "expected": "Guidance is a range of 247.0 to 260.0 million euros.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-HBA-Q22025",
+      "question": "What is the revenue guidance for HBA after Q2 2025?",
+      "expected": "Guidance is a range of 260.0 to 273.0 million euros.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-HBA-Q32025",
+      "question": "What is the revenue guidance for HBA after Q3 2025?",
+      "expected": "Guidance is a range of 273.0 to 286.0 million euros.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-HBA-Q42025",
+      "question": "What is the revenue guidance for HBA after Q4 2025?",
+      "expected": "Guidance is a range of 286.0 to 299.0 million euros.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-MRF-Q12025",
+      "question": "What is the revenue guidance for MRF after Q1 2025?",
+      "expected": "Guidance is a range of 226.0 to 239.0 million euros.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-MRF-Q22025",
+      "question": "What is the revenue guidance for MRF after Q2 2025?",
+      "expected": "Guidance is a range of 239.0 to 252.0 million euros.",
+      "must_cite": [
+        14
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-MRF-Q32025",
+      "question": "What is the revenue guidance for MRF after Q3 2025?",
+      "expected": "Guidance is a range of 252.0 to 265.0 million euros.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unit-guidance-MRF-Q42025",
+      "question": "What is the revenue guidance for MRF after Q4 2025?",
+      "expected": "Guidance is a range of 265.0 to 278.0 million euros.",
+      "must_cite": [
+        16
+      ],
+      "tags": [
+        "unit",
+        "guidance"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-NWL-Q12025",
+      "question": "What was NWL net income in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-NWL-Q22025",
+      "question": "What was NWL net income in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-NWL-Q32025",
+      "question": "What was NWL net income in Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-NWL-Q42025",
+      "question": "What was NWL net income in Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-CBS-Q12025",
+      "question": "What was CBS net income in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-CBS-Q22025",
+      "question": "What was CBS net income in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-CBS-Q32025",
+      "question": "What was CBS net income in Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-CBS-Q42025",
+      "question": "What was CBS net income in Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-HBA-Q12025",
+      "question": "What was HBA net income in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-net_income-HBA-Q22025",
+      "question": "What was HBA net income in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "net_income"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-NWL-Q12025",
+      "question": "Who is the chief executive of NWL?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-NWL-Q22025",
+      "question": "Who is the chief executive of NWL?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-NWL-Q32025",
+      "question": "Who is the chief executive of NWL?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-NWL-Q42025",
+      "question": "Who is the chief executive of NWL?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-CBS-Q12025",
+      "question": "Who is the chief executive of CBS?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-CBS-Q22025",
+      "question": "Who is the chief executive of CBS?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-CBS-Q32025",
+      "question": "Who is the chief executive of CBS?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-CBS-Q42025",
+      "question": "Who is the chief executive of CBS?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-HBA-Q12025",
+      "question": "Who is the chief executive of HBA?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-ceo-HBA-Q22025",
+      "question": "Who is the chief executive of HBA?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "ceo"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-NWL-Q12025",
+      "question": "What was capital expenditure for NWL in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-NWL-Q22025",
+      "question": "What was capital expenditure for NWL in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-NWL-Q32025",
+      "question": "What was capital expenditure for NWL in Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-NWL-Q42025",
+      "question": "What was capital expenditure for NWL in Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-CBS-Q12025",
+      "question": "What was capital expenditure for CBS in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-CBS-Q22025",
+      "question": "What was capital expenditure for CBS in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-CBS-Q32025",
+      "question": "What was capital expenditure for CBS in Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-CBS-Q42025",
+      "question": "What was capital expenditure for CBS in Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-HBA-Q12025",
+      "question": "What was capital expenditure for HBA in Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-capex-HBA-Q22025",
+      "question": "What was capital expenditure for HBA in Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "capex"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-NWL-Q12025",
+      "question": "What is NWL total debt at the end of Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-NWL-Q22025",
+      "question": "What is NWL total debt at the end of Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-NWL-Q32025",
+      "question": "What is NWL total debt at the end of Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-NWL-Q42025",
+      "question": "What is NWL total debt at the end of Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-CBS-Q12025",
+      "question": "What is CBS total debt at the end of Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-CBS-Q22025",
+      "question": "What is CBS total debt at the end of Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-CBS-Q32025",
+      "question": "What is CBS total debt at the end of Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-CBS-Q42025",
+      "question": "What is CBS total debt at the end of Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-HBA-Q12025",
+      "question": "What is HBA total debt at the end of Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-debt-HBA-Q22025",
+      "question": "What is HBA total debt at the end of Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "debt"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-NWL-Q12025",
+      "question": "What effective tax rate did NWL report for Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-NWL-Q22025",
+      "question": "What effective tax rate did NWL report for Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-NWL-Q32025",
+      "question": "What effective tax rate did NWL report for Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-NWL-Q42025",
+      "question": "What effective tax rate did NWL report for Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-CBS-Q12025",
+      "question": "What effective tax rate did CBS report for Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-CBS-Q22025",
+      "question": "What effective tax rate did CBS report for Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-CBS-Q32025",
+      "question": "What effective tax rate did CBS report for Q3 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-CBS-Q42025",
+      "question": "What effective tax rate did CBS report for Q4 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-HBA-Q12025",
+      "question": "What effective tax rate did HBA report for Q1 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-tax_rate-HBA-Q22025",
+      "question": "What effective tax rate did HBA report for Q2 2025?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "tax_rate"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-NWL-Q12025",
+      "question": "How much of NWL revenue in Q1 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-NWL-Q22025",
+      "question": "How much of NWL revenue in Q2 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-NWL-Q32025",
+      "question": "How much of NWL revenue in Q3 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-NWL-Q42025",
+      "question": "How much of NWL revenue in Q4 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-CBS-Q12025",
+      "question": "How much of CBS revenue in Q1 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-CBS-Q22025",
+      "question": "How much of CBS revenue in Q2 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-CBS-Q32025",
+      "question": "How much of CBS revenue in Q3 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-CBS-Q42025",
+      "question": "How much of CBS revenue in Q4 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-HBA-Q12025",
+      "question": "How much of HBA revenue in Q1 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    },
+    {
+      "id": "unanswerable-segment-HBA-Q22025",
+      "question": "How much of HBA revenue in Q2 2025 came from Europe?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "unanswerable",
+        "segment"
+      ]
+    }
+  ]
+}

@@ -38,16 +38,24 @@ jobs:
       - name: Types
         run: npx tsc --noEmit
 
-      - name: Unit tests
-        run: npx vitest run lib/__tests__/campaign-build.test.ts lib/__tests__/agent-memory.test.ts
-
       - name: Confirm Docker is available
         # The database suite skips itself when Docker is missing, which would
         # report green while asserting nothing. Fail here instead, loudly.
+        # Moved ahead of the tests because they now run in one pass.
         run: docker info > /dev/null
 
-      - name: Database tests (real Postgres in a container)
-        run: npx vitest run lib/__tests__/credits.db.test.ts
+      - name: Tests
+        # EVERY test file, with no filter. The previous version named two files
+        # by hand — one of which did not exist — so this step ran one suite of
+        # seven and reported green. Unrun: the metering suite that asserts
+        # liveModules() is exactly ['studio'], the budget suite that holds the
+        # cache-before-fallback rule, and the stream suite that guards the usage
+        # block the whole cost path depends on.
+        #
+        # A hand-written file list stops covering whatever somebody adds next,
+        # silently. `engine/tests/test_ci_contract.py` now fails if this step
+        # ever goes back to naming files, or names one that is not on disk.
+        run: npx vitest run
 
       - name: Production build
         # Placeholder values: the build must not require live credentials, and if

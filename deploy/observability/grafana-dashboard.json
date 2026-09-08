@@ -1,0 +1,213 @@
+{
+  "title": "OMNEX Engine — cost, latency, errors",
+  "uid": "omnex-engine",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "tags": ["omnex", "ai", "cost"],
+  "description": "Panels are ordered by the question they answer: is it up, is it fast, is it correct, what does it cost. Every percentile panel queries the histogram buckets via histogram_quantile — never a pre-averaged percentile, which is arithmetically meaningless across instances.",
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "query": "label_values(omnex_cost_picodollars_total, model)",
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Error rate",
+      "description": "Failed runs over all runs. Paged above 5% sustained for 3 minutes.",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.02 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "omnex:error_rate", "legendFormat": "error rate" }]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Cost per request",
+      "description": "Unit economics, independent of traffic. This is what catches a bad prompt change: total spend rises with traffic and looks normal while this quietly triples.",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.01 },
+              { "color": "red", "value": 0.02 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "omnex:cost_usd_per_request", "legendFormat": "USD/request" }]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Burn rate",
+      "description": "USD/hour from a pico-dollar counter. A rate alert fires while there is still something to do about it; a monthly-total alert fires once the money is gone.",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2 } },
+      "targets": [{ "expr": "omnex:cost_usd_per_hour", "legendFormat": "USD/hour" }]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Prompt cache hit ratio",
+      "description": "Cached input tokens over all input tokens. A collapsed cache is invisible in latency and error panels — only the bill notices.",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.2 },
+              { "color": "green", "value": 0.5 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "omnex:cache_hit_ratio", "legendFormat": "cached share" }]
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "Latency",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Run latency percentiles",
+      "description": "Computed with histogram_quantile over summed bucket rates. Never average per-instance percentiles: two instances each reporting p95=100ms do not imply a fleet p95 of 100ms, and no arithmetic on those two numbers recovers the real one.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(omnex_span_duration_seconds_bucket{kind=\"run\"}[5m])))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(omnex_span_duration_seconds_bucket{kind=\"run\"}[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(omnex_span_duration_seconds_bucket{kind=\"run\"}[5m])))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "p95 by step",
+      "description": "Which stage owns the tail. Retrieval, rerank and generation fail differently and a single run-level percentile hides which one moved.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, kind) (rate(omnex_span_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{kind}}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Cost",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Spend by model",
+      "description": "Stacked USD/hour per model. The router's escalation rate shows up here first: a cheap tier that stops carrying traffic is a routing regression, not a traffic change.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD", "custom": { "stacking": { "mode": "normal" } } }
+      },
+      "targets": [
+        {
+          "expr": "omnex:cost_usd_per_hour_by_model{model=~\"$model\"}",
+          "legendFormat": "{{model}}"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Tokens by direction",
+      "description": "Input, output and cached-input. Cached input is a subset of input, not an addition — see core/money.py.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [
+        {
+          "expr": "sum by (direction) (rate(omnex_tokens_total[5m]))",
+          "legendFormat": "{{direction}}"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "row",
+      "title": "Failures and instrumentation health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Errors by code",
+      "description": "Grouped by the stable machine-readable code, not by message text, so a reworded error does not split into a new series.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
+      "targets": [
+        {
+          "expr": "sum by (code) (rate(omnex_errors_total[5m]))",
+          "legendFormat": "{{code}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Cardinality overflow",
+      "description": "Non-zero means a label hit its cap and observations are folding into __overflow__. Totals stay correct; every breakdown by that label does not. Published rather than logged, because a metric that silently stopped being a breakdown is one people keep reading.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
+      "targets": [
+        {
+          "expr": "increase(omnex_metric_overflow_total[30m])",
+          "legendFormat": "{{metric}}"
+        }
+      ]
+    }
+  ]
+}

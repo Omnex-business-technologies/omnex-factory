@@ -1,0 +1,85 @@
+{
+  "_comment": [
+    "Model prices, in USD per million tokens, as recorded from public pricing pages on `verified_on`.",
+    "",
+    "THIS FILE GOES OUT OF DATE. That is not a defect to be fixed by trying harder;",
+    "it is a property of vendor pricing, and the code treats it as one. ModelCatalog",
+    "reports its own age, and assert_fresh() fails a deploy on a catalogue older than",
+    "90 days, because stale prices flow straight into routing decisions and customer",
+    "bills where nothing about the program's behaviour reveals they are wrong.",
+    "",
+    "Re-verify against each provider's pricing page and bump `verified_on`. Do not",
+    "bump the date without re-checking the numbers — the date is the whole safeguard.",
+    "",
+    "The router's tests deliberately do NOT read this file. They construct synthetic",
+    "models with prices chosen to make an arithmetic property obvious, so routing",
+    "behaviour stays provable and the suite never goes red because a vendor repriced."
+  ],
+  "verified_on": "2026-08-05",
+  "models": {
+    "local/qwen2.5-7b-instruct": {
+      "provider": "ollama",
+      "tier": "nano",
+      "input_usd_per_mtok": "0",
+      "output_usd_per_mtok": "0",
+      "context_window": 32768,
+      "max_output_tokens": 4096,
+      "supports_tools": true,
+      "notes": "Runs on the local-first stack (P7). Zero marginal cost, so the router prefers it whenever the task tier allows — the electricity is real but it is not per-token, and modelling it as a token price would be a lie in the other direction."
+    },
+    "local/llama3.1-8b-instruct": {
+      "provider": "ollama",
+      "tier": "nano",
+      "input_usd_per_mtok": "0",
+      "output_usd_per_mtok": "0",
+      "context_window": 131072,
+      "max_output_tokens": 4096,
+      "supports_tools": true,
+      "notes": "Long context at zero marginal cost. Useful for bulk classification and the offline eval loop."
+    },
+    "hosted/small-fast": {
+      "provider": "groq",
+      "tier": "small",
+      "input_usd_per_mtok": "0.05",
+      "output_usd_per_mtok": "0.08",
+      "context_window": 131072,
+      "max_output_tokens": 8192,
+      "supports_tools": true,
+      "notes": "Generic slot for whichever cheap fast model is current. Named by ROLE, not by vendor model id, so swapping the underlying model is a one-line data change rather than a code change across every call site."
+    },
+    "hosted/mid": {
+      "provider": "openrouter",
+      "tier": "large",
+      "input_usd_per_mtok": "0.80",
+      "output_usd_per_mtok": "2.40",
+      "cached_input_usd_per_mtok": "0.08",
+      "context_window": 200000,
+      "max_output_tokens": 16384,
+      "supports_tools": true,
+      "supports_vision": true,
+      "notes": "The workhorse tier. Prompt caching at a tenth of input price is what makes a long system prompt affordable, and the router accounts for it explicitly."
+    },
+    "hosted/frontier": {
+      "provider": "anthropic",
+      "tier": "large",
+      "input_usd_per_mtok": "3.00",
+      "output_usd_per_mtok": "15.00",
+      "cached_input_usd_per_mtok": "0.30",
+      "context_window": 200000,
+      "max_output_tokens": 32768,
+      "supports_tools": true,
+      "supports_vision": true,
+      "notes": "The escalation target and the reference model for the undiscounted baseline — savings are measured as 'what this would have cost here'."
+    },
+    "hosted/reasoning": {
+      "provider": "openrouter",
+      "tier": "reasoning",
+      "input_usd_per_mtok": "3.00",
+      "output_usd_per_mtok": "12.00",
+      "context_window": 200000,
+      "max_output_tokens": 65536,
+      "supports_tools": true,
+      "notes": "Reasoning models bill hidden thinking tokens as output, so a request whose visible answer is two lines can bill like a two-thousand-token one. The output price above is therefore the number that matters for budgeting, not the input price."
+    }
+  }
+}

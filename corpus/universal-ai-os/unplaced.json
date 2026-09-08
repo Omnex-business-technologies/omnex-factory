@@ -1,0 +1,58 @@
+[
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0001",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0002",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0003",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0004",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0005",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0006",
+    "primary_branch": "ai-ml-foundation",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "architecture"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0007",
+    "primary_branch": "agent-protocol-fabric",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "code"
+  },
+  {
+    "chapter": "Front Matter",
+    "figure_id": "fig_0008",
+    "primary_branch": "agent-protocol-fabric",
+    "reason": "no node name overlaps its text, and its chapter has no affinity above the floor",
+    "role": "code"
+  }
+]

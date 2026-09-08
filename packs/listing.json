@@ -1,0 +1,57 @@
+{
+  "$comment": "What each listing PROMISES a buyer, as data rather than prose. Transcribed from GIG.md's Route B table so a machine can compare it against what QC actually passed. GIG.md stays the copy; this is the contract. If the two disagree, this file is wrong and GIG.md is right — fix here, never widen a promise to match a shortfall. `live` mirrors lib/modules/registry.ts's `enabled`: false means built-but-not-selling, and the invariant only refuses a listing that is BOTH live and short. The rule is not 'you must have 170 images', it is 'you must not sell 170 you do not have'.",
+  "version": "1",
+  "source": "GIG.md — ROUTE B, digital product table",
+  "formats": [
+    "1:1",
+    "4:5",
+    "9:16",
+    "16:9"
+  ],
+  "licence_file": "LICENSE.txt",
+  "licence_claim": "Full commercial licence, unlimited projects",
+  "packs": {
+    "cosmetics": {
+      "listing_name": "Luxury Cosmetics Scenes",
+      "price_eur": 19,
+      "promised_images": 50,
+      "promised_extra": "8 lighting setups",
+      "live": false
+    },
+    "automotive": {
+      "listing_name": "Automotive Campaign Set",
+      "price_eur": 19,
+      "promised_images": 40,
+      "promised_extra": "16:9 and 9:16",
+      "live": false
+    },
+    "jewellery": {
+      "listing_name": "Jewellery Macro Pack",
+      "price_eur": 19,
+      "promised_images": 40,
+      "promised_extra": "velvet / silk / stone / water scenes",
+      "live": false
+    },
+    "food": {
+      "listing_name": "Food & Restaurant Set",
+      "price_eur": 19,
+      "promised_images": 40,
+      "promised_extra": "plated and table scenes",
+      "live": false
+    }
+  },
+  "bundles": {
+    "vault": {
+      "listing_name": "The Complete Vault",
+      "price_eur": 49,
+      "includes": [
+        "cosmetics",
+        "automotive",
+        "jewellery",
+        "food"
+      ],
+      "promised_images": 170,
+      "live": false
+    }
+  }
+}

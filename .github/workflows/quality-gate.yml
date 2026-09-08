@@ -1,0 +1,86 @@
+name: Quality gate
+
+# Runs the golden suite on every pull request and BLOCKS on a regression.
+#
+# The point is the exit code. A quality check that prints a warning and exits 0
+# is a quality check that never stops anything, and every team that has one
+# eventually discovers it has been green through a month of decline. This fails
+# the build the same way a type error does, and the regressed case ids are in
+# the log where the person who broke them is already looking.
+#
+# The baseline lives in the repository (suites/baseline.json) rather than in an
+# artefact store. Two reasons: a change to it shows up in a pull request diff
+# where someone has to approve it, and it is never updated automatically on
+# success. Auto-updating ratifies a slow decline one commit at a time, each only
+# slightly worse than the last, until the baseline IS the degraded system.
+#
+# The suite runs against the local, zero-cost path, so this needs no credential
+# and costs nothing per run. That is what makes it affordable to run on every
+# push rather than nightly — and a gate that runs nightly tells you which of
+# yesterday's twelve merges broke it, which is not the same as telling you.
+
+on:
+  pull_request:
+    paths:
+      - "engine/**"
+      - ".github/workflows/quality-gate.yml"
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: engine
+
+jobs:
+  gate:
+    name: Golden suite regression gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: engine/pyproject.toml
+
+      - name: Install
+        run: uv venv && uv pip install -e '.[dev]'
+
+      - name: Confirm the suite is still the one the baseline was recorded against
+        # A changed suite makes the comparison meaningless, and the gate refuses
+        # rather than comparing. Surfacing it here names the cause instead of
+        # letting the next step fail with a stack trace.
+        run: |
+          uv run python -c "
+          import sys; sys.path.insert(0, 'src')
+          import json
+          from omnex.evals import Suite, load_baseline
+          suite = Suite.load('suites/rag_core.json'); suite.validate()
+          baseline = load_baseline('suites/baseline.json')
+          print(f'suite {suite.name}: {len(suite.cases)} cases, fingerprint {suite.fingerprint}')
+          if baseline and baseline.suite_fingerprint != suite.fingerprint:
+              print('::error::the suite changed since the baseline was recorded.')
+              print('::error::Re-record deliberately: python scripts/eval_gate.py --record')
+              sys.exit(1)
+          "
+
+      - name: Run the gate
+        run: uv run python scripts/eval_gate.py --baseline suites/baseline.json --out .omnex/runs
+
+      - name: Keep the run whether it passed or not
+        # A failed run is the most useful one to keep — it is the evidence for
+        # what changed. Deleting it because the build went red is how a team
+        # loses the ability to answer "when did this start".
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-run-${{ github.run_number }}
+          path: engine/.omnex/runs/
+          retention-days: 90

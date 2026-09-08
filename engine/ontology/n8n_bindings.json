@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "why": [
+    "Branch XI's missing field, as data: 'tool bindings - endpoint, method and",
+    "credential per tool - so an emitted n8n workflow runs instead of importing",
+    "as a wiring diagram'. omnex.factory.compile.bindings loads and validates",
+    "this; omnex.factory.compile.n8n emits from it.",
+    "",
+    "Nothing here is confirmed. Confirmed means a person imported a workflow",
+    "carrying this shape into a real n8n instance and it was accepted, and no",
+    "process that writes this file can establish that. Setting confirmed true",
+    "requires confirmed_by and confirmed_at, and the loader refuses the claim",
+    "without them - the same rule ontology/nodes.json runs on symbol resolution.",
+    "",
+    "Where a storefront endpoint is absent it is absent on purpose. The open web",
+    "is refused at this environment's proxy, so the Etsy and Lemon Squeezy API",
+    "shapes could not be read. A url written from memory that imports cleanly and",
+    "calls the wrong host is worse than no url, so those bindings carry the parts",
+    "that are knowable - node type, method, credential name - and a note saying",
+    "what has to be filled in."
+  ],
+  "node_types": {
+    "noop": {
+      "type": "n8n-nodes-base.noOp",
+      "type_version": 1,
+      "calls_out": false,
+      "confirmed": false,
+      "note": "The placeholder the emitter has always used for an unbound ref."
+    },
+    "webhook": {
+      "type": "n8n-nodes-base.webhook",
+      "type_version": 2,
+      "calls_out": false,
+      "confirmed": false,
+      "note": "Inbound trigger. Signature verification and idempotency are separate steps, not properties of this node."
+    },
+    "http": {
+      "type": "n8n-nodes-base.httpRequest",
+      "type_version": 4.2,
+      "calls_out": true,
+      "confirmed": false,
+      "note": "type_version written from memory and unverified; an import is what settles it."
+    },
+    "command": {
+      "type": "n8n-nodes-base.executeCommand",
+      "type_version": 1,
+      "calls_out": false,
+      "confirmed": false,
+      "note": "Runs a command on the n8n host. Used for this repository's own scripts, whose interface is knowable here."
+    }
+  },
+  "bindings": {
+    "order.received": {
+      "node_type": "webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omnex/order",
+        "responseMode": "responseNode"
+      },
+      "source": "proposal",
+      "note": "The entry point for a paid order. The signature check is order.verify_signature and must run before anything else reads the body."
+    },
+    "order.verify_signature": {
+      "node_type": "command",
+      "parameters": {
+        "command": "python -m omnex.pipeline verify --timestamp \"$OMNEX_TIMESTAMP\" --signature \"$OMNEX_SIGNATURE\""
+      },
+      "env": [
+        "OMNEX_WEBHOOK_SECRET"
+      ],
+      "confirmed": false,
+      "source": "this repository",
+      "note": "src/omnex/pipeline/__main__.py. Body arrives on stdin; the signing secret is read from OMNEX_WEBHOOK_SECRET and never from a flag, because argv is visible in ps and n8n logs the command it ran. Exit 0 proceed, 1 refused."
+    },
+    "order.deduplicate": {
+      "node_type": "command",
+      "parameters": {
+        "command": "python -m omnex.pipeline claim --store \"$OMNEX_CLAIM_STORE\" --event-id \"$OMNEX_EVENT_ID\""
+      },
+      "confirmed": false,
+      "source": "this repository",
+      "note": "src/omnex/pipeline/__main__.py, backed by pipeline.Claims. Both storefronts retry, and two deliveries of one order is two GPU-built packs and one confused buyer. Exit 0 proceed, 3 already delivered - route 3 to a stop, not to an error branch."
+    },
+    "pack.verify_listing": {
+      "node_type": "command",
+      "parameters": {
+        "command": "python packs/listing_check.py"
+      },
+      "confirmed": false,
+      "source": "this repository",
+      "note": "packs/listing_check.py exists and its exit code is the contract: non-zero when a listing promises more images than passed QC."
+    },
+    "pack.build": {
+      "node_type": "command",
+      "parameters": {
+        "command": "python packs/build_pack.py \"$OMNEX_PACK\" --out dist/"
+      },
+      "confirmed": false,
+      "source": "this repository",
+      "note": "packs/build_pack.py exists and refuses a manifest entry with no image, a missing licence, and a pack that does not cover its listing."
+    },
+    "lemonsqueezy.create_product": {
+      "node_type": "http",
+      "credentials": {
+        "httpHeaderAuth": "OMNEX_LEMONSQUEEZY"
+      },
+      "parameters": {
+        "method": "POST",
+        "sendBody": true
+      },
+      "source": "proposal",
+      "note": "url absent on purpose: the Lemon Squeezy API shape could not be read from the environment this was written in, and an endpoint from memory that imports cleanly and posts to the wrong host is worse than a blank. Fill in the url, import once, then record confirmed_by and confirmed_at."
+    },
+    "etsy.create_draft_listing": {
+      "node_type": "http",
+      "credentials": {
+        "oAuth2Api": "OMNEX_ETSY"
+      },
+      "parameters": {
+        "method": "POST",
+        "sendBody": true
+      },
+      "source": "proposal",
+      "note": "url absent on purpose, same reason as lemonsqueezy.create_product. Etsy Open API v3 is OAuth2 and the credential is named, never carried."
+    }
+  }
+}

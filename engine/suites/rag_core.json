@@ -1,0 +1,1416 @@
+{
+  "name": "rag_core",
+  "version": "1",
+  "cases": [
+    {
+      "id": "lookup-owner-billing",
+      "question": "Which team owns the billing service?",
+      "expected": "The billing service is owned by team-a.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-search",
+      "question": "Which team owns the search service?",
+      "expected": "The search service is owned by team-b.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-ingest",
+      "question": "Which team owns the ingest service?",
+      "expected": "The ingest service is owned by team-c.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-auth",
+      "question": "Which team owns the auth service?",
+      "expected": "The auth service is owned by team-d.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-scheduler",
+      "question": "Which team owns the scheduler service?",
+      "expected": "The scheduler service is owned by team-e.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-notifier",
+      "question": "Which team owns the notifier service?",
+      "expected": "The notifier service is owned by team-f.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-gateway",
+      "question": "Which team owns the gateway service?",
+      "expected": "The gateway service is owned by team-a.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-reporting",
+      "question": "Which team owns the reporting service?",
+      "expected": "The reporting service is owned by team-b.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-archive",
+      "question": "Which team owns the archive service?",
+      "expected": "The archive service is owned by team-c.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-webhooks",
+      "question": "Which team owns the webhooks service?",
+      "expected": "The webhooks service is owned by team-d.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-indexer",
+      "question": "Which team owns the indexer service?",
+      "expected": "The indexer service is owned by team-e.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-importer",
+      "question": "Which team owns the importer service?",
+      "expected": "The importer service is owned by team-f.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-exporter",
+      "question": "Which team owns the exporter service?",
+      "expected": "The exporter service is owned by team-a.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-reconciler",
+      "question": "Which team owns the reconciler service?",
+      "expected": "The reconciler service is owned by team-b.",
+      "must_cite": [
+        14
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-dispatcher",
+      "question": "Which team owns the dispatcher service?",
+      "expected": "The dispatcher service is owned by team-c.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-collector",
+      "question": "Which team owns the collector service?",
+      "expected": "The collector service is owned by team-d.",
+      "must_cite": [
+        16
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-renderer",
+      "question": "Which team owns the renderer service?",
+      "expected": "The renderer service is owned by team-e.",
+      "must_cite": [
+        17
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-validator",
+      "question": "Which team owns the validator service?",
+      "expected": "The validator service is owned by team-f.",
+      "must_cite": [
+        18
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-throttler",
+      "question": "Which team owns the throttler service?",
+      "expected": "The throttler service is owned by team-a.",
+      "must_cite": [
+        19
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-replicator",
+      "question": "Which team owns the replicator service?",
+      "expected": "The replicator service is owned by team-b.",
+      "must_cite": [
+        20
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-compactor",
+      "question": "Which team owns the compactor service?",
+      "expected": "The compactor service is owned by team-c.",
+      "must_cite": [
+        21
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-planner",
+      "question": "Which team owns the planner service?",
+      "expected": "The planner service is owned by team-d.",
+      "must_cite": [
+        22
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-resolver",
+      "question": "Which team owns the resolver service?",
+      "expected": "The resolver service is owned by team-e.",
+      "must_cite": [
+        23
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-shipper",
+      "question": "Which team owns the shipper service?",
+      "expected": "The shipper service is owned by team-f.",
+      "must_cite": [
+        24
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-owner-sampler",
+      "question": "Which team owns the sampler service?",
+      "expected": "The sampler service is owned by team-a.",
+      "must_cite": [
+        25
+      ],
+      "tags": [
+        "lookup",
+        "ownership"
+      ]
+    },
+    {
+      "id": "lookup-restart-billing",
+      "question": "What must happen before restarting billing?",
+      "expected": "Restarting billing requires draining the queue first.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-search",
+      "question": "What must happen before restarting search?",
+      "expected": "Restarting search requires draining the queue first.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-ingest",
+      "question": "What must happen before restarting ingest?",
+      "expected": "Restarting ingest requires draining the queue first.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-auth",
+      "question": "What must happen before restarting auth?",
+      "expected": "Restarting auth requires draining the queue first.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-scheduler",
+      "question": "What must happen before restarting scheduler?",
+      "expected": "Restarting scheduler requires draining the queue first.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-notifier",
+      "question": "What must happen before restarting notifier?",
+      "expected": "Restarting notifier requires draining the queue first.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-gateway",
+      "question": "What must happen before restarting gateway?",
+      "expected": "Restarting gateway requires draining the queue first.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-reporting",
+      "question": "What must happen before restarting reporting?",
+      "expected": "Restarting reporting requires draining the queue first.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-archive",
+      "question": "What must happen before restarting archive?",
+      "expected": "Restarting archive requires draining the queue first.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-webhooks",
+      "question": "What must happen before restarting webhooks?",
+      "expected": "Restarting webhooks requires draining the queue first.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-indexer",
+      "question": "What must happen before restarting indexer?",
+      "expected": "Restarting indexer requires draining the queue first.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-importer",
+      "question": "What must happen before restarting importer?",
+      "expected": "Restarting importer requires draining the queue first.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-exporter",
+      "question": "What must happen before restarting exporter?",
+      "expected": "Restarting exporter requires draining the queue first.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-reconciler",
+      "question": "What must happen before restarting reconciler?",
+      "expected": "Restarting reconciler requires draining the queue first.",
+      "must_cite": [
+        14
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-dispatcher",
+      "question": "What must happen before restarting dispatcher?",
+      "expected": "Restarting dispatcher requires draining the queue first.",
+      "must_cite": [
+        15
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-collector",
+      "question": "What must happen before restarting collector?",
+      "expected": "Restarting collector requires draining the queue first.",
+      "must_cite": [
+        16
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-renderer",
+      "question": "What must happen before restarting renderer?",
+      "expected": "Restarting renderer requires draining the queue first.",
+      "must_cite": [
+        17
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-validator",
+      "question": "What must happen before restarting validator?",
+      "expected": "Restarting validator requires draining the queue first.",
+      "must_cite": [
+        18
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-throttler",
+      "question": "What must happen before restarting throttler?",
+      "expected": "Restarting throttler requires draining the queue first.",
+      "must_cite": [
+        19
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-replicator",
+      "question": "What must happen before restarting replicator?",
+      "expected": "Restarting replicator requires draining the queue first.",
+      "must_cite": [
+        20
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-compactor",
+      "question": "What must happen before restarting compactor?",
+      "expected": "Restarting compactor requires draining the queue first.",
+      "must_cite": [
+        21
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-planner",
+      "question": "What must happen before restarting planner?",
+      "expected": "Restarting planner requires draining the queue first.",
+      "must_cite": [
+        22
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-resolver",
+      "question": "What must happen before restarting resolver?",
+      "expected": "Restarting resolver requires draining the queue first.",
+      "must_cite": [
+        23
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-shipper",
+      "question": "What must happen before restarting shipper?",
+      "expected": "Restarting shipper requires draining the queue first.",
+      "must_cite": [
+        24
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "lookup-restart-sampler",
+      "question": "What must happen before restarting sampler?",
+      "expected": "Restarting sampler requires draining the queue first.",
+      "must_cite": [
+        25
+      ],
+      "tags": [
+        "lookup",
+        "procedure"
+      ]
+    },
+    {
+      "id": "numeric-timeout-billing",
+      "question": "What is the request timeout for billing?",
+      "expected": "The billing request timeout is 5 seconds.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-search",
+      "question": "What is the request timeout for search?",
+      "expected": "The search request timeout is 6 seconds.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-ingest",
+      "question": "What is the request timeout for ingest?",
+      "expected": "The ingest request timeout is 7 seconds.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-auth",
+      "question": "What is the request timeout for auth?",
+      "expected": "The auth request timeout is 8 seconds.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-scheduler",
+      "question": "What is the request timeout for scheduler?",
+      "expected": "The scheduler request timeout is 9 seconds.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-notifier",
+      "question": "What is the request timeout for notifier?",
+      "expected": "The notifier request timeout is 10 seconds.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-gateway",
+      "question": "What is the request timeout for gateway?",
+      "expected": "The gateway request timeout is 11 seconds.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-reporting",
+      "question": "What is the request timeout for reporting?",
+      "expected": "The reporting request timeout is 12 seconds.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-archive",
+      "question": "What is the request timeout for archive?",
+      "expected": "The archive request timeout is 13 seconds.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-webhooks",
+      "question": "What is the request timeout for webhooks?",
+      "expected": "The webhooks request timeout is 14 seconds.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-indexer",
+      "question": "What is the request timeout for indexer?",
+      "expected": "The indexer request timeout is 15 seconds.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-importer",
+      "question": "What is the request timeout for importer?",
+      "expected": "The importer request timeout is 16 seconds.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-timeout-exporter",
+      "question": "What is the request timeout for exporter?",
+      "expected": "The exporter request timeout is 17 seconds.",
+      "must_cite": [
+        13
+      ],
+      "tags": [
+        "numeric",
+        "timeout"
+      ]
+    },
+    {
+      "id": "numeric-pool-billing",
+      "question": "How many connections are in the billing pool?",
+      "expected": "The billing connection pool holds 10 connections.",
+      "must_cite": [
+        1
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-search",
+      "question": "How many connections are in the search pool?",
+      "expected": "The search connection pool holds 12 connections.",
+      "must_cite": [
+        2
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-ingest",
+      "question": "How many connections are in the ingest pool?",
+      "expected": "The ingest connection pool holds 14 connections.",
+      "must_cite": [
+        3
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-auth",
+      "question": "How many connections are in the auth pool?",
+      "expected": "The auth connection pool holds 16 connections.",
+      "must_cite": [
+        4
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-scheduler",
+      "question": "How many connections are in the scheduler pool?",
+      "expected": "The scheduler connection pool holds 18 connections.",
+      "must_cite": [
+        5
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-notifier",
+      "question": "How many connections are in the notifier pool?",
+      "expected": "The notifier connection pool holds 20 connections.",
+      "must_cite": [
+        6
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-gateway",
+      "question": "How many connections are in the gateway pool?",
+      "expected": "The gateway connection pool holds 22 connections.",
+      "must_cite": [
+        7
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-reporting",
+      "question": "How many connections are in the reporting pool?",
+      "expected": "The reporting connection pool holds 24 connections.",
+      "must_cite": [
+        8
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-archive",
+      "question": "How many connections are in the archive pool?",
+      "expected": "The archive connection pool holds 26 connections.",
+      "must_cite": [
+        9
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-webhooks",
+      "question": "How many connections are in the webhooks pool?",
+      "expected": "The webhooks connection pool holds 28 connections.",
+      "must_cite": [
+        10
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-indexer",
+      "question": "How many connections are in the indexer pool?",
+      "expected": "The indexer connection pool holds 30 connections.",
+      "must_cite": [
+        11
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "numeric-pool-importer",
+      "question": "How many connections are in the importer pool?",
+      "expected": "The importer connection pool holds 32 connections.",
+      "must_cite": [
+        12
+      ],
+      "tags": [
+        "numeric",
+        "capacity"
+      ]
+    },
+    {
+      "id": "multi-compare-billing-search",
+      "question": "Do billing and search have the same retry count?",
+      "expected": "billing retries 2 times and search retries 3 times.",
+      "must_cite": [
+        1,
+        2
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-search-ingest",
+      "question": "Do search and ingest have the same retry count?",
+      "expected": "search retries 3 times and ingest retries 4 times.",
+      "must_cite": [
+        2,
+        3
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-ingest-auth",
+      "question": "Do ingest and auth have the same retry count?",
+      "expected": "ingest retries 4 times and auth retries 5 times.",
+      "must_cite": [
+        3,
+        4
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-auth-scheduler",
+      "question": "Do auth and scheduler have the same retry count?",
+      "expected": "auth retries 5 times and scheduler retries 2 times.",
+      "must_cite": [
+        4,
+        5
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-scheduler-notifier",
+      "question": "Do scheduler and notifier have the same retry count?",
+      "expected": "scheduler retries 2 times and notifier retries 3 times.",
+      "must_cite": [
+        5,
+        6
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-notifier-gateway",
+      "question": "Do notifier and gateway have the same retry count?",
+      "expected": "notifier retries 3 times and gateway retries 4 times.",
+      "must_cite": [
+        6,
+        7
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-gateway-reporting",
+      "question": "Do gateway and reporting have the same retry count?",
+      "expected": "gateway retries 4 times and reporting retries 5 times.",
+      "must_cite": [
+        7,
+        8
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-reporting-archive",
+      "question": "Do reporting and archive have the same retry count?",
+      "expected": "reporting retries 5 times and archive retries 2 times.",
+      "must_cite": [
+        8,
+        9
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-archive-webhooks",
+      "question": "Do archive and webhooks have the same retry count?",
+      "expected": "archive retries 2 times and webhooks retries 3 times.",
+      "must_cite": [
+        9,
+        10
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-webhooks-indexer",
+      "question": "Do webhooks and indexer have the same retry count?",
+      "expected": "webhooks retries 3 times and indexer retries 4 times.",
+      "must_cite": [
+        10,
+        11
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-indexer-importer",
+      "question": "Do indexer and importer have the same retry count?",
+      "expected": "indexer retries 4 times and importer retries 5 times.",
+      "must_cite": [
+        11,
+        12
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-importer-exporter",
+      "question": "Do importer and exporter have the same retry count?",
+      "expected": "importer retries 5 times and exporter retries 2 times.",
+      "must_cite": [
+        12,
+        13
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-exporter-reconciler",
+      "question": "Do exporter and reconciler have the same retry count?",
+      "expected": "exporter retries 2 times and reconciler retries 3 times.",
+      "must_cite": [
+        13,
+        14
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-reconciler-dispatcher",
+      "question": "Do reconciler and dispatcher have the same retry count?",
+      "expected": "reconciler retries 3 times and dispatcher retries 4 times.",
+      "must_cite": [
+        14,
+        15
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-dispatcher-collector",
+      "question": "Do dispatcher and collector have the same retry count?",
+      "expected": "dispatcher retries 4 times and collector retries 5 times.",
+      "must_cite": [
+        15,
+        16
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-collector-renderer",
+      "question": "Do collector and renderer have the same retry count?",
+      "expected": "collector retries 5 times and renderer retries 2 times.",
+      "must_cite": [
+        16,
+        17
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-renderer-validator",
+      "question": "Do renderer and validator have the same retry count?",
+      "expected": "renderer retries 2 times and validator retries 3 times.",
+      "must_cite": [
+        17,
+        18
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-validator-throttler",
+      "question": "Do validator and throttler have the same retry count?",
+      "expected": "validator retries 3 times and throttler retries 4 times.",
+      "must_cite": [
+        18,
+        19
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-throttler-replicator",
+      "question": "Do throttler and replicator have the same retry count?",
+      "expected": "throttler retries 4 times and replicator retries 5 times.",
+      "must_cite": [
+        19,
+        20
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "multi-compare-replicator-compactor",
+      "question": "Do replicator and compactor have the same retry count?",
+      "expected": "replicator retries 5 times and compactor retries 2 times.",
+      "must_cite": [
+        20,
+        21
+      ],
+      "tags": [
+        "multi_page",
+        "comparison"
+      ]
+    },
+    {
+      "id": "refusal-cost-billing",
+      "question": "What is the monthly cost of running billing?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "cost"
+      ]
+    },
+    {
+      "id": "refusal-cost-search",
+      "question": "What is the monthly cost of running search?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "cost"
+      ]
+    },
+    {
+      "id": "refusal-cost-ingest",
+      "question": "What is the monthly cost of running ingest?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "cost"
+      ]
+    },
+    {
+      "id": "refusal-cost-auth",
+      "question": "What is the monthly cost of running auth?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "cost"
+      ]
+    },
+    {
+      "id": "refusal-cost-scheduler",
+      "question": "What is the monthly cost of running scheduler?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "cost"
+      ]
+    },
+    {
+      "id": "refusal-sla-billing",
+      "question": "What is the uptime SLA for billing?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "sla"
+      ]
+    },
+    {
+      "id": "refusal-sla-search",
+      "question": "What is the uptime SLA for search?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "sla"
+      ]
+    },
+    {
+      "id": "refusal-sla-ingest",
+      "question": "What is the uptime SLA for ingest?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "sla"
+      ]
+    },
+    {
+      "id": "refusal-sla-auth",
+      "question": "What is the uptime SLA for auth?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "sla"
+      ]
+    },
+    {
+      "id": "refusal-sla-scheduler",
+      "question": "What is the uptime SLA for scheduler?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "sla"
+      ]
+    },
+    {
+      "id": "refusal-language-billing",
+      "question": "Which programming language is billing written in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "language"
+      ]
+    },
+    {
+      "id": "refusal-language-search",
+      "question": "Which programming language is search written in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "language"
+      ]
+    },
+    {
+      "id": "refusal-language-ingest",
+      "question": "Which programming language is ingest written in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "language"
+      ]
+    },
+    {
+      "id": "refusal-language-auth",
+      "question": "Which programming language is auth written in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "language"
+      ]
+    },
+    {
+      "id": "refusal-language-scheduler",
+      "question": "Which programming language is scheduler written in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "language"
+      ]
+    },
+    {
+      "id": "refusal-oncall-billing",
+      "question": "Who is on call for billing this weekend?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "oncall"
+      ]
+    },
+    {
+      "id": "refusal-oncall-search",
+      "question": "Who is on call for search this weekend?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "oncall"
+      ]
+    },
+    {
+      "id": "refusal-oncall-ingest",
+      "question": "Who is on call for ingest this weekend?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "oncall"
+      ]
+    },
+    {
+      "id": "refusal-oncall-auth",
+      "question": "Who is on call for auth this weekend?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "oncall"
+      ]
+    },
+    {
+      "id": "refusal-oncall-scheduler",
+      "question": "Who is on call for scheduler this weekend?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "oncall"
+      ]
+    },
+    {
+      "id": "refusal-region-billing",
+      "question": "Which cloud region does billing run in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "region"
+      ]
+    },
+    {
+      "id": "refusal-region-search",
+      "question": "Which cloud region does search run in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "region"
+      ]
+    },
+    {
+      "id": "refusal-region-ingest",
+      "question": "Which cloud region does ingest run in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "region"
+      ]
+    },
+    {
+      "id": "refusal-region-auth",
+      "question": "Which cloud region does auth run in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "region"
+      ]
+    },
+    {
+      "id": "refusal-region-scheduler",
+      "question": "Which cloud region does scheduler run in?",
+      "expected": "",
+      "expect_refusal": true,
+      "tags": [
+        "refusal",
+        "region"
+      ]
+    }
+  ]
+}

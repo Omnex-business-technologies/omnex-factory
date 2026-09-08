@@ -1,0 +1,2571 @@
+{
+  "suite": "rag_core",
+  "suite_fingerprint": "9d63ce68a45c5a51",
+  "at": "2026-08-05T07:28:49.655849+00:00",
+  "label": "baseline",
+  "thresholds": {},
+  "pass_rate": 0.8333333333333334,
+  "total_cost_picos": 0,
+  "results": [
+    {
+      "case_id": "lookup-owner-billing",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [1, 2], required [1], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-search",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [1, 2], required [2], spurious [1]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-ingest",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [3], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-auth",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [3, 4], required [4], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-scheduler",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.5
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [4, 5, 6], required [5], spurious [4, 6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-notifier",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [6, 7], required [6], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-gateway",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [6, 7], required [7], spurious [6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-reporting",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [8], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-archive",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [8, 9], required [9], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-webhooks",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [9, 10], required [10], spurious [9]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-indexer",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [10, 11], required [11], spurious [10]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-importer",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [11, 12], required [12], spurious [11]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-exporter",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [12, 13], required [13], spurious [12]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-reconciler",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [13, 14], required [14], spurious [13]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-dispatcher",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [14, 15], required [15], spurious [14]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-collector",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [15, 16], required [16], spurious [15]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-renderer",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [16, 17], required [17], spurious [16]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-validator",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [17, 18], required [18], spurious [17]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-throttler",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [18, 19], required [19], spurious [18]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-replicator",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [19, 20], required [20], spurious [19]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-compactor",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [20, 21], required [21], spurious [20]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-planner",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [21, 22], required [22], spurious [21]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-resolver",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [22, 23], required [23], spurious [22]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-shipper",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [23, 24], required [24], spurious [23]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-owner-sampler",
+      "tags": [
+        "lookup",
+        "ownership"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [24, 25], required [25], spurious [24]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-billing",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [1, 2], required [1], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-search",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [2], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-ingest",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [3], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-auth",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [3, 4], required [4], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-scheduler",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.5
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [4, 5, 6], required [5], spurious [4, 6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-notifier",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [6, 7], required [6], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-gateway",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [7], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-reporting",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [8], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-archive",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [8, 9], required [9], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-webhooks",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [9, 10], required [10], spurious [9]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-indexer",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [10, 11], required [11], spurious [10]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-importer",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [11, 12], required [12], spurious [11]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-exporter",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [12, 13], required [13], spurious [12]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-reconciler",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [13, 14], required [14], spurious [13]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-dispatcher",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [14, 15], required [15], spurious [14]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-collector",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [15, 16], required [16], spurious [15]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-renderer",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [16, 17], required [17], spurious [16]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-validator",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [17, 18], required [18], spurious [17]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-throttler",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [18, 19], required [19], spurious [18]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-replicator",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [19, 20], required [20], spurious [19]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-compactor",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [20, 21], required [21], spurious [20]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-planner",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [21, 22], required [22], spurious [21]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-resolver",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [22, 23], required [23], spurious [22]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-shipper",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [23, 24], required [24], spurious [23]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "lookup-restart-sampler",
+      "tags": [
+        "lookup",
+        "procedure"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [25], required [25]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-billing",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [1, 2], required [1], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-search",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [2], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-ingest",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [3], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-auth",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [3, 4], required [4], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-scheduler",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.5
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [4, 5, 6], required [5], spurious [4, 6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-notifier",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [6, 7], required [6], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-gateway",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [7], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-reporting",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [8], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-archive",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [8, 9], required [9], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-webhooks",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [9, 10], required [10], spurious [9]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-indexer",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [10, 11], required [11], spurious [10]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-importer",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [11, 12], required [12], spurious [11]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-timeout-exporter",
+      "tags": [
+        "numeric",
+        "timeout"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "2/3 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [12, 13], required [13], spurious [12]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-billing",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [1, 2], required [1], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-search",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [2], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-ingest",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [2, 3], required [3], spurious [2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-auth",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [3, 4], required [4], spurious [3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-scheduler",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.5
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [4, 5, 6], required [5], spurious [4, 6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-notifier",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [6, 7], required [6], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-gateway",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [7], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-reporting",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [7, 8], required [8], spurious [7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-archive",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [8, 9], required [9], spurious [8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-webhooks",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [9, 10], required [10], spurious [9]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-indexer",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [10, 11], required [11], spurious [10]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "numeric-pool-importer",
+      "tags": [
+        "numeric",
+        "capacity"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.75,
+        "faithfulness": 1.0,
+        "refusal_accuracy": 1.0,
+        "citation_accuracy": 0.6666666666666666
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "3/4 question terms addressed",
+        "faithfulness": "all claims supported",
+        "refusal_accuracy": "answered as expected",
+        "citation_accuracy": "cited [11, 12], required [12], spurious [11]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-billing-search",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [1, 2]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-search-ingest",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [2, 3]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-ingest-auth",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [3, 4]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-auth-scheduler",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [4, 5]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-scheduler-notifier",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [5, 6]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-notifier-gateway",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [6, 7]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-gateway-reporting",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [7, 8]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-reporting-archive",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [8, 9]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-archive-webhooks",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [9, 10]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-webhooks-indexer",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [10, 11]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-indexer-importer",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [11, 12]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-importer-exporter",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [12, 13]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-exporter-reconciler",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [13, 14]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-reconciler-dispatcher",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [14, 15]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-dispatcher-collector",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [15, 16]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-collector-renderer",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [16, 17]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-renderer-validator",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [17, 18]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-validator-throttler",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [18, 19]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-throttler-replicator",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [19, 20]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "multi-compare-replicator-compactor",
+      "tags": [
+        "multi_page",
+        "comparison"
+      ],
+      "metrics": {
+        "context_recall": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 0.0,
+        "refusal_accuracy": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "detail": {
+        "context_recall": "no relevant chunks declared",
+        "answer_relevancy": "0/5 question terms addressed",
+        "faithfulness": "1 unsupported claim(s)",
+        "refusal_accuracy": "refused an answerable question",
+        "citation_accuracy": "cited [], required [20, 21]"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-cost-billing",
+      "tags": [
+        "refusal",
+        "cost"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-cost-search",
+      "tags": [
+        "refusal",
+        "cost"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-cost-ingest",
+      "tags": [
+        "refusal",
+        "cost"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-cost-auth",
+      "tags": [
+        "refusal",
+        "cost"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-cost-scheduler",
+      "tags": [
+        "refusal",
+        "cost"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-sla-billing",
+      "tags": [
+        "refusal",
+        "sla"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-sla-search",
+      "tags": [
+        "refusal",
+        "sla"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-sla-ingest",
+      "tags": [
+        "refusal",
+        "sla"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-sla-auth",
+      "tags": [
+        "refusal",
+        "sla"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-sla-scheduler",
+      "tags": [
+        "refusal",
+        "sla"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-language-billing",
+      "tags": [
+        "refusal",
+        "language"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-language-search",
+      "tags": [
+        "refusal",
+        "language"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-language-ingest",
+      "tags": [
+        "refusal",
+        "language"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-language-auth",
+      "tags": [
+        "refusal",
+        "language"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-language-scheduler",
+      "tags": [
+        "refusal",
+        "language"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-oncall-billing",
+      "tags": [
+        "refusal",
+        "oncall"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-oncall-search",
+      "tags": [
+        "refusal",
+        "oncall"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-oncall-ingest",
+      "tags": [
+        "refusal",
+        "oncall"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-oncall-auth",
+      "tags": [
+        "refusal",
+        "oncall"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-oncall-scheduler",
+      "tags": [
+        "refusal",
+        "oncall"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-region-billing",
+      "tags": [
+        "refusal",
+        "region"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-region-search",
+      "tags": [
+        "refusal",
+        "region"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-region-ingest",
+      "tags": [
+        "refusal",
+        "region"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-region-auth",
+      "tags": [
+        "refusal",
+        "region"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    },
+    {
+      "case_id": "refusal-region-scheduler",
+      "tags": [
+        "refusal",
+        "region"
+      ],
+      "metrics": {
+        "refusal_accuracy": 1.0
+      },
+      "detail": {
+        "refusal_accuracy": "correctly refused"
+      },
+      "cost_picos": 0,
+      "error": ""
+    }
+  ]
+}

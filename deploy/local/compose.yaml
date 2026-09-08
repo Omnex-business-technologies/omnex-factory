@@ -1,0 +1,57 @@
+# The local-first stack. One command, zero API cost, offline.
+#
+#     docker compose -f deploy/local/compose.yaml up -d
+#     docker compose -f deploy/local/compose.yaml exec engine \
+#         python scripts/eval_gate.py
+#
+# The point is not "a dev environment". It is that this runs the SAME code paths
+# as production — the same router, the same guardrails, the same grounder, the
+# same eval gate — with the model tier swapped for one that costs nothing. A
+# development environment that differs from production is one where the bugs you
+# find are not the bugs you have.
+#
+# Everything here is open source and self-hosted: Ollama for inference, SQLite
+# for vectors, the engine's own BM25 for lexical search. There is no account to
+# create and no key to paste, which is what makes it usable by someone
+# evaluating the system before they are willing to pay for anything.
+
+name: omnex-local
+
+services:
+  ollama:
+    image: ollama/ollama:0.5.7
+    ports: ["11434:11434"]
+    volumes:
+      - ollama-models:/root/.ollama
+    # Models are pulled on first use rather than baked into the image: the
+    # image stays small, and which model you want is a local decision.
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  engine:
+    build:
+      context: ../../engine
+      dockerfile: ../deploy/local/Dockerfile
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OMNEX_ENV: development
+      OLLAMA_HOST: http://ollama:11434
+      # Deliberately empty. If any of these are set, the local stack is not
+      # testing the local path — it is quietly billing someone.
+      OPENAI_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
+      GROQ_API_KEY: ""
+    volumes:
+      - ../../engine:/app
+      - omnex-data:/app/.omnex
+    working_dir: /app
+    command: ["sleep", "infinity"]
+
+volumes:
+  ollama-models:
+  omnex-data:

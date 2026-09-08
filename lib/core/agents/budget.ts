@@ -130,6 +130,13 @@ const RATE_PER_MTOK: Record<string, { in: number; out: number }> = {
 }
 
 export function estimateCostEur(provider: string, promptTokens: number, completionTokens: number): number {
+  // A cache hit made no provider call, so it cost nothing. This has to be
+  // checked BEFORE the unknown-provider fallback: `complete()` returns
+  // `cache:exact` / `cache:semantic` as the provider name, which is not in the
+  // table, so the fallback would price the one genuinely free path in the
+  // system at the most expensive rate it knows.
+  if (provider.startsWith('cache:')) return 0
+
   const rate = RATE_PER_MTOK[provider]
   // An unknown provider is treated as paid, not free: assuming zero would hide
   // real spend behind a name this table has not been updated for.

@@ -1,0 +1,221 @@
+name: Engine
+
+# The Python engine's own check, separate from the Next.js one in ci.yml.
+#
+# Separate because they fail for unrelated reasons and have unrelated runtimes:
+# a Postgres container has nothing to do with a mypy error, and folding them
+# into one job means a five-second type failure waits on a two-minute Docker
+# pull before it reports.
+#
+# The whole suite runs with NO API key, NO network and NO container. That is a
+# design constraint of the engine rather than a property of this workflow — every
+# heavy dependency sits behind a Protocol with an in-repo implementation the
+# tests use. It is also why this job takes seconds: a test suite that needs
+# credentials is a test suite that quietly stops being run.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    # The engine's tests read outside engine/, and this filter has to say so or
+    # the gate silently does not run on the change that breaks it. `test_listing`
+    # reads packs/, `test_business_map` reads lib/modules/registry.ts,
+    # `test_env_check` reads every process.env in lib, app and components,
+    # `test_ci_contract` reads CLAUDE.md and these workflows, and the citegate
+    # parity test reads oss/.
+    paths:
+      - "engine/**"
+      - "deploy/**"
+      - "packs/**"
+      - "lib/**"
+      - "app/**"
+      - "components/**"
+      - "oss/**"
+      - "corpus/**"
+      - "CLAUDE.md"
+      - ".github/workflows/*.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: engine-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: engine
+
+jobs:
+  check:
+    name: Types, lint, tests (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor (StrEnum, datetime.UTC). 3.13 is here to catch
+        # deprecations before an image upgrade turns them into a production
+        # incident rather than a CI failure.
+        python: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: engine/pyproject.toml
+
+      - name: Install
+        run: uv venv --python ${{ matrix.python }} && uv pip install -e '.[dev]'
+
+      - name: Lint
+        # `scripts` included: it is 4,700 lines of ontology and corpus tooling
+        # that the test suite imports directly (pythonpath puts it on the path),
+        # so leaving it out lints less than the suite actually runs.
+        run: uv run ruff check src tests scripts
+
+      - name: Format
+        # The lesson from 01c73c8 is that `ruff check` passing does not mean
+        # `ruff format --check` passes. It was only half-applied: this line ran
+        # on two of the three directories the previous one checked.
+        run: uv run ruff format --check src tests scripts
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Invariants
+        # The repository's own rules, as predicates. Exits non-zero on any
+        # breach, and on any rule in `ontology/invariants.json` that has neither
+        # a checker nor a written reason one is impossible — which is what stops
+        # the registry becoming a second copy of CLAUDE.md.
+        run: uv run python scripts/invariant_map.py
+
+      - name: Promise integrity
+        # What `pip install omnex-engine[x]` actually delivers, measured per
+        # dependency. Six of twelve extras once installed libraries no module
+        # imported. An `unsupported` extra with a stated reason passes: the rule
+        # is promise integrity, not adapter count.
+        run: uv run python scripts/extras_check.py
+
+      - name: Release gates
+        # Both targets, never one. The first version of this script passed
+        # citegate and reported thirteen refusals against engine of which
+        # thirteen were false — a gate that is right for the wrong reason looks
+        # exactly like a working one until a second target exists.
+        run: |
+          uv run python scripts/release_check.py --target citegate
+          uv run python scripts/release_check.py --target engine
+
+      - name: Decision queue
+        # All 507 node dossiers, regenerated and required to match what is
+        # committed. The queue is derived; the last three columns of each row
+        # are the person's, and a machine may never fill them.
+        run: |
+          uv run python scripts/node_dossier.py
+          git diff --exit-code ../corpus/universal-ai-os/DECISIONS.md
+
+      - name: Decisions are a person's
+        # Reads any filled row in DECISIONS.md and refuses it unless a person
+        # stands behind it. On a queue nobody has ruled on this reports zero and
+        # exits clean, which is the honest state rather than a passing grade.
+        run: uv run python scripts/apply_decisions.py --dry-run
+
+      - name: Claim registry and run ledger
+        # What this repository asserts, what backs it, and what argues against
+        # it. `claims.py --check` refuses a malformed registry; `runs.py --check`
+        # refuses a ledger whose hash chain says it was edited rather than
+        # appended to, or that carries a secret-shaped value.
+        run: |
+          uv run python scripts/claims.py --check
+          uv run python scripts/runs.py --check
+
+      - name: The spine, end to end
+        # The hardening contract's final gate: fourteen transitions, each
+        # resolving to code that runs and a test that holds it, or classified
+        # DOCUMENTED. It reported 13 EXECUTABLE and 1 DOCUMENTED on the commit
+        # that introduced it — the run ledger had no writer — which is the whole
+        # point: a gate that can only print a passing chain is decorative.
+        run: uv run python scripts/spine_check.py
+
+      - name: Derived execution state
+        # execution_state.json is derived, never authored. This fails when the
+        # committed file and the repository disagree in either direction —
+        # machine state that can lie is worse than none, because it is the one
+        # thing an agent reads instead of looking.
+        run: uv run python scripts/state_map.py --check
+
+      - name: Environment manifest
+        # Compares deploy/env.json with every `process.env` the app reads, in
+        # both directions. It does NOT look at this machine's environment: none
+        # of these are set in CI and a strict check here would be red on every
+        # run until people stopped reading it. `--runtime` is the operator's
+        # mode, on the host that is about to serve.
+        run: uv run python scripts/env_check.py
+
+      - name: Tests
+        run: uv run pytest tests/ -q
+
+      - name: Mutation probe
+        # Breaks each load-bearing rule on purpose and requires a test to go
+        # red. A green suite is evidence of nothing until breaking the code
+        # breaks it, and this is the number that answers "how much of this is
+        # actually held" — which is the honest version of "how many bugs".
+        #
+        # Its own step, and only on one interpreter: twelve mutations each
+        # spawning a pytest is time worth spending once per push, not three
+        # times.
+        if: matrix.python == '3.12'
+        run: uv run python scripts/mutate.py
+
+      - name: Confirm the suite needs no credentials
+        # The claim above is worth enforcing rather than trusting. Running with
+        # the environment stripped catches the first test that quietly starts
+        # depending on a key that happens to be present on a developer machine.
+        env:
+          OPENAI_API_KEY: ""
+          ANTHROPIC_API_KEY: ""
+          GROQ_API_KEY: ""
+          OTEL_EXPORTER_OTLP_ENDPOINT: ""
+        run: uv run pytest tests/ -q
+
+  citegate:
+    name: citegate (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Its own job because `defaults.run.working-directory` above is `engine`, and
+    # that is exactly why this did not exist: every `pytest` in every workflow
+    # inherited it, so citegate's sixteen tests were green on a developer machine
+    # and had never run on a push. `release_check.py` found it while measuring
+    # whether the package was ready to ship, and `test_ci_contract` now refuses
+    # any suite in the repository that no workflow runs.
+    defaults:
+      run:
+        working-directory: oss/citegate
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor `pyproject.toml` declares, and the floor is the one
+        # version a user is most likely to be on and the least likely to be
+        # tested. It said 3.10 until this job was written: the package imports
+        # `enum.StrEnum` and could never have run there.
+        python: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: oss/citegate/pyproject.toml
+
+      - name: Install
+        run: uv venv --python ${{ matrix.python }} && uv pip install -e '.[dev]'
+
+      - name: Lint
+        run: uv run ruff check src tests
+
+      - name: Format
+        run: uv run ruff format --check src tests
+
+      - name: Tests
+        run: uv run pytest tests/ -q

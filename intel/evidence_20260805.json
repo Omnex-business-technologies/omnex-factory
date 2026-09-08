@@ -1,0 +1,800 @@
+{
+  "artifacts": [
+    {
+      "corpus": "OpenSpace: The Skill Management Layer for AI Agents Skill retrieval, quality evaluation by real task outcomes, controlled evolution (FIX, DERIVED, CAPTURED), local-first hub. Python 3.12+, LiteLLM, SQLite, MCP, React + TypeScript dashboard. 7300 stars, 881 forks, MIT.",
+      "description": "OpenSpace: The Skill Management Layer for AI Agents",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Skill retrieval, quality evaluation by real task outcomes, controlled evolution (FIX, DERIVED, CAPTURED), local-first hub. Python 3.12+, LiteLLM, SQLite, MCP, React + TypeScript dashboard. 7300 stars, 881 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/HKUDS/OpenSpace"
+        }
+      ],
+      "forks": 881,
+      "id": "github:HKUDS/OpenSpace",
+      "language": "Python",
+      "licence": "MIT",
+      "name": "HKUDS/OpenSpace",
+      "popularity": 7300,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/HKUDS/OpenSpace"
+    },
+    {
+      "corpus": "Self-evolving cognitive memory and context engine for AI agents in Java Memory graphs, threads and Insight Trees; retrieval via REST, MCP, SDKs. Claims #1 among listed baselines on LoCoMo 86.88, LongMemEval 84.20, PersonaMem 67.91. 903 stars, 91 forks, Apache-2.0.",
+      "description": "Self-evolving cognitive memory and context engine for AI agents in Java",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Memory graphs, threads and Insight Trees; retrieval via REST, MCP, SDKs. Claims #1 among listed baselines on LoCoMo 86.88, LongMemEval 84.20, PersonaMem 67.91. 903 stars, 91 forks, Apache-2.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/openmemind/memind"
+        }
+      ],
+      "forks": 91,
+      "id": "github:openmemind/memind",
+      "language": "Java",
+      "licence": "Apache-2.0",
+      "name": "openmemind/memind",
+      "popularity": 903,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/openmemind/memind"
+    },
+    {
+      "corpus": "Self-referential self-improving agents that can optimize for any computable task Meta-agent generates and refines task-specific agents in a feedback loop; executes model-generated code in isolated domains. Python 3.12, Docker. Carries a safety warning about executing untrusted model-generated code. 2700 stars, 348 forks, licensed CC BY-NC-SA 4.0.",
+      "description": "Self-referential self-improving agents that can optimize for any computable task",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Meta-agent generates and refines task-specific agents in a feedback loop; executes model-generated code in isolated domains. Python 3.12, Docker. Carries a safety warning about executing untrusted model-generated code. 2700 stars, 348 forks, licensed CC BY-NC-SA 4.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/facebookresearch/HyperAgents"
+        }
+      ],
+      "forks": 348,
+      "id": "github:facebookresearch/HyperAgents",
+      "language": "Python",
+      "licence": "CC BY-NC-SA 4.0",
+      "name": "facebookresearch/HyperAgents",
+      "popularity": 2700,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/facebookresearch/HyperAgents"
+    },
+    {
+      "corpus": "AI agents with graph based reasoning memory, scaffolded in seconds Scaffolds a full-stack agent app: FastAPI backend, neo4j-agent-memory, LiteLLM provider injection, Next.js frontend with SSE streaming and graph visualisation. Three-memory architecture: short-term, long-term entity graph, reasoning traces. 704 stars, 98 forks, Apache-2.0.",
+      "description": "AI agents with graph based reasoning memory, scaffolded in seconds",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Scaffolds a full-stack agent app: FastAPI backend, neo4j-agent-memory, LiteLLM provider injection, Next.js frontend with SSE streaming and graph visualisation. Three-memory architecture: short-term, long-term entity graph, reasoning traces. 704 stars, 98 forks, Apache-2.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/neo4j-labs/create-context-graph"
+        }
+      ],
+      "forks": 98,
+      "id": "github:neo4j-labs/create-context-graph",
+      "language": "Python",
+      "licence": "Apache-2.0",
+      "name": "neo4j-labs/create-context-graph",
+      "popularity": 704,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/neo4j-labs/create-context-graph"
+    },
+    {
+      "corpus": "An in-the-wild benchmark for AI agents in the OpenClaw Environment 60 tasks over six categories including Safety Alignment; graded 0.00-1.00 across four harnesses. Leaderboard reports execution time and API cost per model. 500 stars, 56 forks, MIT.",
+      "description": "An in-the-wild benchmark for AI agents in the OpenClaw Environment",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "60 tasks over six categories including Safety Alignment; graded 0.00-1.00 across four harnesses. Leaderboard reports execution time and API cost per model. 500 stars, 56 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/InternLM/WildClawBench"
+        }
+      ],
+      "forks": 56,
+      "id": "github:InternLM/WildClawBench",
+      "language": "Python",
+      "licence": "MIT",
+      "name": "InternLM/WildClawBench",
+      "popularity": 500,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/InternLM/WildClawBench"
+    },
+    {
+      "corpus": "Security governance for OpenClaw and agentic AI runtimes Scan capabilities before use, inspect runtime traffic, export durable audit evidence. Python CLI, Go gateway, policy engines, scanners, observability exporters. States it enforces policy and produces defensible records rather than proving an agent risk-free. 806 stars, 139 forks, Apache-2.0.",
+      "description": "Security governance for OpenClaw and agentic AI runtimes",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Scan capabilities before use, inspect runtime traffic, export durable audit evidence. Python CLI, Go gateway, policy engines, scanners, observability exporters. States it enforces policy and produces defensible records rather than proving an agent risk-free. 806 stars, 139 forks, Apache-2.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/cisco-ai-defense/defenseclaw"
+        }
+      ],
+      "forks": 139,
+      "id": "github:cisco-ai-defense/defenseclaw",
+      "language": "Go",
+      "licence": "Apache-2.0",
+      "name": "cisco-ai-defense/defenseclaw",
+      "popularity": 806,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/cisco-ai-defense/defenseclaw"
+    },
+    {
+      "corpus": "A comprehensive security review framework for AI agents in adversarial environments Review procedures for skills, repositories, URLs and blockchain addresses. Principle: every external input is untrusted until verified. Detection patterns across 26 attack categories with a risk-rating system. 500 stars, 30 forks, MIT.",
+      "description": "A comprehensive security review framework for AI agents in adversarial environments",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Review procedures for skills, repositories, URLs and blockchain addresses. Principle: every external input is untrusted until verified. Detection patterns across 26 attack categories with a risk-rating system. 500 stars, 30 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/slowmist/slowmist-agent-security"
+        }
+      ],
+      "forks": 30,
+      "id": "github:slowmist/slowmist-agent-security",
+      "language": "Markdown",
+      "licence": "MIT",
+      "name": "slowmist/slowmist-agent-security",
+      "popularity": 500,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/slowmist/slowmist-agent-security"
+    },
+    {
+      "corpus": "Real-time visualization of Claude Code agent orchestration Event relay server receiving agent hooks over HTTP and streaming via SSE, Next.js canvas for the node graph, VS Code extension. Concurrent multi-session monitoring and JSONL replay. 1500 stars, 162 forks, Apache-2.0.",
+      "description": "Real-time visualization of Claude Code agent orchestration",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Event relay server receiving agent hooks over HTTP and streaming via SSE, Next.js canvas for the node graph, VS Code extension. Concurrent multi-session monitoring and JSONL replay. 1500 stars, 162 forks, Apache-2.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/patoles/agent-flow"
+        }
+      ],
+      "forks": 162,
+      "id": "github:patoles/agent-flow",
+      "language": "TypeScript",
+      "licence": "Apache-2.0",
+      "name": "patoles/agent-flow",
+      "popularity": 1500,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/patoles/agent-flow"
+    },
+    {
+      "corpus": "An agent-first task board, Mission control for your AI workforce Each agent gets an Ed25519 identity, claims tasks, opens pull requests and self-organises into teams. Task dependencies and cross-repository support. 434 stars, 35 forks, FSL-1.1-ALv2 converting to Apache-2.0 after two years.",
+      "description": "An agent-first task board, Mission control for your AI workforce",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Each agent gets an Ed25519 identity, claims tasks, opens pull requests and self-organises into teams. Task dependencies and cross-repository support. 434 stars, 35 forks, FSL-1.1-ALv2 converting to Apache-2.0 after two years.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/saltbo/agent-kanban"
+        }
+      ],
+      "forks": 35,
+      "id": "github:saltbo/agent-kanban",
+      "language": "TypeScript",
+      "licence": "FSL-1.1-ALv2",
+      "name": "saltbo/agent-kanban",
+      "popularity": 434,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/saltbo/agent-kanban"
+    },
+    {
+      "corpus": "macOS menu bar app for tracking Claude Code token usage and costs Rust backend watches local JSONL session files, parses token counts, applies per-model pricing including cache read costs. Offline by default. Optional Supabase and webhook integrations. 306 stars, 51 forks, MIT.",
+      "description": "macOS menu bar app for tracking Claude Code token usage and costs",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Rust backend watches local JSONL session files, parses token counts, applies per-model pricing including cache read costs. Offline by default. Optional Supabase and webhook integrations. 306 stars, 51 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/soulduse/ai-token-monitor"
+        }
+      ],
+      "forks": 51,
+      "id": "github:soulduse/ai-token-monitor",
+      "language": "TypeScript",
+      "licence": "MIT",
+      "name": "soulduse/ai-token-monitor",
+      "popularity": 306,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/soulduse/ai-token-monitor"
+    },
+    {
+      "corpus": "Minimal kernel to make any AI coding agent stateful Three markdown files as the kernel \u2014 AGENTS.md, IDENTITY.md, KNOWLEDGE.md \u2014 plus knowledge/ and append-only notes/ directories in a git repository. No database and no vector store. 335 stars, 40 forks, MIT.",
+      "description": "Minimal kernel to make any AI coding agent stateful",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Three markdown files as the kernel \u2014 AGENTS.md, IDENTITY.md, KNOWLEDGE.md \u2014 plus knowledge/ and append-only notes/ directories in a git repository. No database and no vector store. 335 stars, 40 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/oguzbilgic/agent-kernel"
+        }
+      ],
+      "forks": 40,
+      "id": "github:oguzbilgic/agent-kernel",
+      "language": "Markdown",
+      "licence": "MIT",
+      "name": "oguzbilgic/agent-kernel",
+      "popularity": 335,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/oguzbilgic/agent-kernel"
+    },
+    {
+      "corpus": "tmux sidebar for coding agents with per-thread markers and a local HTTP API Sidebar showing live session state, status pills, logs and detected localhost ports inside tmux. Local HTTP API lets scripts and agents push metadata. 1200 stars, 70 forks, MIT.",
+      "description": "tmux sidebar for coding agents with per-thread markers and a local HTTP API",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Sidebar showing live session state, status pills, logs and detected localhost ports inside tmux. Local HTTP API lets scripts and agents push metadata. 1200 stars, 70 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/Ataraxy-Labs/opensessions"
+        }
+      ],
+      "forks": 70,
+      "id": "github:Ataraxy-Labs/opensessions",
+      "language": "Rust",
+      "licence": "MIT",
+      "name": "Ataraxy-Labs/opensessions",
+      "popularity": 1200,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/Ataraxy-Labs/opensessions"
+    },
+    {
+      "corpus": "A private Claude-Code-style coding agent for Apple Silicon MLX-native, Ollama and OpenAI API compatible, zero API keys. Monaco editor, git panel, terminal, MCP servers, local diffusion image generation, document RAG and LoRA fine-tuning. 104 stars, 18 forks, MIT.",
+      "description": "A private Claude-Code-style coding agent for Apple Silicon",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "MLX-native, Ollama and OpenAI API compatible, zero API keys. Monaco editor, git panel, terminal, MCP servers, local diffusion image generation, document RAG and LoRA fine-tuning. 104 stars, 18 forks, MIT.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/ovoment/ovo-local-llm"
+        }
+      ],
+      "forks": 18,
+      "id": "github:ovoment/ovo-local-llm",
+      "language": "TypeScript",
+      "licence": "MIT",
+      "name": "ovoment/ovo-local-llm",
+      "popularity": 104,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/ovoment/ovo-local-llm"
+    },
+    {
+      "corpus": "Claude Code skills based on The Minimalist Entrepreneur 10 skills covering community, idea validation, MVP, first customers, pricing, marketing, growth, values and business review. Installed through the Claude Code plugin marketplace. 9800 stars, 1000 forks, no licence file.",
+      "description": "Claude Code skills based on The Minimalist Entrepreneur",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "10 skills covering community, idea validation, MVP, first customers, pricing, marketing, growth, values and business review. Installed through the Claude Code plugin marketplace. 9800 stars, 1000 forks, no licence file.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/slavingia/skills"
+        }
+      ],
+      "forks": 1000,
+      "id": "github:slavingia/skills",
+      "language": "Markdown",
+      "licence": "",
+      "name": "slavingia/skills",
+      "popularity": 9800,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/slavingia/skills"
+    },
+    {
+      "corpus": "Curated list of the best truly open-source AI projects, models, tools Daily updated curation of models, development tools and infrastructure, scoped to genuinely open-source projects. 4400 stars, 563 forks, CC0-1.0.",
+      "description": "Curated list of the best truly open-source AI projects, models, tools",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Daily updated curation of models, development tools and infrastructure, scoped to genuinely open-source projects. 4400 stars, 563 forks, CC0-1.0.",
+          "fetched_on": "2026-08-05",
+          "url": "https://github.com/alvinunreal/awesome-opensource-ai"
+        }
+      ],
+      "forks": 563,
+      "id": "github:alvinunreal/awesome-opensource-ai",
+      "language": "Markdown",
+      "licence": "CC0-1.0",
+      "name": "alvinunreal/awesome-opensource-ai",
+      "popularity": 4400,
+      "popularity_kind": "stars",
+      "source": "github",
+      "tags": [],
+      "url": "https://github.com/alvinunreal/awesome-opensource-ai"
+    },
+    {
+      "corpus": "Library to easily interface with LLM API providers",
+      "description": "Library to easily interface with LLM API providers",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Library to easily interface with LLM API providers",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/litellm/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:litellm",
+      "language": "Python",
+      "licence": "",
+      "name": "litellm",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "fastuuid<1.0,>=0.14.0",
+        "httpx<1.0,>=0.28.0",
+        "openai<3.0.0,>=2.20.0",
+        "python-dotenv<2.0,>=1.0.0",
+        "tiktoken<1.0,>=0.8.0",
+        "importlib-metadata<9.0,>=8.0.0",
+        "tokenizers<1.0,>=0.21.0",
+        "click<9.0,>=8.0.0",
+        "jinja2<4.0,>=3.1.6",
+        "aiohttp<4.0,>=3.10",
+        "pydantic<3.0.0,>=2.10.0",
+        "jsonschema<5.0,>=4.0.0",
+        "gunicorn<24.0,>=23.0.0;",
+        "uvicorn<1.0,>=0.33.0;",
+        "granian<3.0,>=2.7.4;",
+        "uvloop<1.0,>=0.21.0;",
+        "fastapi<1.0,>=0.136.3;",
+        "starlette<2.0,>=1.0.1;",
+        "backoff<3.0,>=2.2.1;",
+        "pyyaml<7.0,>=6.0.3;",
+        "rq<3.0,>=2.7.0;",
+        "orjson<4.0,>=3.11.6;",
+        "apscheduler<4.0,>=3.11.2;",
+        "fastapi-sso<1.0,>=0.19.0;",
+        "pyjwt<3.0,>=2.13.0;",
+        "python-multipart<1.0,>=0.0.27;",
+        "cryptography<49.0,>=48.0.1;",
+        "pynacl<2.0,>=1.6.2;",
+        "websockets<16.0,>=15.0.1;",
+        "boto3<2.0,>=1.43.1;",
+        "azure-identity<2.0,>=1.25.2;",
+        "azure-storage-blob<13.0,>=12.28.0;",
+        "mcp<2.0,>=1.28.1;",
+        "litellm-proxy-extras==0.4.81;",
+        "litellm-enterprise==0.1.52;",
+        "restrictedpython<9.0,>=8.1;",
+        "rich<14.0,>=13.9.4;",
+        "inquirerpy<1.0,>=0.3.4;",
+        "polars<2.0,>=1.38.1;",
+        "soundfile<1.0,>=0.12.1;"
+      ],
+      "url": "https://pypi.org/project/litellm/"
+    },
+    {
+      "corpus": "Building stateful, multi-actor applications with LLMs",
+      "description": "Building stateful, multi-actor applications with LLMs",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Building stateful, multi-actor applications with LLMs",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/langgraph/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:langgraph",
+      "language": "Python",
+      "licence": "",
+      "name": "langgraph",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "langchain-core<2,>=1.4.7",
+        "langgraph-checkpoint<5.0.0,>=4.1.0",
+        "langgraph-prebuilt<1.2.0,>=1.1.0",
+        "langgraph-sdk<0.5.0,>=0.4.2",
+        "pydantic>=2.7.4",
+        "xxhash>=3.5.0"
+      ],
+      "url": "https://pypi.org/project/langgraph/"
+    },
+    {
+      "corpus": "Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
+      "description": "Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/crewai/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:crewai",
+      "language": "Python",
+      "licence": "",
+      "name": "crewai",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "aiofiles~=24.1.0",
+        "aiosqlite~=0.21.0",
+        "appdirs~=1.4.4",
+        "cel-python<0.6,>=0.5.0",
+        "chromadb~=1.1.0",
+        "click<9,>=8.1.7",
+        "crewai-cli==1.15.11",
+        "crewai-core==1.15.11",
+        "httpx~=0.28.1",
+        "instructor>=1.3.3",
+        "json-repair~=0.60.1",
+        "json5~=0.10.0",
+        "jsonref~=1.1.0",
+        "lancedb<0.30.1,>=0.29.2",
+        "mcp~=1.28.1",
+        "openai<3,>=2.30.0",
+        "openpyxl~=3.1.5",
+        "opentelemetry-api~=1.42.0",
+        "opentelemetry-exporter-otlp-proto-http~=1.42.0",
+        "opentelemetry-sdk~=1.42.0",
+        "pdfplumber~=0.11.4",
+        "portalocker~=2.7.0",
+        "pydantic-settings<3,>=2.14.2",
+        "pydantic<2.13,>=2.11.9",
+        "pyjwt<3,>=2.13.0",
+        "python-dotenv<2,>=1.2.2",
+        "pyyaml~=6.0",
+        "regex~=2026.1.15",
+        "tokenizers<1,>=0.21",
+        "tomli-w~=1.1.0",
+        "tomli~=2.0.2",
+        "a2a-sdk~=0.3.10;",
+        "aiocache",
+        "httpx-auth~=0.23.1;",
+        "httpx-sse~=0.4.0;",
+        "anthropic~=0.73.0;",
+        "aiobotocore~=3.8.0;",
+        "boto3~=1.43.46;",
+        "azure-ai-inference~=1.0.0b9;",
+        "azure-identity<2,>=1.17.0;"
+      ],
+      "url": "https://pypi.org/project/crewai/"
+    },
+    {
+      "corpus": "Long-term memory for AI Agents",
+      "description": "Long-term memory for AI Agents",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Long-term memory for AI Agents",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/mem0ai/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:mem0ai",
+      "language": "Python",
+      "licence": "",
+      "name": "mem0ai",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "httpx>=0.28.0",
+        "openai>=1.90.0",
+        "posthog>=7.14.0",
+        "protobuf<7.0.0,>=5.29.6",
+        "pydantic>=2.7.3",
+        "pytz>=2024.1",
+        "qdrant-client>=1.12.0",
+        "sqlalchemy>=2.0.31",
+        "isort>=5.13.2;",
+        "pytest>=8.2.2;",
+        "ruff==0.16.0;",
+        "boto3>=1.34.0;",
+        "elasticsearch<9.0.0,>=8.0.0;",
+        "fastembed>=0.3.1;",
+        "langchain-community<1.0.0,>=0.3.27;",
+        "langchain-core<1.0.0,>=0.3.85;",
+        "langchain<1.0.0,>=0.3.30;",
+        "opensearch-py>=2.0.0;",
+        "sentence-transformers>=5.2.0;",
+        "transformers>=5.3.0;",
+        "google-genai>=1.0.0;",
+        "google-generativeai>=0.3.0;",
+        "groq>=0.3.0;",
+        "litellm>=1.83.7;",
+        "ollama>=0.3.0;",
+        "openai>=1.90.0;",
+        "together>=0.2.10;",
+        "vertexai>=0.1.0;",
+        "spacy>=3.7.0;",
+        "pytest-asyncio>=0.23.7;",
+        "pytest-mock>=3.14.0;",
+        "pytest>=8.2.2;",
+        "azure-identity>=1.24.0;",
+        "azure-search-documents>=11.4.0b8;",
+        "cassandra-driver>=3.29.0;",
+        "chromadb>=0.4.24;",
+        "databricks-sdk>=0.63.0;",
+        "dbutils>=3.0.3;",
+        "elasticsearch<9.0.0,>=8.0.0;",
+        "faiss-cpu>=1.7.4;"
+      ],
+      "url": "https://pypi.org/project/mem0ai/"
+    },
+    {
+      "corpus": "Client library for the Qdrant vector search engine",
+      "description": "Client library for the Qdrant vector search engine",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Client library for the Qdrant vector search engine",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/qdrant-client/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:qdrant-client",
+      "language": "Python",
+      "licence": "Apache-2.0",
+      "name": "qdrant-client",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "fastembed<0.9,>=0.8;",
+        "fastembed-gpu<0.9,>=0.8;",
+        "grpcio>=1.41.0",
+        "httpx",
+        "numpy>=1.21;",
+        "numpy<2.3.0,>=1.21;",
+        "numpy>=1.26;",
+        "numpy>=2.1.0;",
+        "numpy>=2.3.0;",
+        "portalocker<4.0,>=2.7.0",
+        "protobuf>=3.20.0",
+        "pydantic!=2.0.*,!=2.1.*,!=2.2.0,>=1.10.8",
+        "urllib3<3,>=1.26.14"
+      ],
+      "url": "https://pypi.org/project/qdrant-client/"
+    },
+    {
+      "corpus": "The LLM Evaluation Framework",
+      "description": "The LLM Evaluation Framework",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "The LLM Evaluation Framework",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/deepeval/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:deepeval",
+      "language": "Python",
+      "licence": "Apache-2.0",
+      "name": "deepeval",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "aiohttp",
+        "click<8.4.0,>=8.0.0",
+        "grpcio<2.0.0,>=1.67.1",
+        "jinja2",
+        "nest_asyncio",
+        "openai",
+        "opentelemetry-api<2.0.0,>=1.24.0",
+        "opentelemetry-sdk<2.0.0,>=1.24.0",
+        "portalocker",
+        "posthog<7.0.0,>=5.4.0;",
+        "posthog<8.0.0,>=7.0.0;",
+        "pydantic<3.0.0,>=2.11.7",
+        "pydantic-settings<3.0.0,>=2.10.1",
+        "pyfiglet",
+        "pyperclip<2.0,>=1.8;",
+        "pytest",
+        "pytest-asyncio",
+        "pytest-repeat",
+        "pytest-rerunfailures",
+        "pytest-xdist",
+        "python-dotenv<2.0.0,>=1.1.1",
+        "questionary<3.0.0,>=2.0.0",
+        "requests<3.0.0,>=2.31.0",
+        "rich<15.0.0,>=13.6.0",
+        "sentry-sdk",
+        "setuptools",
+        "tabulate<0.10.0,>=0.9.0",
+        "tenacity<=10.0.0,>=8.0.0",
+        "textual<2.0,>=0.80;",
+        "tqdm<5.0.0,>=4.66.1",
+        "typer<1.0.0,>=0.9",
+        "wheel"
+      ],
+      "url": "https://pypi.org/project/deepeval/"
+    },
+    {
+      "corpus": "Evaluation framework for RAG and LLM applications",
+      "description": "Evaluation framework for RAG and LLM applications",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Evaluation framework for RAG and LLM applications",
+          "fetched_on": "2026-08-05",
+          "url": "https://pypi.org/project/ragas/"
+        }
+      ],
+      "forks": 0,
+      "id": "pypi:ragas",
+      "language": "Python",
+      "licence": "Apache License\n                                   Version 2.0, January 2004\n                                http://www.apache.org/licenses/\n        \n           TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n        \n           1. Definitions.\n        \n              \"License\" shall mean the terms and conditions for use, reproduction,\n              and distribution as defined by Sections 1 through 9 of this document.\n        \n              \"Licensor\" shall mean the copyright owner or entity authorized by\n              the copyright owner that is granting the License.\n        \n              \"Legal Entity\" shall mean the union of the acting entity and all\n              other entities that control, are controlled by, or are under common\n              control with that entity. For the purposes of this definition,\n              \"control\" means (i) the power, direct or indirect, to cause the\n              direction or management of such entity, whether by contract or\n              otherwise, or (ii) ownership of fifty percent (50%) or more of the\n              outstanding shares, or (iii) beneficial ownership of such entity.\n        \n              \"You\" (or \"Your\") shall mean an individual or Legal Entity\n              exercising permissions granted by this License.\n        \n              \"Source\" form shall mean the preferred form for making modifications,\n              including but not limited to software source code, documentation\n              source, and configuration files.\n        \n              \"Object\" form shall mean any form resulting from mechanical\n              transformation or translation of a Source form, including but\n              not limited to compiled object code, generated documentation,\n              and conversions to other media types.\n        \n              \"Work\" shall mean the work of authorship, whether in Source or\n              Object form, made available under the License, as indicated by a\n              copyright notice that is included in or attached to the work\n              (an example is provided in the Appendix below).\n        \n              \"Derivative Works\" shall mean any work, whether in Source or Object\n              form, that is based on (or derived from) the Work and for which the\n              editorial revisions, annotations, elaborations, or other modifications\n              represent, as a whole, an original work of authorship. For the purposes\n              of this License, Derivative Works shall not include works that remain\n              separable from, or merely link (or bind by name) to the interfaces of,\n              the Work and Derivative Works thereof.\n        \n              \"Contribution\" shall mean any work of authorship, including\n              the original version of the Work and any modifications or additions\n              to that Work or Derivative Works thereof, that is intentionally\n              submitted to Licensor for inclusion in the Work by the copyright owner\n              or by an individual or Legal Entity authorized to submit on behalf of\n              the copyright owner. For the purposes of this definition, \"submitted\"\n              means any form of electronic, verbal, or written communication sent\n              to the Licensor or its representatives, including but not limited to\n              communication on electronic mailing lists, source code control systems,\n              and issue tracking systems that are managed by, or on behalf of, the\n              Licensor for the purpose of discussing and improving the Work, but\n              excluding communication that is conspicuously marked or otherwise\n              designated in writing by the copyright owner as \"Not a Contribution.\"\n        \n              \"Contributor\" shall mean Licensor and any individual or Legal Entity\n              on behalf of whom a Contribution has been received by Licensor and\n              subsequently incorporated within the Work.\n        \n           2. Grant of Copyright License. Subject to the terms and conditions of\n              this License, each Contributor hereby grants to You a perpetual,\n              worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n              copyright license to reproduce, prepare Derivative Works of,\n              publicly display, publicly perform, sublicense, and distribute the\n              Work and such Derivative Works in Source or Object form.\n        \n           3. Grant of Patent License. Subject to the terms and conditions of\n              this License, each Contributor hereby grants to You a perpetual,\n              worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n              (except as stated in this section) patent license to make, have made,\n              use, offer to sell, sell, import, and otherwise transfer the Work,\n              where such license applies only to those patent claims licensable\n              by such Contributor that are necessarily infringed by their\n              Contribution(s) alone or by combination of their Contribution(s)\n              with the Work to which such Contribution(s) was submitted. If You\n              institute patent litigation against any entity (including a\n              cross-claim or counterclaim in a lawsuit) alleging that the Work\n              or a Contribution incorporated within the Work constitutes direct\n              or contributory patent infringement, then any patent licenses\n              granted to You under this License for that Work shall terminate\n              as of the date such litigation is filed.\n        \n           4. Redistribution. You may reproduce and distribute copies of the\n              Work or Derivative Works thereof in any medium, with or without\n              modifications, and in Source or Object form, provided that You\n              meet the following conditions:\n        \n              (a) You must give any other recipients of the Work or\n                  Derivative Works a copy of this License; and\n        \n              (b) You must cause any modified files to carry prominent notices\n                  stating that You changed the files; and\n        \n              (c) You must retain, in the Source form of any Derivative Works\n                  that You distribute, all copyright, patent, trademark, and\n                  attribution notices from the Source form of the Work,\n                  excluding those notices that do not pertain to any part of\n                  the Derivative Works; and\n        \n              (d) If the Work includes a \"NOTICE\" text file as part of its\n                  distribution, then any Derivative Works that You distribute must\n                  include a readable copy of the attribution notices contained\n                  within such NOTICE file, excluding those notices that do not\n                  pertain to any part of the Derivative Works, in at least one\n                  of the following places: within a NOTICE text file distributed\n                  as part of the Derivative Works; within the Source form or\n                  documentation, if provided along with the Derivative Works; or,\n                  within a display generated by the Derivative Works, if and\n                  wherever such third-party notices normally appear. The contents\n                  of the NOTICE file are for informational purposes only and\n                  do not modify the License. You may add Your own attribution\n                  notices within Derivative Works that You distribute, alongside\n                  or as an addendum to the NOTICE text from the Work, provided\n                  that such additional attribution notices cannot be construed\n                  as modifying the License.\n        \n              You may add Your own copyright statement to Your modifications and\n              may provide additional or different license terms and conditions\n              for use, reproduction, or distribution of Your modifications, or\n              for any such Derivative Works as a whole, provided Your use,\n              reproduction, and distribution of the Work otherwise complies with\n              the conditions stated in this License.\n        \n           5. Submission of Contributions. Unless You explicitly state otherwise,\n              any Contribution intentionally submitted for inclusion in the Work\n              by You to the Licensor shall be under the terms and conditions of\n              this License, without any additional terms or conditions.\n              Notwithstanding the above, nothing herein shall supersede or modify\n              the terms of any separate license agreement you may have executed\n              with Licensor regarding such Contributions.\n        \n           6. Trademarks. This License does not grant permission to use the trade\n              names, trademarks, service marks, or product names of the Licensor,\n              except as required for reasonable and customary use in describing the\n              origin of the Work and reproducing the content of the NOTICE file.\n        \n           7. Disclaimer of Warranty. Unless required by applicable law or\n              agreed to in writing, Licensor provides the Work (and each\n              Contributor provides its Contributions) on an \"AS IS\" BASIS,\n              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n              implied, including, without limitation, any warranties or conditions\n              of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n              PARTICULAR PURPOSE. You are solely responsible for determining the\n              appropriateness of using or redistributing the Work and assume any\n              risks associated with Your exercise of permissions under this License.\n        \n           8. Limitation of Liability. In no event and under no legal theory,\n              whether in tort (including negligence), contract, or otherwise,\n              unless required by applicable law (such as deliberate and grossly\n              negligent acts) or agreed to in writing, shall any Contributor be\n              liable to You for damages, including any direct, indirect, special,\n              incidental, or consequential damages of any character arising as a\n              result of this License or out of the use or inability to use the\n              Work (including but not limited to damages for loss of goodwill,\n              work stoppage, computer failure or malfunction, or any and all\n              other commercial damages or losses), even if such Contributor\n              has been advised of the possibility of such damages.\n        \n           9. Accepting Warranty or Additional Liability. While redistributing\n              the Work or Derivative Works thereof, You may choose to offer,\n              and charge a fee for, acceptance of support, warranty, indemnity,\n              or other liability obligations and/or rights consistent with this\n              License. However, in accepting such obligations, You may act only\n              on Your own behalf and on Your sole responsibility, not on behalf\n              of any other Contributor, and only if You agree to indemnify,\n              defend, and hold each Contributor harmless for any liability\n              incurred by, or claims asserted against, such Contributor by reason\n              of your accepting any such warranty or additional liability.\n        \n           END OF TERMS AND CONDITIONS\n        \n           APPENDIX: How to apply the Apache License to your work.\n        \n              To apply the Apache License to your work, attach the following\n              boilerplate notice, with the fields enclosed by brackets \"[]\"\n              replaced with your own identifying information. (Don't include\n              the brackets!)  The text should be enclosed in the appropriate\n              comment syntax for the file format. We also recommend that a\n              file or class name and description of purpose be included on the\n              same \"printed page\" as the copyright notice for easier\n              identification within third-party archives.\n        \n           Copyright [2023] [Vibrant Labs]\n        \n           Licensed under the Apache License, Version 2.0 (the \"License\");\n           you may not use this file except in compliance with the License.\n           You may obtain a copy of the License at\n        \n               http://www.apache.org/licenses/LICENSE-2.0\n        \n           Unless required by applicable law or agreed to in writing, software\n           distributed under the License is distributed on an \"AS IS\" BASIS,\n           WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n           See the License for the specific language governing permissions and\n           limitations under the License.\n        ",
+      "name": "ragas",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "pypi",
+      "tags": [
+        "numpy<3.0.0,>=1.21.0",
+        "datasets>=4.0.0",
+        "tiktoken",
+        "pydantic>=2.0.0",
+        "nest-asyncio",
+        "appdirs",
+        "diskcache>=5.6.3",
+        "typer",
+        "rich",
+        "openai>=1.0.0",
+        "tqdm",
+        "instructor",
+        "pillow>=10.4.0",
+        "networkx",
+        "scikit-network",
+        "langchain",
+        "langchain-core",
+        "langchain-community",
+        "langchain_openai",
+        "sentence-transformers;",
+        "transformers;",
+        "nltk;",
+        "rouge_score;",
+        "rapidfuzz;",
+        "pandas;",
+        "datacompy;",
+        "sacrebleu;",
+        "llama_index;",
+        "r2r;",
+        "GitPython;",
+        "GitPython;",
+        "langfuse>=3.2.4;",
+        "mlflow>=3.1.4;",
+        "google-api-python-client>=2.178.0;",
+        "google-auth>=2.40.3;",
+        "google-auth-oauthlib>=1.2.2;",
+        "haystack-ai;",
+        "oci>=2.160.1;",
+        "ag-ui-protocol>=0.1.9;",
+        "httpx>=0.27.0;"
+      ],
+      "url": "https://pypi.org/project/ragas/"
+    },
+    {
+      "corpus": "AI SDK by Vercel - build apps like ChatGPT, Claude, Gemini, and more with a single interface for any model using the Vercel AI Gateway or go direct to OpenAI, Anthropic, Google, or any other model provider.",
+      "description": "AI SDK by Vercel - build apps like ChatGPT, Claude, Gemini, and more with a single interface for any model using the Vercel AI Gateway or go direct to OpenAI, Anthropic, Google, or any other model provider.",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "AI SDK by Vercel - build apps like ChatGPT, Claude, Gemini, and more with a single interface for any model using the Vercel AI Gateway or go direct to OpenAI, Anthropic, Google, or any other model provider.",
+          "fetched_on": "2026-08-05",
+          "url": "https://www.npmjs.com/package/ai"
+        }
+      ],
+      "forks": 0,
+      "id": "npm:ai",
+      "language": "JavaScript/TypeScript",
+      "licence": "Apache-2.0",
+      "name": "ai",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "npm",
+      "tags": [
+        "@ai-sdk/gateway",
+        "@ai-sdk/provider",
+        "@ai-sdk/provider-utils"
+      ],
+      "url": "https://www.npmjs.com/package/ai"
+    },
+    {
+      "corpus": "Model Context Protocol implementation for TypeScript",
+      "description": "Model Context Protocol implementation for TypeScript",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Model Context Protocol implementation for TypeScript",
+          "fetched_on": "2026-08-05",
+          "url": "https://www.npmjs.com/package/@modelcontextprotocol/sdk"
+        }
+      ],
+      "forks": 0,
+      "id": "npm:@modelcontextprotocol/sdk",
+      "language": "JavaScript/TypeScript",
+      "licence": "MIT",
+      "name": "@modelcontextprotocol/sdk",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "npm",
+      "tags": [
+        "@hono/node-server",
+        "ajv",
+        "ajv-formats",
+        "content-type",
+        "cors",
+        "cross-spawn",
+        "eventsource",
+        "eventsource-parser",
+        "express",
+        "express-rate-limit",
+        "hono",
+        "jose",
+        "json-schema-typed",
+        "pkce-challenge",
+        "raw-body",
+        "zod",
+        "zod-to-json-schema"
+      ],
+      "url": "https://www.npmjs.com/package/@modelcontextprotocol/sdk"
+    },
+    {
+      "corpus": "Typescript bindings for langchain",
+      "description": "Typescript bindings for langchain",
+      "evidence": [
+        {
+          "confidence": "high",
+          "excerpt": "Typescript bindings for langchain",
+          "fetched_on": "2026-08-05",
+          "url": "https://www.npmjs.com/package/langchain"
+        }
+      ],
+      "forks": 0,
+      "id": "npm:langchain",
+      "language": "JavaScript/TypeScript",
+      "licence": "MIT",
+      "name": "langchain",
+      "popularity": 0,
+      "popularity_kind": "downloads",
+      "source": "npm",
+      "tags": [
+        "@langchain/langgraph",
+        "@langchain/langgraph-checkpoint",
+        "langsmith",
+        "zod"
+      ],
+      "url": "https://www.npmjs.com/package/langchain"
+    }
+  ],
+  "fetched_on": "2026-08-05"
+}

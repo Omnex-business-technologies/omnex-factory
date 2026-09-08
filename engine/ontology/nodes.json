@@ -1,0 +1,4061 @@
+{
+  "nodes": [
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Algorithms",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Data Structures",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Distributed Systems",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Operating Systems",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Networking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Databases",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Compilers",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Concurrency",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Parallelism",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Cryptography",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Information Theory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Probability",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Statistics",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Optimization",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Systems Design",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "I",
+      "claim": "gap",
+      "name": "Software Engineering",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Monolith",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Modular Monolith",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Microservices",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Event-Driven",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Layered",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Hexagonal",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Clean Architecture",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Domain-Driven Design",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "CQRS",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Event Sourcing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Saga",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Strangler",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Backend-for-Frontend",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "API Gateway",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Pub/Sub",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Queue-Based",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Streaming",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.serving.BatchResult",
+      "branch": "II",
+      "claim": "proposed",
+      "name": "Batch",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Serverless",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Edge",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Distributed",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Peer-to-Peer",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.core.RetryPolicy",
+      "branch": "II",
+      "claim": "proposed",
+      "name": "Retry",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Backoff",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Circuit Breaker",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Bulkhead",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.core.TimeoutExceeded",
+      "branch": "II",
+      "claim": "proposed",
+      "name": "Timeout",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.pipeline.IdempotencyStore",
+      "branch": "II",
+      "claim": "proposed",
+      "name": "Idempotency",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Checkpoint",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Replay",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Failover",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "II",
+      "claim": "gap",
+      "name": "Graceful Degradation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Classical ML",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Deep Learning",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Transformers",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "LLMs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Small Language Models",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Mixture of Experts",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Multimodal Models",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Vision",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Speech",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Audio",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Image Generation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Video",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Embeddings",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Rerankers",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Classifiers",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Diffusion",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Fine-Tuning",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.finetune.LoraConfig",
+      "branch": "III",
+      "claim": "proposed",
+      "name": "LoRA",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "QLoRA",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Distillation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.serving.QuantizationProfile",
+      "branch": "III",
+      "claim": "proposed",
+      "name": "Quantization",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Synthetic Data",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Reinforcement Learning",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "RLHF",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "RLAIF",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Reasoning",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "III",
+      "claim": "gap",
+      "name": "Inference Optimization",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Prompt Engineering",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "System Prompts",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Structured Outputs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Function Calling",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Tool Calling",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Model Routing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Model Cascading",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Fallback Models",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Model Selection",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Model Ensembles",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Context Windows",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Token Optimization",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Prompt Caching",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Inference Caching",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Batch Inference",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Streaming",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IV",
+      "claim": "gap",
+      "name": "Structured Generation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Assembly",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Selection",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Ranking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Compression",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Caching",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Routing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Context Isolation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Token Budgeting",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.graph.State",
+      "branch": "V",
+      "claim": "proposed",
+      "name": "State",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Session State",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Agent State",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Scratchpads",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Working Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Long Context",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Contextual Retrieval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "V",
+      "claim": "gap",
+      "name": "Dynamic Context",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Naive RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Advanced RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Hybrid RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "GraphRAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Agentic RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Corrective RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Self-RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Adaptive RAG",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Multi-Hop Retrieval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Multi-Query",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Query Expansion",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Reranking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Semantic Search",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Keyword Search",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Vector Search",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Knowledge Graphs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Entity Resolution",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Document Intelligence",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Chunking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.vectors.EmbeddingCache",
+      "branch": "VI",
+      "claim": "proposed",
+      "name": "Embedding",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Indexing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VI",
+      "claim": "gap",
+      "name": "Retrieval Evaluation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.rag.GroundingVerdict",
+      "branch": "VI",
+      "claim": "proposed",
+      "name": "Grounding",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.evals.citation_accuracy",
+      "branch": "VI",
+      "claim": "proposed",
+      "name": "Citation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Tool-Calling Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "ReAct",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Planner",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Executor",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.router.Router",
+      "branch": "VII",
+      "claim": "proposed",
+      "name": "Router",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Supervisor",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Critic",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Reflection",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.Evaluator",
+      "branch": "VII",
+      "claim": "proposed",
+      "name": "Evaluator",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Research Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Coding Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Browser Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Data Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Memory Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Recovery Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Security Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Sales Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Support Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Finance Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VII",
+      "claim": "gap",
+      "name": "Operations Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Sequential",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Parallel",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Hierarchical",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Supervisor",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Delegation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Handoffs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Debate",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.crew.Consensus",
+      "branch": "VIII",
+      "claim": "proposed",
+      "name": "Consensus",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Swarm",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Blackboard",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Shared Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Distributed Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Agent Teams",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Agent Networks",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Agent Marketplaces",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "VIII",
+      "claim": "gap",
+      "name": "Agent-to-Agent Economy",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Working Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Short-Term Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Conversation Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Episodic Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Semantic Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Procedural Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.memory.LongTermMemory",
+      "branch": "IX",
+      "claim": "proposed",
+      "name": "Long-Term Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Vector Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Graph Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "KV Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "External Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Compressed Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Hierarchical Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Personalized Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "IX",
+      "claim": "gap",
+      "name": "Shared Memory",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Graph Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Role Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Loop Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Workflow Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Event Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Hierarchical Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Human Orchestration",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "X",
+      "claim": "gap",
+      "name": "Framework-Neutral Abstraction",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Triggers",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Webhooks",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Schedules",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Events",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Forms",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "HTTP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "APIs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Databases",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Files",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Queues",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Branches",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Conditions",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Loops",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Merges",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Code Nodes",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Sub-workflows",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Credentials",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Secrets",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Human Approval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Retries",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Error Workflows",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Execution History",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Scaling",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XI",
+      "claim": "gap",
+      "name": "Self-Hosting",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "HTTP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "REST",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "GraphQL",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "gRPC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "WebSockets",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "SSE",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "Webhooks",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "OpenAPI",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "OAuth",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "OIDC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "JWT",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.mcp.McpClient",
+      "branch": "XII",
+      "claim": "proposed",
+      "name": "MCP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "A2A",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "AG-UI",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "A2UI",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "UCP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XII",
+      "claim": "gap",
+      "name": "AP2",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "SQL",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "NoSQL",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Vector Database",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Graph Database",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Object Storage",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Search Engine",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.vectors.EmbeddingCache",
+      "branch": "XIII",
+      "claim": "proposed",
+      "name": "Cache",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Data Warehouse",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Data Lake",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Lakehouse",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Event Store",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Feature Store",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "ETL",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "ELT",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "CDC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Streaming",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.serving.BatchResult",
+      "branch": "XIII",
+      "claim": "proposed",
+      "name": "Batch",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.core.ValidationFailed",
+      "branch": "XIII",
+      "claim": "proposed",
+      "name": "Validation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Deduplication",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Schema Evolution",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Lineage",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Data Quality",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIII",
+      "claim": "gap",
+      "name": "Data Governance",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Registry",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Discovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Selection",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Permissions",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Invocation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Validation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Sandbox",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Timeout",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Retry",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Result Validation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Audit",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Budget",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Tool Rate Limit",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Browser",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.vectors.SearchHit",
+      "branch": "XIV",
+      "claim": "proposed",
+      "name": "Search",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.mcp.ErrorCode",
+      "branch": "XIV",
+      "claim": "proposed",
+      "name": "Code",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Shell",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "SQL Tool",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "HTTP Tool",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Files",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Email",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Calendar",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "CRM",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "ERP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Payments",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Cloud",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIV",
+      "claim": "gap",
+      "name": "Internal APIs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "IAM",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "RBAC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "ABAC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Identity",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Agent Identity",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Scoped Credentials",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Secrets",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Encryption",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "KMS",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "PII Detection",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "DLP",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Sandboxing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Network Isolation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Prompt Injection Defense",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Tool Abuse Defense",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Data Exfiltration Defense",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Supply Chain Security",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Model Security",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Agent Security",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Runtime Containment",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.crew.AuditEntry",
+      "branch": "XV",
+      "claim": "proposed",
+      "name": "Audit",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XV",
+      "claim": "gap",
+      "name": "Policy Enforcement",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Unit Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Component Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Agent Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Workflow Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "System Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Business Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.evals.citation_accuracy",
+      "branch": "XVI",
+      "claim": "proposed",
+      "name": "Accuracy",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Task Success",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Tool Success",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Groundedness",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.evals.faithfulness",
+      "branch": "XVI",
+      "claim": "proposed",
+      "name": "Faithfulness",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Relevance",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Safety",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Reliability",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.obs.DEFAULT_LATENCY_BUCKETS",
+      "branch": "XVI",
+      "claim": "proposed",
+      "name": "Latency",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.mean_cost_per_accepted",
+      "branch": "XVI",
+      "claim": "proposed",
+      "name": "Cost",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Drift",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Recovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "User Satisfaction",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "ROI",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Golden Dataset",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Synthetic Dataset",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Regression",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "LLM-as-Judge",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Human Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "A/B Testing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Red Team",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Adversarial Testing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Production Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVI",
+      "claim": "gap",
+      "name": "Continuous Eval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Logs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.deploy.CanaryMetrics",
+      "branch": "XVII",
+      "claim": "proposed",
+      "name": "Metrics",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Traces",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Token Usage",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.obs.DEFAULT_LATENCY_BUCKETS",
+      "branch": "XVII",
+      "claim": "proposed",
+      "name": "Latency",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.mean_cost_per_accepted",
+      "branch": "XVII",
+      "claim": "proposed",
+      "name": "Cost",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Tool Calls",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Agent Steps",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Model Calls",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Retrieval Results",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Memory Retrieval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Errors",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Retries",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "User Feedback",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Trace ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Session ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Agent Run ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Tool Call ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Model Call ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Workflow ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVII",
+      "claim": "gap",
+      "name": "Customer ID",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Retries",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Backoff",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.core.TimeoutExceeded",
+      "branch": "XVIII",
+      "claim": "proposed",
+      "name": "Timeout",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Circuit Breaker",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Bulkhead",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Dead Letter Queue",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Checkpointing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Durable Execution",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Replay",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Recovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.pipeline.IdempotencyStore",
+      "branch": "XVIII",
+      "claim": "proposed",
+      "name": "Idempotency",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Failover",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Disaster Recovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Multi-Region",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Load Shedding",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XVIII",
+      "claim": "gap",
+      "name": "Graceful Degradation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Local",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.intel.DockerHubSource",
+      "branch": "XIX",
+      "claim": "proposed",
+      "name": "Docker",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Kubernetes",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "VM",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Serverless",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "GPU",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "CPU",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Edge",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Cloud",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Multi-Cloud",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "CI/CD",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "IaC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Networking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Autoscaling",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Service Discovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.finetune.LoraConfig",
+      "branch": "XIX",
+      "claim": "proposed",
+      "name": "Config",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Secrets Management",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "Registries",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XIX",
+      "claim": "gap",
+      "name": "GPU Scheduling",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "AI Coding",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Code Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Repo Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Issue Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "PR Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Test Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Debug Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Refactoring Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Documentation Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Migration Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "Security Review Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "DevOps Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XX",
+      "claim": "gap",
+      "name": "SRE Agents",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Sales",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Marketing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Support",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Research",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Operations",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Finance",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "HR",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Legal Ops",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Procurement",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Customer Success",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Analytics",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Reporting",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXI",
+      "claim": "gap",
+      "name": "Knowledge Management",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Discovery",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.factory.Recommendation",
+      "branch": "XXII",
+      "claim": "proposed",
+      "name": "Recommendation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Negotiation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Authorization",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Purchase",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Payment",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Fulfillment",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Tracking",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXII",
+      "claim": "gap",
+      "name": "Refund",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.tenancy.Reconciliation",
+      "branch": "XXII",
+      "claim": "proposed",
+      "name": "Reconciliation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "SaaS",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "API",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Workflow",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Copilot",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Autonomous Service",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Marketplace Product",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Enterprise System",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "White Label",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIII",
+      "claim": "gap",
+      "name": "Embedded Agent",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Subscription",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.llm.Usage",
+      "branch": "XXIV",
+      "claim": "proposed",
+      "name": "Usage",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Credits",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "API Billing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Licensing",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Marketplace",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Transaction Fee",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Managed Service",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Enterprise",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "White Label",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Performance-Based",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "CAC",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "LTV",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "ARPU",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Gross Margin",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Contribution Margin",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Churn",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Retention",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Payback",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXIV",
+      "claim": "gap",
+      "name": "Conversion",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "Market Signals",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "Customer Problems",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "Search Demand",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "Competitor Movement",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "Technology Changes",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "New APIs",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "New Protocols",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "New Regulations",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "New Workflows",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXV",
+      "claim": "gap",
+      "name": "New Inefficiencies",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Revenue",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.mean_cost_per_accepted",
+      "branch": "XXVI",
+      "claim": "proposed",
+      "name": "Cost",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.factory.Margin",
+      "branch": "XXVI",
+      "claim": "proposed",
+      "name": "Margin",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.evals.citation_accuracy",
+      "branch": "XXVI",
+      "claim": "proposed",
+      "name": "Accuracy",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Reliability",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.llm.Usage",
+      "branch": "XXVI",
+      "claim": "proposed",
+      "name": "Usage",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Retention Impact",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Risk",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Growth Potential",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Scale",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Optimize",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Refactor",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.MergePolicy",
+      "branch": "XXVI",
+      "claim": "proposed",
+      "name": "Merge",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Reposition",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "License",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVI",
+      "claim": "gap",
+      "name": "Kill",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.factory.observe",
+      "branch": "XXVII",
+      "claim": "proposed",
+      "name": "Observe",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Understand",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Find Bottleneck",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Generate Options",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.serving.simulate",
+      "branch": "XXVII",
+      "claim": "proposed",
+      "name": "Simulate",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.harness.evaluate",
+      "branch": "XXVII",
+      "claim": "proposed",
+      "name": "Evaluate",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Security Check",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Economic Check",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Human Approval",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Deploy",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Measure",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Learn",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Policy Bounds",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVII",
+      "claim": "gap",
+      "name": "Budget Bounds",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.deploy.RollbackDecision",
+      "branch": "XXVII",
+      "claim": "proposed",
+      "name": "Rollback",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.crew.AuditTrail",
+      "branch": "XXVII",
+      "claim": "proposed",
+      "name": "Audit Trail",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Unknown Pattern Intake",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Research",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": "omnex.core.ValidationFailed",
+      "branch": "XXVIII",
+      "claim": "proposed",
+      "name": "Validation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Classification",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Ontology Insertion",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Evaluation",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Versioning",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Completeness Scoring",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Source Fidelity",
+      "note": "",
+      "verified": false
+    },
+    {
+      "alias": null,
+      "branch": "XXVIII",
+      "claim": "gap",
+      "name": "Confidence Scoring",
+      "note": "",
+      "verified": false
+    }
+  ],
+  "ontology_version": "2"
+}

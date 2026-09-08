@@ -1,0 +1,1033 @@
+{
+  "$comment": [
+    "The ontology, mapped onto what engine/ actually contains.",
+    "",
+    "This file holds CLAIMS. It does not hold status: scripts/ontology_map.py",
+    "derives status by importing every module and resolving every symbol, so a",
+    "branch cannot claim `implemented` for code that does not exist. Editing this",
+    "file to claim more makes the script and tests/test_ontology.py fail, which is",
+    "the point — a completeness score the author also controls is not evidence.",
+    "",
+    "No figure appears anywhere in this file. `measured_by` names the producer of",
+    "a branch's number instead, because a literal typed here drifts from its",
+    "source the moment the source is re-measured on another machine.",
+    "",
+    "`worth_it` answers exactly one question: should an AUTONOMOUS LOOP own this",
+    "branch? It is omnex.harness.worth_it, whose gate is about loops, not about",
+    "features. A NOT-worth-it verdict means 'do not point a loop at it'. It never",
+    "means 'do not build it'.",
+    "",
+    "Version 2 adds ten branches DERIVED from a corpus rather than assumed from a",
+    "proposal. Version 1 mapped the twenty-eight branches somebody wrote down; it",
+    "could confirm or refute each of them and could not discover a twenty-ninth.",
+    "`source` records which of the two a branch is, because 'we cover 23 of 28' is",
+    "a claim about a list, not about a field, and the list was not evidence."
+  ],
+  "ontology_version": "2",
+  "branches": [
+    {
+      "id": "I",
+      "name": "Foundational CS",
+      "claim": "knowledge",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [],
+      "note": "A reference category, not a capability. Nothing to ship, nothing to gate.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "II",
+      "name": "Software Architecture and resilience patterns",
+      "claim": "partial",
+      "modules": [
+        "omnex.core",
+        "omnex.deploy",
+        "omnex.pipeline"
+      ],
+      "symbols": [
+        "omnex.core.Attempt",
+        "omnex.core.Deadline",
+        "omnex.core.PermanentError",
+        "omnex.deploy.CanaryPolicy",
+        "omnex.deploy.RollbackDecision",
+        "omnex.pipeline.DeadLetter",
+        "omnex.pipeline.IdempotencyStore"
+      ],
+      "tests": [
+        "tests/test_core.py",
+        "tests/test_deploy.py",
+        "tests/test_pipeline_hitl.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "circuit breaker and bulkhead as named primitives"
+      ],
+      "note": "Retry, deadline, error taxonomy, canary, rollback, dead-letter and idempotency all exist. Two classic patterns are absent by name.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "III",
+      "name": "AI/ML Foundation",
+      "claim": "implemented",
+      "modules": [
+        "omnex.finetune"
+      ],
+      "symbols": [
+        "omnex.finetune.LoraConfig",
+        "omnex.finetune.Example",
+        "omnex.finetune.prepare",
+        "omnex.finetune.ForgettingCheck"
+      ],
+      "tests": [
+        "tests/test_serving_finetune.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Covered to the depth this platform needs: LoRA/DPO data preparation and a forgetting check. Classical ML beyond that is reference knowledge, not a shipped capability.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "IV",
+      "name": "LLM Engineering",
+      "claim": "implemented",
+      "modules": [
+        "omnex.llm"
+      ],
+      "symbols": [
+        "omnex.llm.LanguageModel",
+        "omnex.llm.ModelCatalog",
+        "omnex.llm.ModelSpec",
+        "omnex.llm.Completion",
+        "omnex.llm.CallOptions",
+        "omnex.llm.Message"
+      ],
+      "tests": [
+        "tests/test_router.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Provider adapters behind a Protocol, with a committed model catalogue and scripted/flaky/slow doubles the suite uses instead of a network.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "V",
+      "name": "Context Engineering",
+      "claim": "implemented",
+      "modules": [
+        "omnex.guard"
+      ],
+      "symbols": [
+        "omnex.guard.PromptAssembler",
+        "omnex.guard.Segment",
+        "omnex.guard.Provenance",
+        "omnex.guard.Audience"
+      ],
+      "tests": [
+        "tests/test_guard.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Context is assembled from segments that carry provenance, so untrusted text cannot arrive unlabelled.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "VI",
+      "name": "RAG / Knowledge Engineering",
+      "claim": "partial",
+      "modules": [
+        "omnex.rag"
+      ],
+      "symbols": [
+        "omnex.rag.RagPipeline",
+        "omnex.rag.Grounder",
+        "omnex.rag.Document",
+        "omnex.rag.Page",
+        "omnex.rag.GroundedAnswer",
+        "omnex.rag.SentenceCheck",
+        "omnex.rag.extract_figures",
+        "omnex.rag.cluster_page",
+        "omnex.rag.Manifest",
+        "omnex.rag.Band"
+      ],
+      "tests": [
+        "tests/test_rag.py",
+        "tests/test_figures.py"
+      ],
+      "measured_by": "scripts/skill_numbers.py",
+      "missing": [
+        "the pdfplumber/pypdfium2 reader behind the `figures` extra"
+      ],
+      "note": "Page-anchored citations and grounding refusal are shipped and measured. Figure-level anchoring now has its whole pure-Python half — clustering, bands, duplicate grouping, manifest — with 28 tests that need none of the extras. What is absent is the reader that feeds it, which is built against a real document rather than guessed at.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "VII",
+      "name": "Agentic AI",
+      "claim": "implemented",
+      "modules": [
+        "omnex.harness"
+      ],
+      "symbols": [
+        "omnex.harness.Contract",
+        "omnex.harness.Criterion",
+        "omnex.harness.Evaluator",
+        "omnex.harness.Grade",
+        "omnex.harness.RunState",
+        "omnex.harness.evaluate"
+      ],
+      "tests": [
+        "tests/test_harness.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "The worth-it gate, the frozen contract, the clean-context evaluator and persisted run state. The evaluator has no parameter through which the maker's transcript can reach it, enforced by a signature test.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "VIII",
+      "name": "Multi-Agent",
+      "claim": "implemented",
+      "modules": [
+        "omnex.crew"
+      ],
+      "symbols": [
+        "omnex.crew.Crew",
+        "omnex.crew.Consensus",
+        "omnex.crew.Opinion",
+        "omnex.crew.AuditTrail",
+        "omnex.crew.decide"
+      ],
+      "tests": [
+        "tests/test_crew.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Consensus over independent opinions with a hash-chained audit trail, so a decision cannot be edited after the fact without breaking the chain.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "IX",
+      "name": "Agent Memory",
+      "claim": "partial",
+      "modules": [
+        "omnex.memory"
+      ],
+      "symbols": [
+        "omnex.memory.ShortTermBuffer",
+        "omnex.memory.LongTermMemory",
+        "omnex.memory.MemoryEntry",
+        "omnex.memory.EvictionPolicy",
+        "omnex.memory.compress"
+      ],
+      "tests": [
+        "tests/test_memory.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "consolidate as a distinct operation, separate from compress"
+      ],
+      "note": "Capture, store, retrieve, compress and expire are present. The proposed chain also names consolidation, which today is folded into compression rather than being its own step.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "X",
+      "name": "Agent Orchestration",
+      "claim": "implemented",
+      "modules": [
+        "omnex.graph"
+      ],
+      "symbols": [
+        "omnex.graph.Graph",
+        "omnex.graph.Node",
+        "omnex.graph.State",
+        "omnex.graph.Budget",
+        "omnex.graph.GraphRun",
+        "omnex.graph.StepRecord"
+      ],
+      "tests": [
+        "tests/test_harness.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "A framework-neutral graph runtime with a budget and JSON checkpoints. LangGraph and CrewAI sit behind the `agents` extra as adapters, never as the default.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XI",
+      "name": "Workflow Automation as an execution target",
+      "claim": "partial",
+      "modules": [
+        "omnex.pipeline",
+        "omnex.factory"
+      ],
+      "symbols": [
+        "omnex.pipeline.Job",
+        "omnex.pipeline.JobState",
+        "omnex.pipeline.Worker",
+        "omnex.pipeline.WebhookVerifier",
+        "omnex.pipeline.DeadLetter",
+        "omnex.factory.compile.Target",
+        "omnex.factory.compile.plan",
+        "omnex.factory.compile.assert_round_trips",
+        "omnex.factory.compile.Catalogue",
+        "omnex.factory.compile.Binding",
+        "omnex.factory.compile.NodeType"
+      ],
+      "tests": [
+        "tests/test_pipeline_hitl.py",
+        "tests/test_compile.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "a binding confirmed by an import — 0 of 7 today. The catalogue supplies node type, method and credential name per tool, and two storefront bindings carry no url because the Etsy and Lemon Squeezy shapes could not be read from the environment this was written in. Nothing here can perform the import that would settle them."
+      ],
+      "note": "Queues, workers, webhooks with signature verification, idempotency, retries and dead-letter exist as a runtime, and omnex.factory.compile emits that shape as an n8n workflow JSON somebody can import into their own instance. The bindings this branch was missing are now data: engine/ontology/n8n_bindings.json, loaded and validated by omnex.factory.compile.bindings, emitted by the n8n target. A ref with a binding gets its real node type and parameters; a ref without one still gets n8n-nodes-base.noOp and says so in its own notes field. The claim stays partial rather than complete, and the honest reason is in `missing`: written down is not the same as seen to work, and confirming a binding requires an import this process cannot perform. emit(require_confirmed=True) is the gate that keeps an unconfirmed shape out of anything unattended.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XII",
+      "name": "Agent Protocol Fabric",
+      "claim": "partial",
+      "modules": [
+        "omnex.mcp"
+      ],
+      "symbols": [
+        "omnex.mcp.McpClient",
+        "omnex.mcp.McpServer",
+        "omnex.mcp.Transport",
+        "omnex.mcp.ToolResult",
+        "omnex.mcp.ToolPrice"
+      ],
+      "tests": [
+        "tests/test_mcp.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "A2A agent-to-agent transport"
+      ],
+      "note": "MCP now exists: JSON-RPC 2.0 over a Transport Protocol, stdlib only, with tool results returning as untrusted guard.Segment content priced in pico-dollar Money. It was built because BUILD_ORDER.md ranked it first — 62 of 509 figures name it, more than twice the next node — not because it was the interesting one. A2A remains absent. The worth_it block below is unchanged on purpose: it answers whether a long-running LOOP over this branch is economic, which building one module does not alter, and editing it to match what was just shipped is precisely the self-grading this ontology refuses.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XIII",
+      "name": "Data Engineering",
+      "claim": "implemented",
+      "modules": [
+        "omnex.vectors",
+        "omnex.pipeline"
+      ],
+      "symbols": [
+        "omnex.vectors.HybridStore",
+        "omnex.vectors.SqliteStore",
+        "omnex.vectors.Chunk",
+        "omnex.vectors.BackupManifest",
+        "omnex.pipeline.payload_hash"
+      ],
+      "tests": [
+        "tests/test_vectors.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Ingest, chunking, hybrid dense/lexical storage, RRF fusion, backup and restore with a manifest.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XIV",
+      "name": "Tool / Action Fabric",
+      "claim": "implemented",
+      "modules": [
+        "omnex.guard"
+      ],
+      "symbols": [
+        "omnex.guard.SandboxPolicy",
+        "omnex.guard.SandboxResult",
+        "omnex.guard.run_python"
+      ],
+      "tests": [
+        "tests/test_guard.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Tool execution is contained by an explicit sandbox policy rather than trusted.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XV",
+      "name": "Security",
+      "claim": "implemented",
+      "modules": [
+        "omnex.guard"
+      ],
+      "symbols": [
+        "omnex.guard.InjectionDetector",
+        "omnex.guard.Guardrail",
+        "omnex.guard.PiiVault",
+        "omnex.guard.RateLimiter",
+        "omnex.guard.OutputGuard"
+      ],
+      "tests": [
+        "tests/test_guard.py"
+      ],
+      "measured_by": "scripts/skill_numbers.py",
+      "missing": [],
+      "note": "Injection fence, PII detection and vaulting, rate limits, output guard. The corpus is saturated, which says the corpus is small — not that injection is solved.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XVI",
+      "name": "Evaluation",
+      "claim": "implemented",
+      "modules": [
+        "omnex.evals"
+      ],
+      "symbols": [
+        "omnex.evals.Gate",
+        "omnex.evals.GateDecision",
+        "omnex.evals.Suite",
+        "omnex.evals.GoldenCase",
+        "omnex.evals.EvalRunner",
+        "omnex.evals.contamination_report"
+      ],
+      "tests": [
+        "tests/test_evals.py",
+        "tests/test_benchmark.py"
+      ],
+      "measured_by": "suites/LEADERBOARD.md",
+      "missing": [],
+      "note": "Gates on newly-failing cases rather than on the mean, and suite fingerprints refuse cross-suite comparison so an edited expectation cannot pass as an improvement.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XVII",
+      "name": "Observability",
+      "claim": "implemented",
+      "modules": [
+        "omnex.obs"
+      ],
+      "symbols": [
+        "omnex.obs.Tracer",
+        "omnex.obs.Span",
+        "omnex.obs.MetricsRegistry",
+        "omnex.obs.CostLedger",
+        "omnex.obs.AlertManager",
+        "omnex.obs.TailSampler"
+      ],
+      "tests": [
+        "tests/test_obs.py",
+        "tests/test_obs_export.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Tracing, metrics, tail sampling, a cost ledger in pico-dollars and alerting. OTel and Prometheus export sit behind the `otel` extra.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XVIII",
+      "name": "Reliability",
+      "claim": "implemented",
+      "modules": [
+        "omnex.core",
+        "omnex.pipeline",
+        "omnex.deploy"
+      ],
+      "symbols": [
+        "omnex.core.Attempt",
+        "omnex.core.Deadline",
+        "omnex.core.BudgetExceeded",
+        "omnex.pipeline.DeadLetter",
+        "omnex.deploy.RollbackDecision"
+      ],
+      "tests": [
+        "tests/test_core.py",
+        "tests/test_deploy.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Retry with a deadline, budget exhaustion as a named error, dead-letter for what cannot be retried, and rollback as a decision rather than a manual step.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XIX",
+      "name": "Infrastructure",
+      "claim": "implemented",
+      "modules": [
+        "omnex.deploy",
+        "omnex.serving",
+        "omnex.tenancy"
+      ],
+      "symbols": [
+        "omnex.deploy.FlagSet",
+        "omnex.deploy.Variant",
+        "omnex.serving.plan_capacity",
+        "omnex.serving.PrefixAwareBalancer",
+        "omnex.tenancy.Tenant",
+        "omnex.tenancy.Quota"
+      ],
+      "tests": [
+        "tests/test_deploy.py",
+        "tests/test_serving_finetune.py",
+        "tests/test_tenancy.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Feature flags and canary variants, capacity planning and prefix-aware balancing, multi-tenant quotas and usage reconciliation.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XX",
+      "name": "AI Development / coding agents",
+      "claim": "partial",
+      "modules": [
+        "omnex.harness",
+        "omnex.factory"
+      ],
+      "symbols": [
+        "omnex.harness.Plan",
+        "omnex.harness.Proposal",
+        "omnex.harness.Rubric",
+        "omnex.harness.Workspace",
+        "omnex.harness.Fleet",
+        "omnex.factory.AgentSpec",
+        "omnex.factory.Stage",
+        "omnex.factory.Pipeline",
+        "omnex.factory.compile.Blueprint"
+      ],
+      "tests": [
+        "tests/test_harness.py",
+        "tests/test_factory.py",
+        "tests/test_compile.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "the chain wired to a live paying surface — the machinery runs end to end in tests, and module N+1 does not open until module N has taken a payment"
+      ],
+      "note": "The pieces exist — planning, proposals, rubrics, isolated workspaces, a fleet that refuses overlapping paths — and omnex.factory makes the gate order a TYPE rather than a diagram, with worth_it at its head and a spec fingerprinted against a harness.Contract. A spec now COMPILES to three targets through one neutral blueprint, each required to re-read its own output: parse(emit(bp)) == bp, checked across five paradigms, and the check is itself tested by breaking an emitter on purpose. What is still missing is money attached to a run rather than to a spreadsheet.",
+      "worth_it": {
+        "repeats_weekly": true,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXI",
+      "name": "Business Automation",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "business process automation as an engine capability"
+      ],
+      "note": "The root Next.js app is the business surface and lib/modules/registry.ts is its spine, but engine/ ships nothing here. Deliberately: module N+1 does not open until module N has taken a real payment.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": false,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": false,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXII",
+      "name": "Agentic Commerce",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "agent-initiated purchase and settlement"
+      ],
+      "note": "Nothing here, and nothing downstream of it until a module has taken a real payment. A commerce layer over zero transactions has nothing to be correct about.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": false,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": false,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXIII",
+      "name": "Product Engine",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "packaging an agent spec as a sellable product"
+      ],
+      "note": "lib/modules/registry.ts already generates launcher, pricing and navigation from one manifest list, which is this branch at the app layer. engine/ has no equivalent and does not need one until there is a second live module.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": false,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": false,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXIV",
+      "name": "Revenue Engine",
+      "claim": "implemented",
+      "modules": [
+        "omnex.intel",
+        "omnex.factory"
+      ],
+      "symbols": [
+        "omnex.intel.BusinessModel",
+        "omnex.intel.Opportunity",
+        "omnex.intel.Complexity",
+        "omnex.core.Money",
+        "omnex.factory.AgentEconomics",
+        "omnex.factory.RunCost",
+        "omnex.factory.Margin"
+      ],
+      "tests": [
+        "tests/test_intel.py",
+        "tests/test_economics.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Opportunities priced in exact pico-dollar Money and ranked by payback. Revenue models are enumerated as types, not as prose. Money is now attached to a RUN rather than to a spreadsheet: revenue less model, tool, infra, storage and review cost, per run, per agent, per customer, in exact picos. Acquisition is deliberately NOT subtracted per run — charging it that way makes a customer look worse the more they use the product — and is answered by payback_runs() instead. Failed runs are costed and counted, or the cheapest agent is one that fails everything.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XXV",
+      "name": "Opportunity Engine",
+      "claim": "implemented",
+      "modules": [
+        "omnex.intel"
+      ],
+      "symbols": [
+        "omnex.intel.Snapshot",
+        "omnex.intel.CoverageMatrix",
+        "omnex.intel.Velocity",
+        "omnex.intel.assess",
+        "omnex.intel.mine",
+        "omnex.intel.verify_document"
+      ],
+      "tests": [
+        "tests/test_intel.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "Scanning, evidence with provenance, growth velocity whose confidence is computed from observation count, a gap matrix, and self-verification of its own reports through omnex.rag.ground.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XXVI",
+      "name": "Agent Portfolio",
+      "claim": "partial",
+      "modules": [
+        "omnex.intel",
+        "omnex.factory"
+      ],
+      "symbols": [
+        "omnex.intel.Portfolio",
+        "omnex.intel.Score",
+        "omnex.intel.Assessment",
+        "omnex.intel.DomainVerdict",
+        "omnex.factory.Portfolio",
+        "omnex.factory.Asset",
+        "omnex.factory.Decision"
+      ],
+      "tests": [
+        "tests/test_intel.py",
+        "tests/test_portfolio.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "a second live module — the portfolio machinery is ready and n=1 is not a portfolio, which report() states on its own first line"
+      ],
+      "note": "Opportunity and threat scored on two axes that are never blended into one number. Applied to one live module it is n=1 — the code is not the constraint here, customers are. Live agents are now assets with one explicit decision each — scale, optimise, refactor, merge, reposition, license, kill — and recommend() proposes while only enact() records a person's name against it. Three refusals: too few runs is WATCH, nothing is killed on a dimension nobody measured, and MERGE comes from overlap across the portfolio because it cannot be decided about one asset alone.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": false,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXVII",
+      "name": "Autonomous Self-Improvement",
+      "claim": "implemented",
+      "modules": [
+        "omnex.harness",
+        "omnex.factory"
+      ],
+      "symbols": [
+        "omnex.harness.Health",
+        "omnex.harness.Diagnosis",
+        "omnex.harness.Intervention",
+        "omnex.harness.diagnose",
+        "omnex.harness.mean_cost_per_accepted",
+        "omnex.factory.Observation",
+        "omnex.factory.NodeClaim",
+        "omnex.factory.to_run_state"
+      ],
+      "tests": [
+        "tests/test_harness.py",
+        "tests/test_feedback.py"
+      ],
+      "measured_by": null,
+      "missing": [],
+      "note": "The outer loop watches cost per accepted change, not score. A loop whose score creeps while cost per accepted change worsens is reported stuck rather than improving, and it may never weaken a frozen criterion. The loop now closes: runs, compiler results and portfolio decisions become one observation stream diagnose() reads, and an accepted improvement writes back a node claim. That claim is always 'proposed' and there is no parameter that makes it 'implemented' — the thing producing the evidence does not grade it. A zero-cost observation is refused, because cost per accepted change falls toward zero the more of them a loop emits.",
+      "worth_it": null,
+      "source": "proposal"
+    },
+    {
+      "id": "XXVIII",
+      "name": "Meta-layer",
+      "claim": "partial",
+      "modules": [
+        "omnex.harness",
+        "omnex.intel"
+      ],
+      "symbols": [
+        "omnex.harness.Contract",
+        "omnex.harness.Condition",
+        "omnex.intel.Confidence",
+        "omnex.intel.NoiseFilter",
+        "omnex.intel.FilterReport"
+      ],
+      "tests": [
+        "tests/test_harness.py",
+        "tests/test_intel.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "ontology versioning with a research queue for unknown patterns"
+      ],
+      "note": "Frozen criteria, named refusal conditions, computed confidence and a filter that must account for every row it drops. This file is version 1 of the ontology; there is no history and no queue behind it yet.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": false,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": false,
+        "has_change_method": true,
+        "has_standard_assessment": false
+      },
+      "source": "proposal"
+    },
+    {
+      "id": "XXIX",
+      "name": "Constrained decoding and schema enforcement",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "logit bias and grammar-constrained generation"
+      ],
+      "note": "`JsonVerifier` checks a schema after the fact and escalates on failure, which pays for a wasted call. Constraining the decode so malformed output cannot be produced is absent. Named by chapter 2.2.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXX",
+      "name": "AST-aware code chunking",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "chunking that splits on syntax rather than on sentences"
+      ],
+      "note": "`rag.chunk_document` splits prose. Splitting source code the same way cuts functions in half, and the retrieved half compiles into nothing. Zero uses of `ast.parse` in the package. Named by chapters 6.2 and 18.2.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXI",
+      "name": "microVM execution isolation",
+      "claim": "partial",
+      "modules": [],
+      "symbols": [
+        "omnex.guard.SandboxPolicy",
+        "omnex.guard.run_python"
+      ],
+      "tests": [
+        "tests/test_guard.py"
+      ],
+      "measured_by": null,
+      "missing": [
+        "kernel-level isolation for untrusted code"
+      ],
+      "note": "`guard.SandboxPolicy` sets rlimits on an in-process run — timeout, CPU, address space, file size, process count. That contains a runaway script, not a hostile one. The standard the corpus describes is a Firecracker microVM over VSOCK. Named by chapters 8.1 and 8.2.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXII",
+      "name": "Diff generation and AST-level patch verification",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "structural verification that a produced patch is valid"
+      ],
+      "note": "The coding-agent chain can propose a change and cannot check that the change parses, applies, or touches only what it claimed. Named by chapter 11.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXIII",
+      "name": "Latency as a first-class budget",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "a Latency primitive symmetric with Money"
+      ],
+      "note": "Every cost in this repo is exact pico-dollar `Money` and every gate can refuse on spend. There is no equivalent type for time, so a router that is cheaper and four seconds slower is invisible to the same machinery. This is the sharpest omission the corpus surfaced. Named by chapter 16.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXIV",
+      "name": "LLM-as-Judge evaluation",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "a judge adapter with measured agreement against human labels"
+      ],
+      "note": "`evals` scores against golden cases, which is exact and cannot grade open-ended output. A judge is the standard answer and carries its own failure mode — agreement with humans must itself be measured, or the judge becomes the thing being optimised. Named by chapter 14.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXV",
+      "name": "Context positioning",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "ordering retrieved context by measured positional recall"
+      ],
+      "note": "Retrieval ranks by relevance and places results in rank order. Recall is not flat across a long context, so the most relevant chunk can land where the model attends least. Named by chapter 15.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXVI",
+      "name": "Speculative decoding",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "draft-and-verify decoding in the serving path"
+      ],
+      "note": "`serving` plans capacity and balances by prefix. It does not shorten a single response. Named by chapter 7.3.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXVII",
+      "name": "Parallel tool execution",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "fan-out over independent tool calls within one turn"
+      ],
+      "note": "Tool calls run in sequence. `harness.edges` already knows which steps are independent — the runtime does not act on it for tools. Named by chapter 4.2.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    },
+    {
+      "id": "XXXVIII",
+      "name": "Teacher-model synthetic data generation",
+      "claim": "gap",
+      "modules": [],
+      "symbols": [],
+      "tests": [],
+      "measured_by": null,
+      "missing": [
+        "generating training data from a stronger model, with contamination checks"
+      ],
+      "note": "`finetune.prepare` consumes examples somebody else produced. `evals.contamination_report` exists and is not wired to a generator. Named by chapter 17.",
+      "worth_it": {
+        "repeats_weekly": false,
+        "verification_is_automated": true,
+        "budget_absorbs_waste": true,
+        "agent_has_tools": true,
+        "has_goal_metric": true,
+        "has_change_method": true,
+        "has_standard_assessment": true
+      },
+      "source": "corpus:agentic-ai-handbook"
+    }
+  ]
+}

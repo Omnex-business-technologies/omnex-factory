@@ -28,6 +28,10 @@ export const RATE_LIMITS = {
   'stripe_checkout': { windowMs: 60_000, maxReqs: 10, keyPrefix: 'st'  },
   'email_send':      { windowMs: 60_000, maxReqs: 20, keyPrefix: 'em'  },
   'auth':            { windowMs: 60_000, maxReqs: 15, keyPrefix: 'au'  },
+  // Streaming holds a connection open for the length of a run, so the limit is
+  // on how many runs may be STARTED — a generous per-message cap would let one
+  // user hold every worker slot with long-running streams nobody is reading.
+  'copilot_stream':  { windowMs: 60_000, maxReqs: 12, keyPrefix: 'cp'  },
 } satisfies Record<string, RateLimitConfig>
 
 export type RateLimitRoute = keyof typeof RATE_LIMITS

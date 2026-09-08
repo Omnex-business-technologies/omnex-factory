@@ -1,0 +1,123 @@
+# Recording and alerting rules for the omnex engine.
+#
+# Two conventions here are deliberate and worth reading before editing.
+#
+# Cost is a counter in PICO-dollars (1e-12 USD), not a gauge in dollars. A gauge
+# of "current spend" is unusable — a scrape gap loses the increment, a restart
+# resets it to zero, and there is no way to ask "what did the last hour cost".
+# A counter survives all three, and `rate()` over it answers the question that
+# actually gets asked, which is burn rate rather than balance. Picos because a
+# single cheap call is ~5e-8 USD, and a float64 accumulating dollars at that
+# scale loses precision long before the month ends.
+#
+# Every alert has a `for:` clause. A rule that fires on one scrape fires on one
+# slow request, and an alert that pages for one slow request is an alert people
+# mute. The engine's own AlertManager applies the same sustain/clear asymmetry
+# in-process (see obs/anomaly.py); these rules mirror it for the scrape path.
+
+groups:
+  - name: omnex-recording
+    interval: 15s
+    rules:
+      # Burn rate in USD/hour. Prometheus has no fixed-point type, so the pico
+      # counter is divided here, at the display boundary, after the exact
+      # integer arithmetic has already happened in-process.
+      - record: omnex:cost_usd_per_hour
+        expr: sum(rate(omnex_cost_picodollars_total[5m])) * 3600 / 1e12
+
+      - record: omnex:cost_usd_per_hour_by_model
+        expr: sum by (model) (rate(omnex_cost_picodollars_total[5m])) * 3600 / 1e12
+
+      # Cost per successful request. The number that decides whether a product
+      # has a margin; spend alone cannot tell you if it grew because traffic
+      # grew or because the system got worse.
+      - record: omnex:cost_usd_per_request
+        expr: >
+          (sum(rate(omnex_cost_picodollars_total[5m])) / 1e12)
+          / clamp_min(sum(rate(omnex_spans_total{kind="run",status="ok"}[5m])), 0.001)
+
+      - record: omnex:error_rate
+        expr: >
+          sum(rate(omnex_spans_total{kind="run",status="error"}[5m]))
+          / clamp_min(sum(rate(omnex_spans_total{kind="run"}[5m])), 0.001)
+
+      # Percentiles are computed with histogram_quantile over the bucket
+      # counters — never by averaging per-instance percentiles, which is
+      # arithmetically meaningless. See obs/histogram.py.
+      - record: omnex:latency_p95
+        expr: histogram_quantile(0.95, sum by (le, name) (rate(omnex_span_duration_seconds_bucket{kind="run"}[5m])))
+
+      - record: omnex:latency_p99
+        expr: histogram_quantile(0.99, sum by (le, name) (rate(omnex_span_duration_seconds_bucket{kind="run"}[5m])))
+
+      - record: omnex:cache_hit_ratio
+        expr: >
+          sum(rate(omnex_tokens_total{direction="cached_input"}[5m]))
+          / clamp_min(sum(rate(omnex_tokens_total{direction="input"}[5m])), 1)
+
+  - name: omnex-alerts
+    rules:
+      - alert: ErrorRateHigh
+        expr: omnex:error_rate > 0.05
+        for: 3m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $value | humanizePercentage }} of runs are failing"
+          runbook: "Check omnex_errors_total by code; the failure_path() of a kept trace names the step."
+
+      - alert: LatencyP99Regressed
+        expr: omnex:latency_p99 > 10
+        for: 10m
+        labels: { severity: ticket }
+        annotations:
+          summary: "p99 run latency is {{ $value | humanizeDuration }}"
+
+      # Burn rate, not total spend. A monthly-total alert fires once the money
+      # is already gone; a rate alert fires while there is still something to do
+      # about it.
+      - alert: SpendBurnRateHigh
+        expr: omnex:cost_usd_per_hour > 5
+        for: 15m
+        labels: { severity: ticket }
+        annotations:
+          summary: "Burning ${{ $value | printf \"%.2f\" }}/hour"
+          runbook: "omnex:cost_usd_per_hour_by_model shows which tier; check the router is not escalating everything."
+
+      # Unit economics, independent of traffic. This is the one that catches a
+      # bad prompt change: spend rises with traffic and looks normal, while cost
+      # per request quietly triples.
+      - alert: CostPerRequestRegressed
+        expr: omnex:cost_usd_per_request > 0.02
+        for: 15m
+        labels: { severity: ticket }
+        annotations:
+          summary: "Cost per request is ${{ $value | printf \"%.4f\" }}"
+
+      # A collapsed cache is invisible in every other signal: latency barely
+      # moves, errors do not move at all, and only the bill notices.
+      - alert: PromptCacheCollapsed
+        expr: omnex:cache_hit_ratio < 0.2
+        for: 20m
+        labels: { severity: ticket }
+        annotations:
+          summary: "Prompt cache hit ratio fell to {{ $value | humanizePercentage }}"
+          runbook: "Usually a changing prefix — a timestamp or request id moved into the cached system prompt."
+
+      # Metrics about the metrics. Overflow means a breakdown silently stopped
+      # being a breakdown, so every dashboard split by that label is now wrong.
+      - alert: MetricCardinalityOverflow
+        expr: increase(omnex_metric_overflow_total[30m]) > 0
+        for: 5m
+        labels: { severity: ticket }
+        annotations:
+          summary: "{{ $labels.metric }} is folding series into __overflow__"
+          runbook: "An unbounded label value reached the cap. Totals are still correct; the breakdown is not."
+
+      # The absence of data is itself a signal — and the one most often missed,
+      # because every other rule silently stops evaluating when the target dies.
+      - alert: EngineNotReporting
+        expr: absent(omnex_spans_total)
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "No metrics from the engine — the scrape target is down, not idle"

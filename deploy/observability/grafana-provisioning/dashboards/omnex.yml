@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: omnex
+    type: file
+    # The dashboard is provisioned from the repo, not edited in the UI. A
+    # dashboard that only exists in Grafana's database is lost with the volume
+    # and cannot be reviewed in a pull request.
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

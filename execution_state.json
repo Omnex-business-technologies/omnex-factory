@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
+  "source_commit": "b06e7dc3c56733cd01da50b50383a6dda1c5efae",
+  "branch": "claude/production-ai-projects-bzz82l",
+  "tree_clean": false,
+  "corpus": {
+    "figures": 509,
+    "nodes": 507
+  },
+  "nodes": {
+    "total": 507,
+    "by_claim": {
+      "gap": 461,
+      "proposed": 46
+    },
+    "verified_by_a_person": 0
+  },
+  "branches": {
+    "total": 38,
+    "by_claim": {
+      "gap": 12,
+      "implemented": 16,
+      "knowledge": 1,
+      "partial": 9
+    },
+    "carrying_a_named_gap": 21
+  },
+  "invariants": {
+    "total": 12,
+    "enforced": 9,
+    "declared_unenforceable": 3
+  },
+  "extras": {
+    "by_status": {
+      "partial": 3,
+      "supported": 2,
+      "tooling": 1,
+      "unsupported": 6
+    },
+    "problems": 0,
+    "adapters_named_in_prose_that_do_not_exist": 0
+  },
+  "promise_integrity": {
+    "licences": {
+      "LICENSE": true,
+      "engine/LICENSE": true,
+      "oss/citegate/LICENSE": true
+    }
+  },
+  "gates": {
+    "0_integrity": {
+      "status": "PASS",
+      "why": "every licence file the metadata declares is present, every extra's status matches what the code imports, and no docstring names a module that does not exist",
+      "evidence": [
+        "3 declared licences present",
+        "extras: {'partial': 3, 'supported': 2, 'tooling': 1, 'unsupported': 6}",
+        "invariants enforced: 9/12"
+      ]
+    },
+    "1_architecture": {
+      "status": "UNKNOWN",
+      "why": "507 nodes carry a claim, but a claim is not a dossier: nothing yet records the evidence, candidates and containment direction per node, so 'mapped' cannot be asserted",
+      "evidence": [
+        "nodes by claim: {'gap': 461, 'proposed': 46}",
+        "node_dossier.py does not exist"
+      ]
+    },
+    "2_evidence": {
+      "status": "UNKNOWN",
+      "why": "there is no claim or evidence registry yet, so 'important claims have evidence' has nothing to measure against",
+      "evidence": [
+        "state/claims.jsonl does not exist",
+        "state/evidence.jsonl does not exist"
+      ]
+    },
+    "3_implementation": {
+      "status": "UNKNOWN",
+      "why": "the suite is green and the mutation probe kills every mutation, but neither answers coverage per capability; measuring it needs a capability registry that does not exist",
+      "evidence": [
+        "mutate.py exists and is in CI",
+        "no capability registry"
+      ]
+    },
+    "4_integration": {
+      "status": "UNKNOWN",
+      "why": "no integration evidence has been collected",
+      "evidence": []
+    },
+    "5_production": {
+      "status": "UNKNOWN",
+      "why": "nothing is deployed; DOCKER.md and compose.yaml exist and no workflow builds them, and a configuration is not a deployment",
+      "evidence": []
+    },
+    "6_security": {
+      "status": "UNKNOWN",
+      "why": "no secret scanning, dependency audit, SBOM or signed release exists yet",
+      "evidence": []
+    },
+    "7_observability": {
+      "status": "UNKNOWN",
+      "why": "omnex.obs emits traces, metrics and a cost ledger in-process; nothing is collected from a running deployment because there is none",
+      "evidence": []
+    },
+    "8_evaluation": {
+      "status": "UNKNOWN",
+      "why": "omnex.evals gates on newly-failing cases in the suite; no agent runs in production to evaluate",
+      "evidence": []
+    },
+    "9_autonomy": {
+      "status": "UNKNOWN",
+      "why": "no run ledger exists, so no autonomous action can be shown to have been policy-bounded",
+      "evidence": []
+    },
+    "10_distribution": {
+      "status": "UNKNOWN",
+      "why": "release_check.py and release.yml do not exist; no artifact has been built, signed or published",
+      "evidence": []
+    },
+    "11_commercial": {
+      "status": "UNKNOWN",
+      "why": "no external user has obtained the software; 0 listings live",
+      "evidence": []
+    },
+    "12_economic": {
+      "status": "UNKNOWN",
+      "why": "no revenue log exists — 0 recorded is not 0 earned, and BUSINESS.md refuses to render it as a measurement",
+      "evidence": []
+    }
+  },
+  "blocked": [
+    {
+      "what": "Etsy / Lemon Squeezy API shapes",
+      "reason": "the proxy refuses the open web (403 to CONNECT)",
+      "resolution": "a person supplies the endpoint through OMNEX_*_URL"
+    },
+    {
+      "what": "any live listing",
+      "reason": "80 of 170 promised images have passed QC",
+      "resolution": "90 more images generated on a GPU"
+    },
+    {
+      "what": "PyPI publication",
+      "reason": "PYPI_API_TOKEN is held by the person, not this process",
+      "resolution": "the credential holder runs the final step"
+    },
+    {
+      "what": "n8n binding confirmation",
+      "reason": "0 of 7 bindings confirmed by an import",
+      "resolution": "one import into a real n8n instance"
+    }
+  ]
+}

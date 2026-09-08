@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "citegate"
+version = "0.1.0"
+description = "Verify that every sentence of a RAG answer is supported by the source it cites. Zero dependencies."
+readme = "README.md"
+# 3.11, not 3.10. `grounding.py` imports `enum.StrEnum`, which landed in 3.11.
+# The floor said 3.10 until `release_check.py` measured it: pip resolved,
+# installed, and the first `import citegate` raised ImportError. A metadata
+# floor is a promise about interpreters, and this one was not kept.
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["rag", "hallucination", "grounding", "citations", "llm", "evaluation"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# None. That is the feature.
+#
+# Every grounding checker in the ecosystem pulls in either a judge model (a
+# network call and a bill per sentence) or a cross-encoder (torch, ~2 GB, a
+# model download). Both are more accurate than this and neither can run inside a
+# request handler on every response, which is where the check has to be if it is
+# going to stop anything reaching a user.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.8"]
+
+[project.urls]
+Homepage = "https://github.com/RaveZona/omnex-factory/tree/master/oss/citegate"
+Issues = "https://github.com/RaveZona/omnex-factory/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/citegate"]
+
+# Its own, and deliberately identical to engine/pyproject.toml's.
+#
+# citegate had no ruff configuration and there is no config at the repository
+# root either, so it silently fell back to ruff's defaults — line-length 88 and
+# a narrower rule set — while its code was written under the engine's 100. That
+# went unnoticed because nothing had ever linted this package: every workflow
+# job inherited `working-directory: engine`.
+#
+# Mirrored rather than defaulted because `grounding.py`'s sentence splitter is a
+# deliberate twin of `omnex/rag/ingest.py`'s. They have diverged twice, and the
+# lab note's instruction is to read them side by side. Two different line
+# lengths would rewrap one of them and make that reading harder for no gain.
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
