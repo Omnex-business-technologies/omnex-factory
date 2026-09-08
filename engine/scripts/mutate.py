@@ -215,6 +215,14 @@ CATALOGUE: tuple[Mutation, ...] = (
         caught_by=("tests/test_state_map.py::test_drift_is_caught_in_both_directions",),
         rule="machine state that can drift from the repository is worse than none",
     ),
+    Mutation(
+        ident="a_settled_decision_can_be_reopened",
+        path="engine/scripts/node_dossier.py",
+        find='    if node.claim == "rejected":\n        return "settled", "n/a", "a person said no; the proposal must not return"',
+        replace='    if False:\n        return "settled", "n/a", "a person said no; the proposal must not return"',
+        caught_by=("tests/test_node_dossier.py::test_a_settled_node_is_not_reopened",),
+        rule="a person's rejection must not come back as a proposal on the next run",
+    ),
 )
 
 

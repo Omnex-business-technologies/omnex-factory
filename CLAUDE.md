@@ -38,8 +38,8 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,070 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **17 of 17 mutations killed**.
+Current state: **1,085 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **18 of 18 mutations killed**.
 All 68 TypeScript tests now run in CI; until this commit, seven of them did.
 
 ## engine/src/omnex/ — what each module is for
@@ -159,6 +159,19 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   unenforceable with reasons, 2 allowlisted exceptions that each name a working
   injection point. Each bullet in "Non-obvious invariants" above cites its id,
   and a test requires that link in both directions.
+- `corpus/universal-ai-os/DECISIONS.md` + `engine/scripts/node_dossier.py` —
+  **all 507 nodes, each with the evidence a person needs to rule on it.**
+  `nodes.json` has read `0 implemented, 0 rejected` since it was written — not
+  neglect, but the cost of doing an investigation 507 times. Each row carries
+  branch, lifecycle state, direct and chapter figure counts, figure ids, the
+  candidate from `propose()` (**the same resolver**, never a second one), a
+  recommendation and a confidence; the last three columns are the person's and a
+  machine may never fill them. **134 nodes have a direct figure and only 116 read
+  `EVIDENCE-BACKED`** — the other 18 already carry a proposal, so evidence and
+  lifecycle are separate axes and the states are not collapsed. The 373 with no
+  figure are listed **unranked**: scoring an absence of evidence would represent
+  it as a quantity of evidence. `Idempotency` sits there with zero figures while
+  `omnex.pipeline.IdempotencyStore` has been in the package for months.
 - `CONSTITUTION.md` — what holds regardless of phase: the authority hierarchy
   (**repository truth outranks every plan**), the lifecycle states that are never
   collapsed, the three layers of truth, *machine proposes / person confirms*, and
@@ -285,9 +298,9 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: seventeen hand-written mutations against rules the
+  actually held by its tests*: eighteen hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **17 of 17 killed**. On its first run it was 11 — the survivor showed that
+  **18 of 18 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate

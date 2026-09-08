@@ -97,6 +97,14 @@ jobs:
         # is promise integrity, not adapter count.
         run: uv run python scripts/extras_check.py
 
+      - name: Decision queue
+        # All 507 node dossiers, regenerated and required to match what is
+        # committed. The queue is derived; the last three columns of each row
+        # are the person's, and a machine may never fill them.
+        run: |
+          uv run python scripts/node_dossier.py
+          git diff --exit-code ../corpus/universal-ai-os/DECISIONS.md
+
       - name: Derived execution state
         # execution_state.json is derived, never authored. This fails when the
         # committed file and the repository disagree in either direction —
