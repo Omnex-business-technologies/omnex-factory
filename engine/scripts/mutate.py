@@ -231,6 +231,39 @@ CATALOGUE: tuple[Mutation, ...] = (
         caught_by=("tests/test_apply_decisions.py::test_a_machine_shaped_reviewer_is_refused",),
         rule="the one count a machine may not raise stops meaning anything if it can",
     ),
+    Mutation(
+        ident="an_extra_stops_counting_as_a_declaration",
+        path="engine/scripts/release_check.py",
+        find="        declared |= {_requirement_name(str(s)) for s in specs}",
+        replace="        declared |= set()",
+        caught_by=(
+            "tests/test_release_check.py::test_an_optional_dependency_imported_lazily_is_not_a_finding",
+            "tests/test_release_check.py::test_the_committed_target_passes_the_drift_checks",
+        ),
+        rule="a lazy optional import is this repo's design, and reading past it calls it a bug",
+    ),
+    Mutation(
+        ident="a_job_stops_inheriting_the_workflow_default",
+        path="engine/scripts/release_check.py",
+        find='        found[name] = (_working_directory(block) or inherited, "\\n".join(block))',
+        replace='        found[name] = (_working_directory(block), "\\n".join(block))',
+        caught_by=(
+            "tests/test_release_check.py::test_a_job_inherits_the_workflow_working_directory",
+            "tests/test_release_check.py::test_both_suites_in_this_repository_resolve_to_a_job",
+            "tests/test_ci_contract.py::test_every_pytest_suite_in_the_repository_runs_in_ci",
+        ),
+        rule="the check for suites CI does not run could not see the suite CI does run",
+    ),
+    Mutation(
+        ident="a_release_only_workflow_counts_as_ci",
+        path="engine/scripts/release_check.py",
+        find="        if not covers_changes(text):\n            continue",
+        replace="        if False:\n            continue",
+        caught_by=(
+            "tests/test_release_check.py::test_a_tag_only_workflow_does_not_count_as_continuous_integration",
+        ),
+        rule="a suite that only runs on a tag covers no push and no pull request",
+    ),
 )
 
 

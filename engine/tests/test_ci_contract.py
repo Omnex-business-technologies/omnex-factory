@@ -35,6 +35,7 @@ correctness check, and pretending otherwise is how the next weak rule survives.
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -149,6 +150,54 @@ def test_the_python_suite_runs_whole() -> None:
         for commands in _all_commands().values()
         for command in commands
     ), "no workflow runs the whole pytest suite"
+
+
+#: Directories a package tree may contain that are not this repository's code.
+_NOT_OURS = {".venv", "node_modules", "site-packages", ".git", ".mypy_cache"}
+
+
+def test_every_pytest_suite_in_the_repository_runs_in_ci() -> None:
+    """The hole the assertion above left open, found by `release_check.py`.
+
+    `test_the_python_suite_runs_whole` requires *some* workflow to run
+    `pytest tests/` unfiltered, and the engine's satisfied it. Meanwhile every
+    `pytest` in every workflow inherited `working-directory: engine`, so
+    citegate's sixteen tests had never run on a push — green on a developer
+    machine, unrun in CI, and invisible to the file whose entire job is catching
+    exactly that.
+
+    Keyed on directories rather than a list of names, because a list stops
+    covering whatever somebody adds next. `release_check.jobs` is reused rather
+    than copied: it is the one reader that resolves a job's *effective* working
+    directory, and a second implementation here would drift from it — which is
+    the lesson the twin splitters already paid for.
+    """
+    sys.path.insert(0, str(ENGINE / "scripts"))
+    from release_check import covers_changes, jobs
+
+    suites = sorted(
+        found.parent.relative_to(REPO).as_posix()
+        for found in REPO.glob("**/pyproject.toml")
+        if (found.parent / "tests").is_dir() and _NOT_OURS.isdisjoint(found.parts)
+    )
+    assert suites, "no python package with a tests/ directory found, so this is vacuous"
+
+    texts = {path: path.read_text(encoding="utf-8") for path in sorted(WORKFLOWS.glob("*.yml"))}
+    covered = {
+        directory.strip("./")
+        # `release.yml` runs the whole suite and only on a tag. Counting it would
+        # let this pass while no push and no pull request ran anything, which is
+        # the gap this test exists for wearing a different hat.
+        for text in texts.values()
+        if covers_changes(text)
+        for directory, block in jobs(text).values()
+        if re.search(r"\bpytest\b", block)
+    }
+    missing = [suite for suite in suites if suite not in covered]
+    assert not missing, (
+        f"no workflow job runs the tests in {missing} — a suite CI does not run is "
+        "green only on the machine that ran it"
+    )
 
 
 def _is_unfiltered(command: str, runner: str) -> bool:

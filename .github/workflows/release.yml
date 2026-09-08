@@ -1,0 +1,192 @@
+name: Release
+
+# The only workflow here that produces something a stranger can install.
+#
+# Nothing on a normal push runs it. A tag is the deliberate act — and the tag is
+# also a claim about *what* is being released, which `release_check.py --tag`
+# checks against `pyproject.toml` rather than trusting. A release tagged
+# `citegate-v0.2.0` against a 0.1.0 manifest ships an artifact that disagrees
+# with its own name, and nothing else in the chain would notice.
+#
+# **This workflow has never run.** It is configuration until a tag exercises it,
+# and `execution_state.json` records it as UNKNOWN rather than PASS for exactly
+# that reason: a release path nobody has walked is a plan, not a path.
+
+on:
+  push:
+    tags:
+      - "citegate-v*"
+
+# Read by default. Each job widens only what it needs, and the two that can reach
+# outside this repository are the only ones granted any kind of write.
+permissions:
+  contents: read
+
+concurrency:
+  # Never cancel a release in flight. A cancelled publish is the one state that
+  # cannot be reasoned about afterwards — some artifacts exist, some do not, and
+  # nothing records which.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: The whole gate, on the tagged commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # `release_check.py` asks whether HEAD is on a remote branch. At depth
+          # 1 it cannot know and answers UNKNOWN rather than refusing — correct,
+          # but it makes the check decoration. Full history makes it real.
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: engine/pyproject.toml
+
+      - name: Install
+        working-directory: engine
+        run: uv venv --python 3.12 && uv pip install -e '.[dev]'
+
+      - name: The documented gate
+        working-directory: engine
+        # The same block CLAUDE.md documents. A release that skipped it would be
+        # a weaker check than an ordinary push, which is backwards.
+        run: |
+          uv run ruff check src tests scripts
+          uv run ruff format --check src tests scripts
+          uv run mypy
+          uv run python scripts/invariant_map.py
+          uv run python scripts/env_check.py
+          uv run python scripts/extras_check.py
+          uv run python scripts/state_map.py --check
+          uv run python scripts/apply_decisions.py --dry-run
+          uv run pytest tests/ -q
+
+      - name: The suite of the thing actually being released
+        working-directory: oss/citegate
+        run: ../../engine/.venv/bin/python -m pytest tests/ -q
+
+      - name: Release gate
+        working-directory: engine
+        # `--tag`, not `--release`: the tag exists — it is why this is running —
+        # so "is this name free" is always false and the real question is whether
+        # it names the version being built.
+        env:
+          TAG: ${{ github.ref_name }}
+        run: uv run python scripts/release_check.py --target citegate --tag "$TAG"
+
+  build:
+    name: Build and attest
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # the attestation is signed against this run's OIDC identity
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Build sdist and wheel
+        working-directory: oss/citegate
+        run: uv build --out-dir dist
+
+      - name: The artifacts must be readable as a package
+        working-directory: oss/citegate
+        # `uv build` succeeding says the backend ran. This says the metadata PyPI
+        # will render is valid — a long description that fails to render is a
+        # live listing nobody can read, discovered after publishing.
+        run: uvx twine check --strict dist/*
+
+      - name: Attest what built these
+        # Signed provenance tying each artifact to this commit, this workflow and
+        # this run, verifiable by anyone with `gh attestation verify`. That is
+        # what §3.1 asked for: provenance somebody else can check, rather than a
+        # file in which we describe ourselves.
+        #
+        # This is the one line in this file that could not be checked against
+        # GitHub's own documentation from the environment it was written in —
+        # docs.github.com answers 403 at that egress proxy. If this action's
+        # major has moved, the first run of this workflow is where it surfaces.
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: oss/citegate/dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: citegate-dist
+          path: oss/citegate/dist/*
+          if-no-files-found: error
+
+  github_release:
+    name: GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: citegate-dist
+          path: dist
+
+      - name: Publish the release
+        # The artifacts travel in the release, so a user who does not want to
+        # take a PyPI dependency can still get the exact files that were built
+        # and check them against the attestation.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes "Built from ${GITHUB_SHA} by ${GITHUB_WORKFLOW} run ${GITHUB_RUN_ID}.
+
+          Every artifact carries a signed build provenance attestation:
+
+              gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
+
+  pypi:
+    name: PyPI — needs the credential holder
+    needs: [build, github_release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The environment is the gate, and it is deliberately not something this
+    # repository can grant itself: its required reviewer is a person and its
+    # secret is the token that person holds. Same rule `packs/publish.py`
+    # enforces for a storefront, and `apply_decisions.py` for a confirmation —
+    # the system prepares, a person decides.
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: citegate-dist
+          path: dist
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Refuse by name without the credential
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        # Tests emptiness only. The value is never echoed, never written to a
+        # file and never passed as an argument: a preflight that prints a secret
+        # to a build log has copied it, not checked it.
+        run: |
+          if [ -z "${PYPI_API_TOKEN}" ]; then
+            echo "::error::PYPI_API_TOKEN is not set on the 'pypi' environment."
+            echo "Everything before this point succeeded: the gate is green, the"
+            echo "artifacts are built and attested, and the GitHub release exists."
+            echo "Add the secret to the environment and re-run this job."
+            exit 1
+          fi
+
+      - name: Publish
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish dist/*

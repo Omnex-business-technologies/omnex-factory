@@ -7,7 +7,11 @@ name = "citegate"
 version = "0.1.0"
 description = "Verify that every sentence of a RAG answer is supported by the source it cites. Zero dependencies."
 readme = "README.md"
-requires-python = ">=3.10"
+# 3.11, not 3.10. `grounding.py` imports `enum.StrEnum`, which landed in 3.11.
+# The floor said 3.10 until `release_check.py` measured it: pip resolved,
+# installed, and the first `import citegate` raised ImportError. A metadata
+# floor is a promise about interpreters, and this one was not kept.
+requires-python = ">=3.11"
 license = { text = "MIT" }
 keywords = ["rag", "hallucination", "grounding", "citations", "llm", "evaluation"]
 classifiers = [

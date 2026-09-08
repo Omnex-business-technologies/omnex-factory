@@ -97,6 +97,15 @@ jobs:
         # is promise integrity, not adapter count.
         run: uv run python scripts/extras_check.py
 
+      - name: Release gates
+        # Both targets, never one. The first version of this script passed
+        # citegate and reported thirteen refusals against engine of which
+        # thirteen were false — a gate that is right for the wrong reason looks
+        # exactly like a working one until a second target exists.
+        run: |
+          uv run python scripts/release_check.py --target citegate
+          uv run python scripts/release_check.py --target engine
+
       - name: Decision queue
         # All 507 node dossiers, regenerated and required to match what is
         # committed. The queue is derived; the last three columns of each row
@@ -150,4 +159,46 @@ jobs:
           ANTHROPIC_API_KEY: ""
           GROQ_API_KEY: ""
           OTEL_EXPORTER_OTLP_ENDPOINT: ""
+        run: uv run pytest tests/ -q
+
+  citegate:
+    name: citegate (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Its own job because `defaults.run.working-directory` above is `engine`, and
+    # that is exactly why this did not exist: every `pytest` in every workflow
+    # inherited it, so citegate's sixteen tests were green on a developer machine
+    # and had never run on a push. `release_check.py` found it while measuring
+    # whether the package was ready to ship, and `test_ci_contract` now refuses
+    # any suite in the repository that no workflow runs.
+    defaults:
+      run:
+        working-directory: oss/citegate
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor `pyproject.toml` declares, and the floor is the one
+        # version a user is most likely to be on and the least likely to be
+        # tested. It said 3.10 until this job was written: the package imports
+        # `enum.StrEnum` and could never have run there.
+        python: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: oss/citegate/pyproject.toml
+
+      - name: Install
+        run: uv venv --python ${{ matrix.python }} && uv pip install -e '.[dev]'
+
+      - name: Lint
+        run: uv run ruff check src tests
+
+      - name: Format
+        run: uv run ruff format --check src tests
+
+      - name: Tests
         run: uv run pytest tests/ -q

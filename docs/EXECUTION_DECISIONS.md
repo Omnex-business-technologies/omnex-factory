@@ -163,3 +163,86 @@ intended relationship, not a shortfall.
 
 **risk.** Deferral becoming abandonment. Mitigated by this entry naming the
 trigger rather than a date.
+
+---
+
+## D-005 · A gate was right about one target for the wrong reason
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** n/a (a defect fixed)
+
+**context.** `release_check.py` was written to refuse a package that is not ready
+to ship, and its first run found two real defects in `oss/citegate`: a
+`requires-python = ">=3.10"` the code could never satisfy (`enum.StrEnum` is
+3.11, reproduced with `/usr/bin/python3.10 -c "import citegate"`), and sixteen
+tests that had never run in CI.
+
+**evidence.** Run against the *second* target it reported thirteen refusals
+against `engine`, and every one was false:
+
+1. it read `dependencies` and ignored `[project.optional-dependencies]`, so it
+   called `zero_required_dependencies` — the engine's entire design — a defect;
+2. it borrowed `extras_check.importers()`, whose regex matches inside docstrings,
+   and reported imports of `a`, `free`, `the` and `zero`;
+3. it assumed a target's directory name was its import name (engine's is `omnex`);
+4. it looked for `working-directory` only inside job blocks while `engine.yml`
+   sets it in top-level `defaults:` — **so the check written to find suites CI
+   does not run could not see the suite CI does run.**
+
+**alternatives.** Ship it as-is, since it was correct about the target it was
+written for; scope it permanently to citegate; or fix it and require both.
+
+**chosen.** Fix all four, and put **both** targets in CI and in `CLAUDE.md`'s gate
+block. `read_imports` now reads the syntax tree with `ast` rather than a regex.
+
+**reason.** Bug 4 is the one worth recording. It produced the *right answer* for
+citegate — by coincidence of the same bug that made it wrong about engine. A gate
+that is right for the wrong reason is indistinguishable from a working one until
+a second target exists, which is why one target is now never enough. The same
+argument `test_the_round_trip_check_can_actually_fail` already makes for the
+compilers.
+
+**tradeoffs.** A second import scanner beside `extras_check.importers()`. Justified
+by a difference in contract and stated in the docstring: that one asks whether a
+*declared* name appears anywhere, where a false positive is never looked up; this
+asks what a package imports and reads the answer as truth. `IMPORT_NAME` and
+`_requirement_name` are reused rather than copied.
+
+**risk.** A third target exposing a fifth assumption. Mitigated only in that
+`test_the_committed_target_passes_the_drift_checks` is parametrised, so adding a
+target adds a test rather than a hope.
+
+---
+
+## D-006 · `tiktoken` was imported and nothing declared it
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** Fixing D-005's bug 1 cleared twelve of the thirteen refusals. One
+survived, and it was true.
+
+**evidence.** `src/omnex/llm/tokens.py:130` imports `tiktoken` inside
+`TiktokenCounter`. Measured: `dependencies = []` and none of the twelve groups in
+`[project.optional-dependencies]` names it. **There was no
+`pip install omnex-engine[…]` that made that class work.** It fails honestly at
+runtime (`"TiktokenCounter needs tiktoken; HeuristicCounter needs nothing"`), so
+nothing was silently broken — but a real capability had no declared install path.
+
+**alternatives.** Declare it in a group; mark the counter unsupported; or delete
+the class.
+
+**chosen.** Declare `tiktoken>=0.8` in the `llm` extra, beside `litellm`, and add
+`omnex.llm.tokens` to that extra's `backed_by`. `extras_check.py` confirms it at
+2/2 `supported`.
+
+**reason.** `TiktokenCounter` is real, working, tested code with a stated purpose,
+so §4's correction does not apply — the intention plainly still holds and the
+declaration was simply missing. `llm` is the module it serves.
+
+**tradeoffs.** None found. Both dependencies in the group are imported, so the
+extra's status does not change.
+
+**risk.** Low, and the interesting part is what this says about `extras_check.py`:
+it asks *declared → imported* and **cannot see this direction by construction**.
+`release_check.py` asks *imported → declared*. Neither subsumes the other, and
+that asymmetry is why the second checker earns its place rather than duplicating
+the first.

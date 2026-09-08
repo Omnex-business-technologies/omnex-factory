@@ -35,7 +35,12 @@ otel = [
 ]
 
 # P2 router — the real multi-provider call path.
-llm = ["litellm>=1.51"]
+#
+# tiktoken is here because `omnex.llm.tokens.TiktokenCounter` imports it and
+# nothing declared it — no `pip install omnex-engine[...]` made that class work.
+# Found by `release_check.py` asking imported→declared; `extras_check.py` asks
+# declared→imported and cannot see this direction.
+llm = ["litellm>=1.51", "tiktoken>=0.8"]
 
 # P12 vector stores. sqlite-vec is the local default; qdrant is the scale path.
 vectors = ["sqlite-vec>=0.1.6", "qdrant-client>=1.12", "numpy>=1.26"]
@@ -108,7 +113,7 @@ why = "obs/export.py imports opentelemetry. The Prometheus path is rendered as e
 
 [tool.omnex.extras.llm]
 status = "supported"
-backed_by = ["omnex.llm.litellm_adapter"]
+backed_by = ["omnex.llm.litellm_adapter", "omnex.llm.tokens"]
 
 [tool.omnex.extras.vectors]
 status = "partial"

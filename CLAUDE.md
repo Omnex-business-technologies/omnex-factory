@@ -17,6 +17,8 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/python scripts/invariant_map.py \
   && .venv/bin/python scripts/env_check.py \
   && .venv/bin/python scripts/extras_check.py \
+  && .venv/bin/python scripts/release_check.py --target citegate \
+  && .venv/bin/python scripts/release_check.py --target engine \
   && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
@@ -25,6 +27,11 @@ npx tsc --noEmit && npx vitest run && npx next build
 # citegate — from oss/citegate/
 ../../engine/.venv/bin/python -m pytest tests/ -q
 ```
+
+**Both release targets, never one.** `release_check.py` passed on citegate and
+reported thirteen refusals against engine of which thirteen were false. A gate
+that is right for the wrong reason looks exactly like a working one until a
+second target exists.
 
 **`ruff format --check` is not optional.** Omitting it locally is what turned CI
 red at `01c73c8`; `ruff check` passes on code `ruff format` would rewrite. CI
@@ -39,9 +46,11 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,111 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **19 of 19 mutations killed**.
-All 68 TypeScript tests now run in CI; until this commit, seven of them did.
+Current state: **1,143 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **22 of 22 mutations killed**.
+All 68 TypeScript tests now run in CI; until recently, seven of them did.
+**All 16 citegate tests now run in CI too** — until this commit, none of them
+did: every `pytest` in every workflow inherited `working-directory: engine`.
 
 ## engine/src/omnex/ — what each module is for
 
@@ -219,6 +228,26 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   per extra — `vectors` imports qdrant-client and not sqlite-vec or numpy, so
   "backed" hides two unused pins and "unbacked" erases a real adapter.
   Decisions live in `docs/EXECUTION_DECISIONS.md`.
+- `engine/scripts/release_check.py` + `.github/workflows/release.yml` — **what
+  refuses a package before a stranger installs it.** Three modes: the default is
+  drift (declarations against the code and against CI), `--release` is the
+  operator before tagging, and `--tag` is the workflow the tag triggered — there
+  the tag necessarily exists, so "is this name free" inverts into "does it name
+  this version". It found citegate declaring `requires-python = ">=3.10"` while
+  importing `enum.StrEnum` (3.11: pip resolves, installs, first import raises),
+  and citegate's **sixteen tests never running in CI**. Then running it on the
+  *second* target found four bugs in itself — the worst being that the check for
+  suites CI does not run could not see the suite CI does run, and was right about
+  citegate by coincidence of that same bug. **Both targets are in the gate now,
+  never one.** Its import scanner is its own, via `ast`: `extras_check` asks
+  *declared → imported* where a prose false positive is never looked up, this
+  asks *imported → declared* and reads the answer as truth. That asymmetry is
+  what found `tiktoken` imported by `omnex.llm.tokens` and declared by nothing.
+  The release workflow attests provenance with `actions/attest-build-provenance`
+  — verifiable by `gh attestation verify`, not a file we write about ourselves —
+  and PyPI publish sits behind a `pypi` environment needing both the operator's
+  token and their approval. **It has never run**, and `execution_state.json` says
+  UNKNOWN rather than PASS for exactly that reason.
 - `docs/EXECUTION_DECISIONS.md` — why something was built, what evidence forced
   it, what else was considered, whether it can be undone. `D-001` records the
   finding that a detailed execution report described fifteen artifacts of which
@@ -432,6 +461,18 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
 ## Lab notes — mistakes already paid for, do not repeat
 
 - `ruff check` passing does not mean `ruff format --check` passes. Run both.
+- **`ruff check --select RULE --fix` narrows the enabled rule set to RULE, so
+  every `# noqa` for a rule *not* in the selection reads as unused and is
+  stripped.** Run to delete three stale `S603`/`PLC0415` directives, it removed
+  **21** — including every legitimate `E402` and `F401` in the suite — and the
+  damage looks like a tidy-up in the diff. `git checkout` on the files that had
+  no other changes was the recovery. Fix a specific rule by hand, or run
+  `--fix` with the project's own configuration and no `--select`.
+- **A tag-only workflow is not continuous integration.** `release.yml` runs the
+  whole suite, and only when somebody pushes a tag; counting it would let "CI
+  runs this package's tests" pass while no push and no pull request ran
+  anything. `covers_changes()` requires a `pull_request:` or a `push:` with
+  `branches:` before a job counts.
 - **A workflow's `paths:` filter is part of its gate.** `engine.yml` triggered on
   `engine/**` only, while the engine suite reads `packs/`, `lib/`, `app/`,
   `components/`, `oss/`, `corpus/`, `CLAUDE.md` and the workflows themselves. A
