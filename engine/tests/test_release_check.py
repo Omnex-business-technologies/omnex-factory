@@ -387,3 +387,45 @@ def test_a_tag_only_workflow_does_not_count_as_continuous_integration() -> None:
 
     release = (REPO / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
     assert not release_check.covers_changes(release), "release.yml must not count as CI"
+
+
+def test_a_workflow_comment_naming_a_trigger_does_not_become_that_trigger() -> None:
+    """Found by adding a comment, not by reading the code.
+
+    `release.yml` gained `workflow_dispatch` so its first execution need not be
+    the real one, and the comment explaining that it deliberately has **no**
+    `branches:` contains the string `branches:`. Both readers here are substring
+    scans, so that one line flipped `covers_changes` to True — a tag-only
+    workflow reading as continuous integration, which is precisely what this
+    function exists to refuse. It fails toward passing: nothing downstream would
+    have reported it, and `test_every_pytest_suite_in_the_repository_runs_in_ci`
+    would have started counting a workflow no push ever runs.
+    """
+    talks_about_it = (
+        "name: R\non:\n"
+        "  # deliberately no `branches:` and no `pull_request:` here\n"
+        "  push:\n    tags:\n      - 'citegate-v*'\n"
+        "  workflow_dispatch:\n"
+    )
+    assert not release_check.covers_changes(talks_about_it)
+
+    # A `#` inside a quoted scalar is data, not a comment.
+    assert release_check._uncommented('      - "tag#v*"  # a note') == '      - "tag#v*"  '
+    assert release_check._uncommented("  a#b: 1") == "  a#b: 1", (
+        "no space before # is not a comment"
+    )
+
+
+def test_a_job_that_only_mentions_pytest_in_a_comment_does_not_run_it() -> None:
+    """The same blindness one level over, and it is live in `engine.yml`: the
+    citegate job's comment explains that every `pytest` in every workflow used to
+    inherit the wrong directory. A caller grepping the block for `pytest` would
+    match the explanation of the bug instead of the step that fixed it."""
+    discussed_only = (
+        "name: E\njobs:\n"
+        "  talker:\n"
+        "    # this job exists because pytest never ran here\n"
+        "    steps:\n      - run: echo nothing\n"
+    )
+    _, block = release_check.jobs(discussed_only)["talker"]
+    assert "pytest" not in block

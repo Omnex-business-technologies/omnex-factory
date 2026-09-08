@@ -49,7 +49,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,224 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,226 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
@@ -373,7 +373,7 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   recorded, which is not 0 earned" — never €0.00.** It reads the repository and
   cannot see Stripe, Supabase, Etsy or Lemon Squeezy, and says so in its own
   last section; printing an unobservable as zero is the mistake `3766976`
-  already paid for. Today: **day 41, 94 commits, 80 of 170 images through QC,
+  already paid for. Today: **day 41, 101 commits, 80 of 170 images through QC,
   0 listings live, 1 module enabled, no revenue log.**
 - `packs/build_pack.py` — QC-passed images → a file Etsy can deliver. Four
   ratios **cropped from the centre, never padded**: a background scene with bars
@@ -536,6 +536,19 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   runs this package's tests" pass while no push and no pull request ran
   anything. `covers_changes()` requires a `pull_request:` or a `push:` with
   `branches:` before a job counts.
+- **A workflow reader that does not strip comments reads prose as configuration,
+  and fails toward passing.** `covers_changes()` and `jobs()` are substring scans
+  over raw YAML. Adding `workflow_dispatch` to `release.yml` meant writing a
+  comment saying it deliberately has *no* `branches:` — and that comment contains
+  the string `branches:`, which flipped a tag-only release gate into counting as
+  continuous integration. Nothing downstream would have said so: it makes
+  `test_every_pytest_suite_in_the_repository_runs_in_ci` pass more easily, not
+  less. The same blindness is live one level over — `engine.yml`'s citegate job
+  explains itself with a comment containing the word `pytest`, so a job that only
+  *discussed* running a suite would have satisfied every caller grepping its
+  block for one. Both readers now go through `_uncommented()`, which respects
+  quotes so `- "citegate-v*"` survives. Found by writing a comment, not by
+  reading the code.
 - **A workflow's `paths:` filter is part of its gate.** `engine.yml` triggered on
   `engine/**` only, while the engine suite reads `packs/`, `lib/`, `app/`,
   `components/`, `oss/`, `corpus/`, `CLAUDE.md` and the workflows themselves. A

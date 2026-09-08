@@ -11,11 +11,23 @@ name: Release
 # **This workflow has never run.** It is configuration until a tag exercises it,
 # and `execution_state.json` records it as UNKNOWN rather than PASS for exactly
 # that reason: a release path nobody has walked is a plan, not a path.
+#
+# `workflow_dispatch` exists so that the first execution does not have to be the
+# real one. A tag is awkward to undo and a half-made public release is worse, so
+# a dispatch runs gate → build → twine check → attest and stops: the two jobs
+# that reach outside this repository are gated on `github.event_name == 'push'`.
+# That is what makes the rehearsal safe *and* worth running — the one line here
+# that could not be checked against GitHub's documentation from this environment
+# (`actions/attest-build-provenance@v2`, see below) is exercised for real.
 
 on:
   push:
     tags:
       - "citegate-v*"
+  # Deliberately no `branches:` and no `pull_request:` — `covers_changes()` in
+  # `release_check.py` keys on exactly those, and a dispatchable release gate
+  # must still not count as continuous integration.
+  workflow_dispatch:
 
 # Read by default. Each job widens only what it needs, and the two that can reach
 # outside this repository are the only ones granted any kind of write.
@@ -72,12 +84,23 @@ jobs:
 
       - name: Release gate
         working-directory: engine
-        # `--tag`, not `--release`: the tag exists — it is why this is running —
-        # so "is this name free" is always false and the real question is whether
-        # it names the version being built.
+        # On a tag: `--tag`, not `--release` — the tag exists, it is why this is
+        # running, so "is this name free" is always false and the real question
+        # is whether it names the version being built.
+        #
+        # On a dispatch there is no tag to name, so the operator's mode runs
+        # instead. The two ask different questions and neither substitutes for
+        # the other: `--release` refuses a name already taken, `--tag` refuses a
+        # name that disagrees with `pyproject.toml`.
         env:
+          EVENT: ${{ github.event_name }}
           TAG: ${{ github.ref_name }}
-        run: uv run python scripts/release_check.py --target citegate --tag "$TAG"
+        run: |
+          if [ "$EVENT" = "push" ]; then
+            uv run python scripts/release_check.py --target citegate --tag "$TAG"
+          else
+            uv run python scripts/release_check.py --target citegate --release
+          fi
 
   build:
     name: Build and attest
@@ -126,6 +149,10 @@ jobs:
   github_release:
     name: GitHub release
     needs: build
+    # A tag, never a manual dispatch. The rehearsal has to be unable to create
+    # anything public, or it is not a rehearsal — it is the release with a
+    # different trigger.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -156,6 +183,12 @@ jobs:
   pypi:
     name: PyPI — needs the credential holder
     needs: [build, github_release]
+    # Same rule as above. `needs: github_release` would already skip this on a
+    # dispatch, so this line is redundant *today* — and stated for the case it
+    # stops being: the `needs:` list is an ordering choice somebody may change,
+    # while "this job may only run from a tag" is the property. The redundancy
+    # is the cheaper half of that pair.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The environment is the gate, and it is deliberately not something this
