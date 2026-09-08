@@ -574,7 +574,15 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   `engine/**` only, while the engine suite reads `packs/`, `lib/`, `app/`,
   `components/`, `oss/`, `corpus/`, `CLAUDE.md` and the workflows themselves. A
   change to any of those could not turn the job red, so the gate was green by not
-  running. Widened, and the filter now names each reason.
+  running. Widened, and the filter now names each reason. Found again later, the
+  same shape: a commit that only touched `state/evidence.jsonl` and
+  `state/runs.jsonl` (recording `D-012`'s findings) would not have triggered
+  `engine.yml` either, and `test_the_committed_registry_is_well_formed`,
+  `test_the_committed_ledger_is_intact` and three siblings read exactly those
+  files with no path argument. `state/**` and `execution_state.json` are in the
+  filter now. The lesson generalises past this one list: a `paths:` filter is a
+  claim about what a test suite reads, and it drifts the same way any other
+  unchecked claim does — one committed-file test added, one filter entry not.
 - **`test_ci_contract` compared ruff's directories and nothing else.** A whole
   script added to CLAUDE.md's gate block and not to CI passed it untouched —
   which is the same drift it was built for, one level up.
