@@ -11,3 +11,4 @@
 {"claim_id": "C-011", "claim": "citegate is installable from PyPI by a stranger", "type": "external", "source": "the PHASE 3 objective", "dependencies": ["C-005", "C-002"]}
 {"claim_id": "C-012", "claim": "the Etsy listing API shape is readable from this environment", "type": "external", "source": "the egress policy of the environment this was developed in"}
 {"claim_id": "C-013", "claim": "release.yml publishes a GitHub Release carrying the attested artifacts", "type": "pipeline", "source": ".github/workflows/release.yml", "dependencies": ["C-005"]}
+{"claim_id": "C-014", "claim": "deploy/local/Dockerfile builds the engine image and its build-time test suite passes", "type": "pipeline", "source": "deploy/local/Dockerfile"}
