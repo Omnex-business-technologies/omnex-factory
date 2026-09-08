@@ -22,7 +22,12 @@ on:
     # reads packs/, `test_business_map` reads lib/modules/registry.ts,
     # `test_env_check` reads every process.env in lib, app and components,
     # `test_ci_contract` reads CLAUDE.md and these workflows, and the citegate
-    # parity test reads oss/.
+    # parity test reads oss/. `test_the_committed_registry_is_well_formed`,
+    # `test_the_committed_ledger_is_intact`, `test_the_committed_chain_is_whole`
+    # and `test_the_committed_state_agrees_with_the_repository` read the
+    # committed state/*.jsonl and execution_state.json with no path argument —
+    # found by D-012 committing to state/ and execution_state.json alone and
+    # noticing this filter would not have caught a break in either.
     paths:
       - "engine/**"
       - "deploy/**"
@@ -32,6 +37,8 @@ on:
       - "components/**"
       - "oss/**"
       - "corpus/**"
+      - "state/**"
+      - "execution_state.json"
       - "CLAUDE.md"
       - ".github/workflows/*.yml"
   workflow_dispatch:
