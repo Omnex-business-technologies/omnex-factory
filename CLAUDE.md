@@ -651,6 +651,19 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   The doc host and the git lane are different paths through the same proxy and
   answer differently; a 403 on one is not evidence about the other. Bumped to
   `@v4` once the read confirmed `subject-path` still worked unchanged.
+- **A brand-new workflow file cannot be `workflow_dispatch`'d before it reaches
+  the default branch — a new trigger on an already-registered workflow can.**
+  `release.yml` already existed on master when `workflow_dispatch` was added to
+  it on a feature branch, and dispatching from that branch worked (run
+  `34237298583`) — GitHub already had a registry entry for the workflow by
+  path, and a new trigger type on a commit that isn't on master was still
+  honoured. `docker.yml` was a file with no history on any branch GitHub had
+  indexed, and dispatching it the same way returned `404 Not Found` — it did
+  not even appear in the workflow list. The two cases look identical from the
+  commit (both are "a `workflow_dispatch` block on a feature branch") and
+  behave oppositely. Rehearsing a genuinely new workflow needs it on the
+  default branch first; only a new trigger on an existing one can be rehearsed
+  from a feature branch the way `release.yml`'s attestation bump was.
 - **A polling loop on a quiet resource fails this repo's own `worth_it` gate.**
   An hourly PR check-in ran ~30 times against a green, unchanged PR: `repeats`
   holds, `budget` does not — it spent every hour and shipped nothing, and
