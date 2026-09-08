@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "6ba44bc7e0375b5681a91f72accd65cb2994f74f",
+  "source_commit": "363f083528b70a15009b5bb75a904ae5c836c2af",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -48,6 +48,25 @@
       "oss/citegate/LICENSE": true
     }
   },
+  "dossiers": {
+    "generator": true,
+    "rendered": true,
+    "ruled_on_by_a_person": 0
+  },
+  "registry": {
+    "present": true,
+    "claims": 13,
+    "by_status": {
+      "CONTRADICTED": 2,
+      "DISCOVERED": 0,
+      "PARTIALLY_SUPPORTED": 0,
+      "REJECTED": 0,
+      "STALE": 0,
+      "SUPERSEDED": 0,
+      "SUPPORTED": 6,
+      "UNKNOWN": 5
+    }
+  },
   "gates": {
     "0_integrity": {
       "status": "PASS",
@@ -60,18 +79,20 @@
     },
     "1_architecture": {
       "status": "UNKNOWN",
-      "why": "507 nodes carry a claim, but a claim is not a dossier: nothing yet records the evidence, candidates and containment direction per node, so 'mapped' cannot be asserted",
+      "why": "the dossier exists and regenerates in CI, so every node now carries the evidence a person needs; what is missing is the person. 0 of 507 rows have been ruled on, and no machine may raise that number",
       "evidence": [
         "nodes by claim: {'gap': 461, 'proposed': 46}",
-        "node_dossier.py does not exist"
+        "node_dossier.py exists: True",
+        "DECISIONS.md rendered: True",
+        "ruled on by a person: 0"
       ]
     },
     "2_evidence": {
       "status": "UNKNOWN",
-      "why": "there is no claim or evidence registry yet, so 'important claims have evidence' has nothing to measure against",
+      "why": "the claim registry exists and is checked in CI, and status is recomputed rather than stored — but a registry is not the gate: 7 of 13 claims are still UNKNOWN or CONTRADICTED, so 'important claims have evidence' is not yet true",
       "evidence": [
-        "state/claims.jsonl does not exist",
-        "state/evidence.jsonl does not exist"
+        "claims registry present: True",
+        "claims by derived status: {'CONTRADICTED': 2, 'DISCOVERED': 0, 'PARTIALLY_SUPPORTED': 0, 'REJECTED': 0, 'STALE': 0, 'SUPERSEDED': 0, 'SUPPORTED': 6, 'UNKNOWN': 5}"
       ]
     },
     "3_implementation": {

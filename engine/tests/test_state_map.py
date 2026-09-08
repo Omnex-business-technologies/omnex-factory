@@ -15,6 +15,7 @@ bytes, which is why there is no timestamp in it.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -157,3 +158,45 @@ def test_the_state_names_its_own_generator_and_forbids_editing() -> None:
     note = str(_committed()["$comment"])
     assert "state_map.py" in note
     assert "Do not edit" in note
+
+
+def test_no_gate_claims_a_file_is_absent_while_it_sits_in_the_repository() -> None:
+    """The defect this file existed to prevent, found in this file's subject.
+
+    Gates 1 and 2 carried hard-coded evidence — "node_dossier.py does not
+    exist", "state/claims.jsonl does not exist" — written when both were true.
+    Both scripts were then written, entered CI, and ran for weeks while
+    `execution_state.json` went on reporting them absent, and `--check` passed
+    the whole time because it compared the committed file against those same
+    literals. A constant validated against itself.
+
+    So this asserts the property rather than the two known cases: any path a
+    gate names as missing must actually be missing. Keyed on paths, because a
+    list of the two that already bit would stop covering whatever is added next.
+    """
+    absent_pattern = re.compile(r"([\w./-]+\.(?:py|json|jsonl|md|yml|yaml))\s+does not exist")
+
+    offenders: list[str] = []
+    for name, gate in state_map.derive()["gates"].items():
+        for text in [str(gate["why"]), *(str(e) for e in gate["evidence"])]:
+            for named in absent_pattern.findall(text):
+                candidates = [REPO / named, ENGINE / named, ENGINE / "scripts" / named]
+                if any(path.exists() for path in candidates):
+                    offenders.append(f"{name}: says {named!r} does not exist, and it does")
+
+    assert offenders == [], "; ".join(offenders)
+
+
+def test_the_two_repaired_gates_derive_their_evidence_rather_than_stating_it() -> None:
+    """The fix, held in place. Both gates must move when the repository moves,
+    so their evidence has to contain a measured quantity — not a sentence that
+    happened to be true on the day somebody typed it."""
+    gates = state_map.derive()["gates"]
+
+    architecture = " ".join(str(e) for e in gates["1_architecture"]["evidence"])
+    assert "node_dossier.py exists: True" in architecture
+    assert "ruled on by a person: 0" in architecture, "only apply_decisions.py may raise this"
+
+    evidence = " ".join(str(e) for e in gates["2_evidence"]["evidence"])
+    assert "claims registry present: True" in evidence
+    assert "SUPPORTED" in evidence, "the derived status counts, recomputed not stored"

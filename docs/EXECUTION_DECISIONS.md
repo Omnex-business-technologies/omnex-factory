@@ -400,3 +400,103 @@ shared resolver cannot reach — it resolves `module.attribute`, not
 `walk(chain=CHAIN)` bound its default at definition time, which made the gate's
 own failure path untestable. All fixed; the last one is why
 `test_strict_exits_non_zero_when_a_link_is_not_executable` runs a subprocess.
+
+---
+
+## D-010 · Why the PHASE 4 adapters were not built
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** The plan's PHASE 4 names adapters for the extras that declare
+dependencies nothing imports — `api`, `memory`, `worker`, `agents`, `evals`,
+`finetune`. Six of twelve extras, and the obvious next block of work.
+
+**evidence, measured before choosing.** `extras_check.py` reports
+**2 supported · 3 partial · 6 unsupported · 1 tooling**, and every one of the six
+`unsupported` entries already carries a specific reason naming what exists
+in-process instead. That is the rule the checker actually enforces — *an extra
+delivers what it declares, or says it does not* — so promise integrity is
+already satisfied. Nothing in the repository depends on the six, and no observed
+failure calls for them. `next_action.py` does not rank one.
+
+**chosen.** Do not build them. Cut the citegate release instead: `release.yml`
+had never executed, `C-005` carried zero evidence, and that was the largest
+single `UNKNOWN → measured` conversion available.
+
+**reason.** Building six adapters because a diagram names them is the decorative
+architecture `D-004` already refused. A declaration is evidence of an intended
+interface, not proof one should exist.
+
+**the hazard, recorded so it is not rediscovered.** `worker` is the one that
+looks most obviously buildable and is the most dangerous. `Worker.broker` is
+typed to the **concrete** `InMemoryBroker`, and `Worker` runs jobs *in-process*
+with its own retry and dead-lettering; celery hands work to a *remote* worker.
+Extract a shared `Broker` Protocol and `Worker(broker=CeleryBroker(...))`
+type-checks — then submits to celery **and** runs the job locally. A
+double-execution path, in the module whose sibling `claim.py` exists because
+"the other direction charges the customer twice."
+
+So the first step of that phase is **extracting the Protocol and deciding what
+`Worker` may accept**, not writing the adapter. Writing `CeleryBroker` first
+produces two concrete classes that happen to share method names, which is the
+twin-splitter failure with extra steps.
+
+**what was kept.** The celery API was read from PyPI rather than memory
+(`celery 5.6.3`, `requires-python >=3.9`, `send_task(..., task_id=...)` — which
+matters, because it lets an idempotency key *be* the task id). That research is
+in the session scratchpad, not committed: a claim about a third-party API is
+true against a version on a date, and committing it without a
+`reverify_after` would create exactly the stale-figure drift this repository
+keeps paying for.
+
+**tradeoffs.** The six extras stay `unsupported`. Someone reading
+`pyproject.toml` still sees twelve extras and six that deliver nothing — which
+is why the *reason* string on each is load-bearing and why `extras_check.py`
+refuses silence.
+
+**when this reverses.** When an adapter has a real consumer. Not when a diagram
+names one.
+
+---
+
+## D-011 · Narrowing C-005, and why that is not how a claim gets to pass
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** `release.yml` ran for the first time — run `34237298583`,
+`run_number` 1, dispatched rather than tagged. Gate green, build green,
+**attestation green**. `github_release` and `pypi` were skipped by their
+`event_name` guard, and zero releases and zero tags existed afterwards.
+
+**the problem.** `C-005` read "release.yml builds, attests **and publishes**
+citegate". Filing the run as `supports` would have derived `SUPPORTED` for a
+sentence containing a verb the run deliberately never exercised. Filing nothing
+would have thrown away the first real measurement of the release path.
+
+**chosen.** Split, on the precedent already in the registry: `C-005` narrows to
+"builds and attests" — exactly what run `34237298583` demonstrates — and the
+removed half becomes **`C-013`**, "publishes a GitHub Release carrying the
+attested artifacts", `UNKNOWN`, with `dependencies: ["C-005"]`. This is the same
+shape as `C-012` (readability, measured) and `C-009` (acceptance, unknown, and
+depending on it).
+
+**reason, stated plainly because this is the abusable move.** Narrowing a claim
+until the evidence fits is how a registry becomes decorative. What makes this
+legitimate is that **nothing was dropped**: the removed half is a claim in its
+own right, still `UNKNOWN`, still blocking, and `C-011` ("installable from PyPI
+by a stranger") is untouched and stays `UNKNOWN` too — a workflow run is not a
+publish, and a GitHub Release is not PyPI. Three verbs, three states, none
+collapsed. Had the publish half simply been deleted, the count would have
+improved and the repository would know less.
+
+**what the run also settled, for free.** `actions/attest-build-provenance@v2` is
+current. That was the one line in `release.yml` that could not be checked
+against GitHub's documentation from this environment (`docs.github.com` answers
+`403 to CONNECT`), and rehearsing it before the tag is the whole reason
+`workflow_dispatch` was added.
+
+**one prediction that was wrong**, recorded because the ledger's value is in the
+gaps: the dispatch was expected to be refused until `release.yml` reached the
+default branch. The API queued it from the feature branch instead. `R-0004`'s
+own `expected_outcome` held; this was a planning assumption alongside it, and it
+was assumption, not measurement, that made it wrong.

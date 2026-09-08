@@ -2,7 +2,7 @@
 {"claim_id": "C-002", "claim": "citegate imports on Python 3.11", "type": "symbol", "source": "oss/citegate/pyproject.toml requires-python >=3.11"}
 {"claim_id": "C-003", "claim": "the engine test suite runs in CI on every push and pull request", "type": "pipeline", "source": ".github/workflows/engine.yml"}
 {"claim_id": "C-004", "claim": "citegate's test suite runs in CI on every push and pull request", "type": "pipeline", "source": ".github/workflows/engine.yml"}
-{"claim_id": "C-005", "claim": "release.yml builds, attests and publishes citegate", "type": "pipeline", "source": ".github/workflows/release.yml"}
+{"claim_id": "C-005", "claim": "release.yml builds and attests citegate", "type": "pipeline", "source": ".github/workflows/release.yml"}
 {"claim_id": "C-006", "claim": "every declared extra delivers what it declares, or says it does not", "type": "measurement", "source": "engine/pyproject.toml [tool.omnex.extras]"}
 {"claim_id": "C-007", "claim": "22 of 22 hand-written mutations are killed by the test suite", "type": "measurement", "source": "engine/scripts/mutate.py"}
 {"claim_id": "C-008", "claim": "actions/attest-build-provenance@v2 is a current major version", "type": "external", "source": ".github/workflows/release.yml"}
@@ -10,3 +10,4 @@
 {"claim_id": "C-010", "claim": "an n8n node type in the binding catalogue imports into a real n8n instance", "type": "human", "source": "engine/ontology/n8n_bindings.json"}
 {"claim_id": "C-011", "claim": "citegate is installable from PyPI by a stranger", "type": "external", "source": "the PHASE 3 objective", "dependencies": ["C-005", "C-002"]}
 {"claim_id": "C-012", "claim": "the Etsy listing API shape is readable from this environment", "type": "external", "source": "the egress policy of the environment this was developed in"}
+{"claim_id": "C-013", "claim": "release.yml publishes a GitHub Release carrying the attested artifacts", "type": "pipeline", "source": ".github/workflows/release.yml", "dependencies": ["C-005"]}

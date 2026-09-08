@@ -253,11 +253,31 @@ def test_the_committed_registry_records_what_is_not_known() -> None:
 
 
 @pytest.mark.parametrize(
-    ("claim_id", "expected"), [("C-001", Status.CONTRADICTED), ("C-005", Status.UNKNOWN)]
+    ("claim_id", "expected"),
+    [
+        ("C-001", Status.CONTRADICTED),
+        ("C-005", Status.SUPPORTED),
+        ("C-013", Status.UNKNOWN),
+        ("C-011", Status.UNKNOWN),
+    ],
 )
 def test_the_findings_this_session_made_are_on_file(claim_id: str, expected: str) -> None:
     """C-001: citegate did not import on 3.10, proven by running it.
-    C-005: release.yml has never run, so it is UNKNOWN rather than PASS."""
+
+    C-005 read UNKNOWN here for as long as `release.yml` had never run. Run
+    34237298583 — dispatched, not tagged — ran the gate, built the artifacts and
+    **attested them**, which settles that the workflow builds and attests.
+
+    It settles nothing else, and this parametrisation is where that is held.
+    The run's `github_release` and `pypi` jobs were skipped by their event guard,
+    so the publish half was split into **C-013** and stays UNKNOWN, and
+    **C-011** (installable from PyPI by a stranger) stays UNKNOWN too: a
+    workflow run is not a publish, and a GitHub Release is not PyPI.
+
+    Narrowing a claim until the evidence fits is how a registry goes decorative.
+    What makes the split legitimate is that the removed half is still here,
+    still blocking, and still listed above.
+    """
     store = registry_module.load()
     claim = next(c for c in store.claims if c.claim_id == claim_id)
     assert store.status(claim) is expected
