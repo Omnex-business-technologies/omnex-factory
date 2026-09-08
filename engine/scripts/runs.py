@@ -54,9 +54,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 
 ENGINE = Path(__file__).resolve().parents[1]
@@ -165,6 +167,62 @@ def _leaks(run: Run) -> str | None:
     return None
 
 
+def observe(parent: Run, *, result: str, outcome: str, commit_after: str = "") -> Run:
+    """Close a run by APPENDING its observation, never by editing it.
+
+    The ledger is hash-chained, so revising a row breaks every link after it —
+    which means "record the result" cannot be an update. An observation is its
+    own event, linked by `parent_run_id`, and that is not a workaround: what
+    actually happened is a different fact from what was predicted, occurring at a
+    different time.
+
+    **The prediction travels unchanged.** `expected_outcome` is copied from the
+    parent and refused if it differs, so nobody can quietly improve what they
+    said they expected while writing down what occurred. That is the single way
+    this field could be defeated, and the reason it exists at all.
+    """
+    return Run(
+        run_id=f"{parent.run_id}-observed",
+        parent_run_id=parent.run_id,
+        session_id=parent.session_id,
+        agent_id=parent.agent_id,
+        timestamp=_now(),
+        objective=parent.objective,
+        selected_action=parent.selected_action,
+        authorization=parent.authorization,
+        autonomy_level=parent.autonomy_level,
+        git_commit_before=parent.git_commit_before,
+        expected_outcome=parent.expected_outcome,
+        git_commit_after=commit_after or _git("rev-parse", "HEAD"),
+        result=result,
+        observed_outcome=outcome,
+    )
+
+
+def revised_predictions(runs: list[Run]) -> list[str]:
+    """Observations whose `expected_outcome` no longer matches what was predicted."""
+    by_id = {r.run_id: r for r in runs}
+    return [
+        f"{r.run_id}: expected_outcome differs from {r.parent_run_id}'s — a "
+        "prediction may not be revised while its result is being recorded"
+        for r in runs
+        if r.parent_run_id
+        and r.parent_run_id in by_id
+        and r.expected_outcome != by_id[r.parent_run_id].expected_outcome
+    ]
+
+
+def _now() -> str:
+    """The one place a wall-clock time is read, and it is an observation.
+
+    `execution_state.json` and `Checkpoint` carry no timestamp on purpose. A run
+    is the opposite case: when it happened is the fact being recorded, so the
+    contract's "explicit timestamps only for actual observations" applies here
+    and nowhere else in the spine.
+    """
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
 def broken_links(runs: list[Run]) -> list[str]:
     """Every place the chain does not hold, which is every place it was edited."""
     problems: list[str] = []
@@ -180,6 +238,7 @@ def broken_links(runs: list[Run]) -> list[str]:
     problems.extend(
         f"{run.run_id}: carries {leak}" for run in runs if (leak := _leaks(run)) is not None
     )
+    problems.extend(revised_predictions(runs))
     return problems
 
 
@@ -263,9 +322,79 @@ def main() -> int:
     parser.add_argument("--checkpoint", action="store_true", help="write one for this commit")
     parser.add_argument("--recover", action="store_true", help="what a fresh agent needs")
     parser.add_argument("--check", action="store_true", help="refuse a tampered or leaky ledger")
+    parser.add_argument("--record", action="store_true", help="open a run BEFORE doing the work")
+    parser.add_argument("--observe", metavar="RUN_ID", help="append the result of a recorded run")
+    parser.add_argument("--objective", default="", help="--record: what this unit of work is for")
+    parser.add_argument("--action", default="", help="--record: the action selected")
+    parser.add_argument(
+        "--expect",
+        default="",
+        help="--record: what you predict will happen. Required, and it is a "
+        "prediction only because it is written now — it cannot be added later",
+    )
+    parser.add_argument("--result", default="", help="--observe: ok | failed | refused")
+    parser.add_argument("--outcome", default="", help="--observe: what actually happened")
+    parser.add_argument("--level", default="L2_LOCAL", help="the autonomy level acted under")
+    parser.add_argument("--authorization", default="", help="what authorised this run")
     args = parser.parse_args()
 
     runs = load()
+
+    if args.record:
+        missing = [
+            name
+            for name, value in (
+                ("--objective", args.objective),
+                ("--action", args.action),
+                ("--expect", args.expect),
+            )
+            if not value
+        ]
+        if missing:
+            print(f"FAIL {', '.join(missing)} required.")
+            print(
+                "--expect especially: an expectation written after the result is a\n"
+                "description, not a prediction, and this is the only moment it can\n"
+                "honestly be recorded."
+            )
+            return 1
+        opened = append(
+            Run(
+                run_id=f"R-{len(runs) + 1:04d}",
+                session_id=os.environ.get("OMNEX_SESSION_ID", "local"),
+                agent_id=os.environ.get("OMNEX_AGENT_ID", "unattributed"),
+                timestamp=_now(),
+                objective=args.objective,
+                selected_action=args.action,
+                authorization=args.authorization or "not stated",
+                autonomy_level=args.level,
+                git_commit_before=_git("rev-parse", "HEAD"),
+                expected_outcome=args.expect,
+                checkpoint_id=checkpoint().checkpoint_id,
+            )
+        )
+        print(f"recorded {opened.run_id} at {opened.git_commit_before[:12]}")
+        print(f"  expects: {opened.expected_outcome}")
+        print(
+            f"\nClose it with:  python scripts/runs.py --observe {opened.run_id} "
+            "--result ok --outcome '...'"
+        )
+        return 0
+
+    if args.observe:
+        parent = next((r for r in runs if r.run_id == args.observe), None)
+        if parent is None:
+            print(f"FAIL no run {args.observe} on file.")
+            return 1
+        if not (args.result and args.outcome):
+            print("FAIL --result and --outcome required.")
+            return 1
+        closed = append(observe(parent, result=args.result, outcome=args.outcome))
+        print(f"observed {closed.run_id}")
+        print(f"  expected: {parent.expected_outcome}")
+        print(f"  observed: {closed.observed_outcome}  [{closed.result}]")
+        return 0
+
     if args.check:
         problems = broken_links(runs)
         for problem in problems:

@@ -308,6 +308,27 @@ CATALOGUE: tuple[Mutation, ...] = (
         caught_by=("tests/test_runs.py::test_editing_an_earlier_entry_breaks_every_link_after_it",),
         rule="append-only becomes a convention people are asked to respect, not a property",
     ),
+    Mutation(
+        ident="a_design_nothing_has_run_reads_as_working",
+        path="engine/scripts/spine_check.py",
+        find="        if self.artifact and not (REPO / self.artifact).exists():",
+        replace="        if False:",
+        caught_by=(
+            "tests/test_spine_check.py::test_code_that_exists_but_has_never_produced_anything_reads_documented",
+            "tests/test_spine_check.py::test_strict_exits_non_zero_when_a_link_is_not_executable",
+        ),
+        rule="DOCUMENTED collapses into EXECUTABLE and the gate can only report success",
+    ),
+    Mutation(
+        ident="a_prediction_may_be_revised_after_the_fact",
+        path="engine/scripts/runs.py",
+        find="        and r.expected_outcome != by_id[r.parent_run_id].expected_outcome",
+        replace="        and False",
+        caught_by=(
+            "tests/test_runs.py::test_a_prediction_may_not_be_revised_while_its_result_is_recorded",
+        ),
+        rule="what you said you expected can be improved while writing what occurred",
+    ),
 )
 
 

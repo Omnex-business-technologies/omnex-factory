@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -157,3 +158,53 @@ def test_the_briefing_says_its_next_action_is_a_recommendation() -> None:
 
 def test_the_committed_ledger_is_intact() -> None:
     assert ledger.broken_links(ledger.load()) == []
+
+
+# ── closing a run without editing it ──────────────────────────────────────
+def test_an_observation_is_appended_and_never_edits_the_run(tmp_path: Path) -> None:
+    """The ledger is hash-chained, so "record the result" cannot be an update.
+    What happened is a different fact from what was predicted, at a different
+    time, and it gets its own row."""
+    path = tmp_path / "runs.jsonl"
+    opened = ledger.append(_run(), path)
+    closed = ledger.append(
+        ledger.observe(opened, result="ok", outcome="it imported", commit_after="deadbee"), path
+    )
+
+    rows = ledger.load(path)
+    assert len(rows) == 2
+    assert rows[0].observed_outcome == "UNKNOWN", "the original row is untouched"
+    assert closed.parent_run_id == opened.run_id
+    assert ledger.broken_links(rows) == []
+
+
+def test_a_prediction_may_not_be_revised_while_its_result_is_recorded(tmp_path: Path) -> None:
+    """The single way `expected_outcome` could be defeated: quietly improving
+    what you said you expected as you write down what occurred."""
+    path = tmp_path / "runs.jsonl"
+    opened = ledger.append(_run(), path)
+    closed = ledger.observe(opened, result="ok", outcome="fine")
+    honest = ledger.append(closed, path)
+    assert ledger.revised_predictions(ledger.load(path)) == []
+
+    rewritten = replace(honest, expected_outcome="something I never actually predicted")
+    problems = ledger.revised_predictions([opened, rewritten])
+    assert any("may not be revised" in p for p in problems)
+
+
+def test_recording_a_run_refuses_without_a_prediction(tmp_path: Path, monkeypatch) -> None:
+    """`--expect` is required because now is the only moment it can honestly be
+    written. Afterwards it is a description."""
+    monkeypatch.setattr(sys, "argv", ["runs", "--record", "--objective", "x", "--action", "y"])
+    monkeypatch.setattr(ledger, "LEDGER", tmp_path / "runs.jsonl")
+    assert ledger.main() == 1
+
+
+def test_the_committed_ledger_records_a_prediction_made_before_its_outcome() -> None:
+    """R-0001 was written before the work it describes was finished. That is the
+    only kind of row this file can honestly contain, and the reason none of the
+    61 commits before it were backfilled."""
+    rows = ledger.load()
+    assert rows, "the ledger has no writer again"
+    assert all(r.expected_outcome for r in rows)
+    assert ledger.revised_predictions(rows) == []

@@ -129,6 +129,14 @@ jobs:
           uv run python scripts/claims.py --check
           uv run python scripts/runs.py --check
 
+      - name: The spine, end to end
+        # The hardening contract's final gate: fourteen transitions, each
+        # resolving to code that runs and a test that holds it, or classified
+        # DOCUMENTED. It reported 13 EXECUTABLE and 1 DOCUMENTED on the commit
+        # that introduced it — the run ledger had no writer — which is the whole
+        # point: a gate that can only print a passing chain is decorative.
+        run: uv run python scripts/spine_check.py
+
       - name: Derived execution state
         # execution_state.json is derived, never authored. This fails when the
         # committed file and the repository disagree in either direction —

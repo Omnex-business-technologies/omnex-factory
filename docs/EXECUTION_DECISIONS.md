@@ -345,3 +345,58 @@ itself called unverifiable. Being unable to check is not evidence against.
 Split into `C-012` (readability, CONTRADICTED, measured) and `C-009`
 (acceptance, UNKNOWN, no evidence), and `test_being_unable_to_check_is_not_
 evidence_against` now holds that line.
+
+---
+
+## D-009 · The final gate, and the link it was built to find
+
+**date:** 2026-09-08 · **status:** ACCEPTED · **reversible:** yes
+
+**context.** The hardening contract requires, before broad adapter or deployment
+work, that the chain from TRUTH to RECOVERY be demonstrated and that any
+transition which is *merely documented* be classified as such.
+
+**evidence.** `spine_check.py` on the commit that introduced it:
+**13 EXECUTABLE · 1 DOCUMENTED**. The documented one was
+`VERIFICATION → RUN LEDGER`: `runs.py` resolved, `test_runs.py` existed, CI
+checked it — and `state/runs.jsonl` did not exist, because nothing wrote to it.
+Predicted before the checker was written, then reported by it.
+
+**chosen.** Three grades, not two. `ABSENT` means the code is not there.
+`DOCUMENTED` means the code and its test are there and **nothing has ever run
+it**. Collapsing those two into "not passing" would have been tidier and would
+have lost the only distinction that matters here.
+
+**reason.** `DOCUMENTED` is the state that reads as finished in every summary
+that lacks a word for it. `release.yml` is still in it. So was the run ledger,
+and so was this whole architecture on the day `D-001` recorded that fifteen
+reported artifacts existed zero times.
+
+**the writer, and what was refused.** `runs.py --record` opens a run before the
+work with a required `--expect`; `runs.py --observe` closes it. **The
+observation is appended, never written back** — the ledger is hash-chained, so
+editing a row breaks every link after it, and in any case what happened is a
+different fact from what was predicted, at a different time. `expected_outcome`
+travels from parent to observation unchanged and `revised_predictions()` refuses
+a mismatch: the one way that field could be defeated is quietly improving what
+you said you expected while recording what occurred.
+
+**R-0001 is the first row and was not backfilled.** Sixty-one commits of prior
+work have no ledger entry and will not get one. An expectation written after the
+result is a description, and manufacturing sixty-one of them to make an artifact
+exist is precisely the substitution `D-001` caught.
+
+**tradeoffs.** `--strict` is not the default. An all-green chain is the goal, not
+the current state, and a permanently red build is one people learn to ignore —
+the same reasoning that scopes `live_listings_are_covered` to live offers.
+
+**risk.** The chain reading 14/14 and meaning less than it looks. Mitigated by
+two mutations: one collapses `DOCUMENTED` into `EXECUTABLE`, the other lets a
+prediction be revised after the fact. Both are killed.
+
+**two defects found in the checker by running it.** Five links named symbols the
+shared resolver cannot reach — it resolves `module.attribute`, not
+`module.Class.method` — and `state_map.build` did not exist (`derive` does). And
+`walk(chain=CHAIN)` bound its default at definition time, which made the gate's
+own failure path untestable. All fixed; the last one is why
+`test_strict_exits_non_zero_when_a_link_is_not_executable` runs a subprocess.

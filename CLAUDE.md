@@ -21,6 +21,7 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/python scripts/release_check.py --target engine \
   && .venv/bin/python scripts/claims.py --check \
   && .venv/bin/python scripts/runs.py --check \
+  && .venv/bin/python scripts/spine_check.py \
   && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
@@ -48,8 +49,9 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,194 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **27 of 27 mutations killed**.
+Current state: **1,222 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
+EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
