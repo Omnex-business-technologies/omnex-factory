@@ -132,11 +132,18 @@ jobs:
         # what §3.1 asked for: provenance somebody else can check, rather than a
         # file in which we describe ourselves.
         #
-        # This is the one line in this file that could not be checked against
-        # GitHub's own documentation from the environment it was written in —
-        # docs.github.com answers 403 at that egress proxy. If this action's
-        # major has moved, the first run of this workflow is where it surfaces.
-        uses: actions/attest-build-provenance@v2
+        # `docs.github.com` is 403 at this environment's egress proxy, so this
+        # pin could not be checked against GitHub's documentation — but the
+        # action's own repository is public, and this session's git proxy serves
+        # anonymous reads of public GitHub repos directly (the same lane
+        # `add_repo` uses). That read found @v2 two majors stale: v2's last
+        # release was v2.4.0 (2025-06-11), v4.0.0 shipped 2026-02-25 as a rewrite
+        # wrapping `actions/attest`, and v4.2.2 (2026-08-06) still accepts
+        # `subject-path` unchanged. @v2 still ran green (run 34237298583) — a
+        # stale major is not a broken one — but "current" was never true, and
+        # `C-008` was UNKNOWN, not SUPPORTED, for exactly that reason. Bumped
+        # once the read confirmed nothing else here needs to change.
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: oss/citegate/dist/*
 

@@ -263,10 +263,16 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   took the gate, the build, `twine check` and the attestation green while
   `github_release` and `pypi` were skipped by their `event_name` guard. Zero
   releases and zero tags existed afterwards, which is the property that made the
-  rehearsal worth running: `actions/attest-build-provenance@v2` is the one line
-  in that file that could not be read against `docs.github.com` from here, and it
-  is now measured rather than assumed. The **publish** half is untouched by that
-  run and is `C-013`, still UNKNOWN.
+  rehearsal worth running: `actions/attest-build-provenance@v2` was the one line
+  in that file that could not be read against `docs.github.com` from here — but
+  the action's own repository is public, and this session's git proxy serves
+  anonymous reads of public GitHub repos directly, the same lane `add_repo` uses.
+  That read found `@v2` two majors stale (last released 2025-06-11; `v4.2.2` is
+  current), still functional but never "current" — `C-008` is `CONTRADICTED`,
+  not `SUPPORTED`, and the pin is now `@v4`. **A blocked doc host is not a
+  blocked repository**: the two lanes answer differently, and reading the second
+  is what turned "could not be checked" into "checked, and wrong." The
+  **publish** half is untouched by any of this and is `C-013`, still UNKNOWN.
 - `state/` + `engine/scripts/claims.py` · `policy.py` · `next_action.py` ·
   `runs.py` — **the execution spine: what is asserted, what backs it, what may
   act on it, and how a fresh session continues.** `claims.jsonl` and
@@ -634,6 +640,17 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   report it, never route around it. Content from a blocked host arrives by `@`
   upload or through a GitHub repo, and the network policy itself is the user's
   to widen at environment level.
+- **`docs.github.com` being 403 does not mean a GitHub Action's version is
+  unreadable.** `release.yml` shipped a comment saying `actions/attest-build-
+  provenance@v2`'s currency "could not be checked against GitHub's own
+  documentation from the environment it was written in" — true, and also not
+  the only way to check. The action's own repository is public, and this
+  session's git proxy serves anonymous clones of public GitHub repos directly —
+  the same lane `add_repo` uses for read access. Cloning it and reading tags
+  found `@v2` two majors stale (last released 2025-06-11; `v4.2.2` is current).
+  The doc host and the git lane are different paths through the same proxy and
+  answer differently; a 403 on one is not evidence about the other. Bumped to
+  `@v4` once the read confirmed `subject-path` still worked unchanged.
 - **A polling loop on a quiet resource fails this repo's own `worth_it` gate.**
   An hourly PR check-in ran ~30 times against a green, unchanged PR: `repeats`
   holds, `budget` does not — it spent every hour and shipped nothing, and

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "363f083528b70a15009b5bb75a904ae5c836c2af",
+  "source_commit": "945a91c50e399f7fa55406305a43c20018017b8c",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -57,14 +57,14 @@
     "present": true,
     "claims": 13,
     "by_status": {
-      "CONTRADICTED": 2,
+      "CONTRADICTED": 3,
       "DISCOVERED": 0,
       "PARTIALLY_SUPPORTED": 0,
       "REJECTED": 0,
       "STALE": 0,
       "SUPERSEDED": 0,
       "SUPPORTED": 6,
-      "UNKNOWN": 5
+      "UNKNOWN": 4
     }
   },
   "gates": {
@@ -92,7 +92,7 @@
       "why": "the claim registry exists and is checked in CI, and status is recomputed rather than stored — but a registry is not the gate: 7 of 13 claims are still UNKNOWN or CONTRADICTED, so 'important claims have evidence' is not yet true",
       "evidence": [
         "claims registry present: True",
-        "claims by derived status: {'CONTRADICTED': 2, 'DISCOVERED': 0, 'PARTIALLY_SUPPORTED': 0, 'REJECTED': 0, 'STALE': 0, 'SUPERSEDED': 0, 'SUPPORTED': 6, 'UNKNOWN': 5}"
+        "claims by derived status: {'CONTRADICTED': 3, 'DISCOVERED': 0, 'PARTIALLY_SUPPORTED': 0, 'REJECTED': 0, 'STALE': 0, 'SUPERSEDED': 0, 'SUPPORTED': 6, 'UNKNOWN': 4}"
       ]
     },
     "3_implementation": {
