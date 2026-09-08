@@ -500,3 +500,83 @@ gaps: the dispatch was expected to be refused until `release.yml` reached the
 default branch. The API queued it from the feature branch instead. `R-0004`'s
 own `expected_outcome` held; this was a planning assumption alongside it, and it
 was assumption, not measurement, that made it wrong.
+
+---
+
+## D-012 · deploy/local's Dockerfile has never worked, and why the fix is not obvious
+
+**date:** 2026-09-08 · **status:** OPEN — measured, not resolved · **reversible:** yes
+
+**context.** `C-014` claimed `deploy/local/Dockerfile` builds the engine image
+and its build-time test suite passes. `docker.yml` (added and rehearsed in
+`D-010`'s successor work) dispatched for real for the first time — run
+`34275113635`, on `master`, its first execution ever.
+
+**evidence.** The build failed at the baked `RUN python -m pytest tests/ -q`.
+Not the failure DOCKER.md's own lessons predicted (a slim base missing a
+system library, the `insightface`/`libxcb` shape) — ~90 tests fail with
+`FileNotFoundError`-shaped errors: `test_business_map`, `test_env_check`,
+`test_release_check`, `test_state_map`, `test_node_dossier`,
+`test_spine_check`, `test_runs`, `test_claims`, `test_obs_export`,
+`test_pipeline_cli`, `test_mutation`, `test_next_action`, `test_invariants`,
+`test_extras_check`, plus `test_intel` errors. `E-013` files this against
+`C-014` as `CONTRADICTED`.
+
+**root cause.** `compose.yaml`'s `engine` service builds with
+`context: ../../engine` — only the `engine/` subtree ever enters the image.
+Many of the engine's own tests are not self-contained to `engine/`: they read
+`lib/`, `oss/`, `corpus/`, `state/`, `.github/workflows/`, `CLAUDE.md`,
+`execution_state.json`. This is not a new discovery about the tests — CLAUDE.md
+has documented it since `engine.yml`'s own `paths:` filter was widened: *"The
+engine's tests read outside engine/... `test_listing` reads `packs/`,
+`test_business_map` reads `lib/modules/registry.ts`, `test_env_check` reads
+every `process.env` in `lib`, `app` and `components`, `test_ci_contract` reads
+`CLAUDE.md` and these workflows, and the citegate parity test reads `oss/`."*
+`deploy/local/Dockerfile`'s docstring assumed the opposite: *"only needs to be
+able to run the engine and its tests."* That assumption was never checked
+against what the tests actually are, because nothing had ever built the image.
+Inside the container, `Path(__file__).resolve().parents[2]` — the idiom nearly
+every cross-cutting test uses to find the repository root — resolves to the
+filesystem root instead, and every file lookup off it fails.
+
+**why this is not patched in the same commit.** Two real fixes exist and they
+are not equivalent:
+
+1. **Widen the build context to the repository root.** Makes the container's
+   tree match what the tests expect, the same way `engine.yml`'s CI job
+   checks out the whole repo and only sets `working-directory: engine`. Correct
+   in the sense that nothing is skipped — but it directly contradicts
+   `DOCKER.md`'s own claim for this image, "~120 MB instead of ~8 GB," which
+   is a comparison against the *GPU* images and was never measured against a
+   full-repo context. `oss/`, `corpus/` (509 figures), `lib/`, `app/`, `.git/`
+   are all real weight, and `COPY . .` would need a `.dockerignore` written
+   and verified, not assumed.
+2. **Scope the baked test command to a principled subset.** Faster, keeps the
+   image's actual size story true — but "principled" is doing the work: there
+   is no existing marker distinguishing "tests of the `omnex` package" from
+   "monorepo-wide gate tests that happen to live in `engine/tests/`." Inventing
+   one under deadline, to make a red build green, is exactly the class of
+   change `CLAUDE.md`'s own lab notes already warn about — a test suite that
+   quietly stops being run is worse than a red build, and a hand-picked
+   `--ignore` list is the same failure with extra steps.
+
+**chosen: neither, yet.** Recorded as a finding rather than patched blind. This
+session has no working Docker daemon to iterate against locally (`ulimit:
+error setting limit (Operation not permitted)` — a real sandbox restriction,
+not a policy refusal), so every attempt costs a full CI round trip on a design
+question that deserves more than a guess-and-check loop. `R-0008-observed`
+holds the measured failure; this entry holds the reasoning. Whichever fix is
+chosen, it gets its own run recorded before the work, the same as every other
+change this session.
+
+**risk of doing nothing.** `docker.yml` stays on `workflow_dispatch` only and
+is not wired into `pull_request` or `push` — exactly the caution that kept
+this from being a red check on every PR before anyone had verified it could
+pass at all.
+
+**one more prediction wrong, recorded rather than smoothed over.** `R-0008`
+expected a system-library gap. The actual failure was architectural. Both
+`R-0007` and `R-0008` on this same claim were wrong about the mechanism while
+right that something would fail — worth noting as its own small pattern:
+guessing the failure shape from a document written about a *different* image
+class (GPU, `omnex/flux:1`) was less reliable than it read at the time.
