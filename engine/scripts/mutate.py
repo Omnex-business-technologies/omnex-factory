@@ -223,6 +223,16 @@ CATALOGUE: tuple[Mutation, ...] = (
         caught_by=("tests/test_node_dossier.py::test_a_settled_node_is_not_reopened",),
         rule="a person's rejection must not come back as a proposal on the next run",
     ),
+    Mutation(
+        ident="a_machine_may_confirm_its_own_proposal",
+        path="engine/scripts/apply_decisions.py",
+        find="        elif ruling.reviewer.strip().lower() in NOT_A_PERSON:",
+        replace="        elif False:",
+        caught_by=(
+            "tests/test_apply_decisions.py::test_a_machine_shaped_reviewer_is_refused",
+        ),
+        rule="the one count a machine may not raise stops meaning anything if it can",
+    ),
 )
 
 

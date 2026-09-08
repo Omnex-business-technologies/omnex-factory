@@ -18,6 +18,7 @@ npx tsc --noEmit && npx vitest run && npx next build
   && .venv/bin/python scripts/env_check.py \
   && .venv/bin/python scripts/extras_check.py \
   && .venv/bin/python scripts/state_map.py --check \
+  && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
   && .venv/bin/python scripts/mutate.py
 
@@ -38,8 +39,8 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,085 engine tests · 68 TypeScript · 16 citegate**, all green,
-plus **18 of 18 mutations killed**.
+Current state: **1,111 engine tests · 68 TypeScript · 16 citegate**, all green,
+plus **19 of 19 mutations killed**.
 All 68 TypeScript tests now run in CI; until this commit, seven of them did.
 
 ## engine/src/omnex/ — what each module is for
@@ -172,6 +173,20 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   figure are listed **unranked**: scoring an absence of evidence would represent
   it as a quantity of evidence. `Idempotency` sits there with zero figures while
   `omnex.pipeline.IdempotencyStore` has been in the package for months.
+- `engine/scripts/apply_decisions.py` — **the only thing allowed to set
+  `verified`.** `0 implemented` is worth reading precisely because no machine can
+  raise it, so this refuses five ways of pretending: a decision with no reviewer;
+  a **machine-shaped reviewer** (`claude`, `bot`, `agent`, `system`… refused by
+  name, and the message says how a person actually called that proceeds);
+  `implemented` for an alias that does not import (through `core.symbols.resolve`,
+  the one resolver); overturning somebody else's confirmation without `--revise`
+  and a reason; a date that is malformed or in the future. Provenance goes in the
+  node's existing `note` — **no schema change**, because two writers with
+  different ideas of the shape is the drift this repository keeps paying for. A
+  revision **keeps what it overturned** (`was: rejected by … on …`), or nothing
+  would show that anybody disagreed. `deferred` records the look and confirms
+  nothing: `claim` and `verified` are untouched, since collapsing "declined to
+  rule" into "confirmed" inflates the only count that matters.
 - `CONSTITUTION.md` — what holds regardless of phase: the authority hierarchy
   (**repository truth outranks every plan**), the lifecycle states that are never
   collapsed, the three layers of truth, *machine proposes / person confirms*, and
@@ -298,9 +313,9 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: eighteen hand-written mutations against rules the
+  actually held by its tests*: nineteen hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **18 of 18 killed**. On its first run it was 11 — the survivor showed that
+  **19 of 19 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate
