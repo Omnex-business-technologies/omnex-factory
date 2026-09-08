@@ -1,0 +1,51 @@
+name: Docker
+
+# The local-first stack's engine image, built the way `deploy/local/compose.yaml`
+# documents building it, rather than assumed.
+#
+# **This has never run.** `deploy/local/Dockerfile` and `deploy/local/compose.yaml`
+# are in the repository and no workflow has ever built either — the same
+# never-executed class `release.yml` was in until it was dispatched. `C-014`
+# ("deploy/local/Dockerfile builds the engine image and its build-time test suite
+# passes") carries zero evidence for the same reason.
+#
+# `workflow_dispatch` only, on purpose, and not yet wired into `pull_request` or
+# `push`. This workflow is new and unproven; the rehearse-before-trust discipline
+# `release.yml` used — dispatch it, read what breaks, fix it — applies here before
+# every PR starts paying for a Docker build. Widening the trigger is a separate,
+# later decision once this has actually run green at least once.
+#
+# The image is built, never pushed. Nothing here reaches a registry: this settles
+# whether the packaging works, not whether it should be distributed.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build the engine image (deploy/local)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build, exactly the way the compose file documents it
+        # `RUN python -m pytest tests/ -q` is baked into the Dockerfile itself —
+        # a failing suite fails this build, so a green build already carries the
+        # signal. Built through compose rather than a hand-typed `docker build`
+        # so the paths this step exercises are the paths `DOCKER.md` and
+        # `compose.yaml`'s own comment actually tell a person to run.
+        run: docker compose -f deploy/local/compose.yaml build engine
+
+      - name: The image exists under the tag compose actually gives it
+        # A build succeeding is not the same as an image existing under a name
+        # anything can find again — catches a build that silently produced
+        # nothing tagged. The `engine` service has no explicit `image:`, so
+        # compose synthesises one from `name: omnex-local`; read with
+        # `docker compose build --print` (which resolves it without needing a
+        # build to have run) rather than assumed, and confirmed to be
+        # `omnex-local-engine`. Size is a cheap sanity check against the
+        # Dockerfile's own claim of "~120 MB instead of ~8 GB".
+        run: |
+          docker inspect omnex-local-engine \
+            --format 'built: {{.RepoTags}} size: {{.Size}} bytes'
