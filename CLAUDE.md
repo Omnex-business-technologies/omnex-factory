@@ -49,7 +49,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,224 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,230 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
@@ -218,7 +218,15 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   itself and the validator would have to learn to ignore a field — it is keyed on
   `source_commit` instead. Today: **1 gate PASS, 12 UNKNOWN, 0 FAIL**, and every
   UNKNOWN names the evidence it waits for, because `UNKNOWN` is a state and
-  `false` is a claim.
+  `false` is a claim. **Gates 0, 1 and 2 derive their evidence; the rest state
+  why they cannot.** That distinction was itself a defect for weeks: gates 1 and
+  2 carried the hard-coded strings "node_dossier.py does not exist" and
+  "state/claims.jsonl does not exist", both scripts were then written and entered
+  CI, and `--check` passed the whole time because it compared the committed file
+  against those same literals — a constant validated against itself, in the file
+  whose docstring warns about exactly this. `test_no_gate_claims_a_file_is_absent_
+  while_it_sits_in_the_repository` is the structural fix, keyed on paths rather
+  than on the two cases that already bit.
 - `LICENSE` (`/`, `engine/`, `oss/citegate/`) — MIT. Both `pyproject.toml` files
   declared `license = { text = "MIT" }` with **no licence file anywhere in the
   repository**, which is the same shape `build_pack.py` already refuses in a
@@ -250,8 +258,15 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   The release workflow attests provenance with `actions/attest-build-provenance`
   — verifiable by `gh attestation verify`, not a file we write about ourselves —
   and PyPI publish sits behind a `pypi` environment needing both the operator's
-  token and their approval. **It has never run**, and `execution_state.json` says
-  UNKNOWN rather than PASS for exactly that reason.
+  token and their approval. **It has now run** — `workflow_dispatch` was added so
+  the first execution would not have to be the real one, and run `34237298583`
+  took the gate, the build, `twine check` and the attestation green while
+  `github_release` and `pypi` were skipped by their `event_name` guard. Zero
+  releases and zero tags existed afterwards, which is the property that made the
+  rehearsal worth running: `actions/attest-build-provenance@v2` is the one line
+  in that file that could not be read against `docs.github.com` from here, and it
+  is now measured rather than assumed. The **publish** half is untouched by that
+  run and is `C-013`, still UNKNOWN.
 - `state/` + `engine/scripts/claims.py` · `policy.py` · `next_action.py` ·
   `runs.py` — **the execution spine: what is asserted, what backs it, what may
   act on it, and how a fresh session continues.** `claims.jsonl` and
@@ -373,7 +388,7 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   recorded, which is not 0 earned" — never €0.00.** It reads the repository and
   cannot see Stripe, Supabase, Etsy or Lemon Squeezy, and says so in its own
   last section; printing an unobservable as zero is the mistake `3766976`
-  already paid for. Today: **day 41, 94 commits, 80 of 170 images through QC,
+  already paid for. Today: **day 41, 102 commits, 80 of 170 images through QC,
   0 listings live, 1 module enabled, no revenue log.**
 - `packs/build_pack.py` — QC-passed images → a file Etsy can deliver. Four
   ratios **cropped from the centre, never padded**: a background scene with bars
@@ -536,6 +551,19 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   runs this package's tests" pass while no push and no pull request ran
   anything. `covers_changes()` requires a `pull_request:` or a `push:` with
   `branches:` before a job counts.
+- **A workflow reader that does not strip comments reads prose as configuration,
+  and fails toward passing.** `covers_changes()` and `jobs()` are substring scans
+  over raw YAML. Adding `workflow_dispatch` to `release.yml` meant writing a
+  comment saying it deliberately has *no* `branches:` — and that comment contains
+  the string `branches:`, which flipped a tag-only release gate into counting as
+  continuous integration. Nothing downstream would have said so: it makes
+  `test_every_pytest_suite_in_the_repository_runs_in_ci` pass more easily, not
+  less. The same blindness is live one level over — `engine.yml`'s citegate job
+  explains itself with a comment containing the word `pytest`, so a job that only
+  *discussed* running a suite would have satisfied every caller grepping its
+  block for one. Both readers now go through `_uncommented()`, which respects
+  quotes so `- "citegate-v*"` survives. Found by writing a comment, not by
+  reading the code.
 - **A workflow's `paths:` filter is part of its gate.** `engine.yml` triggered on
   `engine/**` only, while the engine suite reads `packs/`, `lib/`, `app/`,
   `components/`, `oss/`, `corpus/`, `CLAUDE.md` and the workflows themselves. A

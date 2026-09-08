@@ -300,9 +300,35 @@ def _workflow_text() -> dict[str, str]:
     return {p.name: p.read_text(encoding="utf-8") for p in sorted(WORKFLOWS.glob("*.yml"))}
 
 
+def _uncommented(line: str) -> str:
+    """`line` with its YAML comment removed, quotes respected.
+
+    Both readers below are substring scans over raw text, which means a workflow
+    *comment* describing a key counts as that key. That is not hypothetical: the
+    comment added to `release.yml`'s `on:` block explaining that it deliberately
+    has no `branches:` contains the string `branches:`, and flipped
+    `covers_changes` to True — making a tag-only workflow read as continuous
+    integration, which is the exact gap that function exists to close. It fails
+    toward passing, so nothing downstream would have said so.
+
+    A comment opens at `#` when it starts the line or follows whitespace, and
+    never inside a quoted scalar — `- "citegate-v*"` must survive intact.
+    """
+    quote = ""
+    for index, char in enumerate(line):
+        if quote:
+            if char == quote:
+                quote = ""
+        elif char in "\"'":
+            quote = char
+        elif char == "#" and (index == 0 or line[index - 1].isspace()):
+            return line[:index]
+    return line
+
+
 def _working_directory(lines: list[str]) -> str:
     for line in lines:
-        match = re.search(r"working-directory:\s*(\S+)", line)
+        match = re.search(r"working-directory:\s*(\S+)", _uncommented(line))
         if match:
             return match.group(1)
     return ""
@@ -321,8 +347,14 @@ def jobs(text: str) -> dict[str, tuple[str, str]]:
     `engine` unless it overrides. Reading only job blocks reported the engine's
     own suite as never run — a check for unrun suites that could not see the
     suite that runs.
+
+    Comments are stripped first, for the reason `_uncommented` gives. It matters
+    twice here: a top-level comment at column 0 would close the section early,
+    and `engine.yml`'s citegate job explains itself with a comment containing the
+    word `pytest` — so a job that only *discussed* running a suite would satisfy
+    every caller that greps this block for one.
     """
-    lines = text.splitlines()
+    lines = [_uncommented(line) for line in text.splitlines()]
     opens = next((i for i, line in enumerate(lines) if line.rstrip() == "jobs:"), None)
     if opens is None:
         return {}
@@ -358,11 +390,14 @@ def covers_changes(text: str) -> bool:
     would otherwise satisfy "CI runs this package's tests" while covering no
     push and no pull request, which is the same shape as the gap this check was
     built to find, one level over. A release gate is not continuous integration.
+
+    Comments are stripped before the scan — see `_uncommented`. A workflow that
+    explains in prose why it has no `branches:` must not thereby acquire one.
     """
-    lines = text.splitlines()
+    lines = [_uncommented(line) for line in text.splitlines()]
     opens = next((i for i, line in enumerate(lines) if re.match(r"^on:\s*$", line)), None)
     if opens is None:
-        return bool(re.search(r"^on:.*\b(push|pull_request)\b", text, re.MULTILINE))
+        return bool(re.search(r"^on:.*\b(push|pull_request)\b", "\n".join(lines), re.MULTILINE))
     body: list[str] = []
     for line in lines[opens + 1 :]:
         if line.strip() and not line.startswith(" "):

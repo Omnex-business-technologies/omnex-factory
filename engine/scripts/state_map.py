@@ -132,6 +132,44 @@ def _licences() -> dict[str, bool]:
     return {name: (REPO / name).exists() for name in LICENSED}
 
 
+def _dossiers() -> dict[str, Any]:
+    """Whether the node dossier exists, and how many rows a person has ruled on.
+
+    Gate 1 asserted "node_dossier.py does not exist" as a hard-coded string for
+    long enough that the script arrived, entered CI, and regenerated 507 rows
+    while the state file went on saying it was absent. Derived now, so the gate
+    moves when the repository does.
+    """
+    return {
+        "generator": (ENGINE / "scripts" / "node_dossier.py").exists(),
+        "rendered": (REPO / "corpus" / "universal-ai-os" / "DECISIONS.md").exists(),
+        "ruled_on_by_a_person": _nodes()["verified_by_a_person"],
+    }
+
+
+def _registry() -> dict[str, Any]:
+    """The claim registry's shape, recomputed — never read from a stored status.
+
+    Gate 2 said "state/claims.jsonl does not exist" while `claims.py --check`
+    ran in CI against thirteen claims. A gate whose evidence is a literal cannot
+    notice that it came true.
+    """
+    import claims as registry
+
+    if not (registry.CLAIMS.exists() and registry.EVIDENCE.exists()):
+        return {"present": False, "claims": 0, "by_status": {}}
+
+    ledger = registry.load()
+    counted = registry.summarise(ledger)
+    return {
+        "present": True,
+        "claims": len(ledger.claims),
+        # Recomputed by `summarise`, never read from a stored field: a stored
+        # status is a typeable status, which is the one thing claims.py refuses.
+        "by_status": {str(k): v for k, v in sorted(counted.items(), key=lambda kv: str(kv[0]))},
+    }
+
+
 def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"status": status, "why": why, "evidence": evidence or []}
 
@@ -139,13 +177,29 @@ def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str,
 def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """The twelve maturity gates, each measured or explicitly unmeasured.
 
-    Only gate 0 is decidable from a repository scan. The rest need evidence this
-    process cannot produce — a deployment, a user, a payment — and each says
-    which, because "UNKNOWN" without a reason is indistinguishable from
-    "nobody looked".
+    Gates 0, 1 and 2 are decidable from a repository scan. The rest need
+    evidence this process cannot produce — a deployment, a user, a payment —
+    and each says which, because "UNKNOWN" without a reason is
+    indistinguishable from "nobody looked".
+
+    **A gate's evidence must be derived, not written.** Gates 1 and 2 carried
+    hard-coded strings — "node_dossier.py does not exist", "state/claims.jsonl
+    does not exist" — and both scripts were subsequently written, entered CI,
+    and ran for weeks while this file went on reporting them absent. `--check`
+    passed throughout, because it compared the committed file against the same
+    literals: a constant validated against itself. That is the exact failure
+    this module's own docstring warns about, in the module that warns about it.
+    A gate whose evidence is a literal cannot notice that it came true.
     """
     licences = facts["promise_integrity"]["licences"]
     extras = facts["extras"]
+    dossiers = facts["dossiers"]
+    registry = facts["registry"]
+    unsettled = sum(
+        count
+        for status, count in registry["by_status"].items()
+        if status in {"UNKNOWN", "CONTRADICTED"}
+    )
     integrity_broken = [f"{name} is missing" for name, present in licences.items() if not present]
     if extras["problems"]:
         integrity_broken.append(f"{extras['problems']} extras problem(s)")
@@ -168,16 +222,34 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "1_architecture": _gate(
             UNKNOWN,
-            "507 nodes carry a claim, but a claim is not a dossier: nothing yet "
-            "records the evidence, candidates and containment direction per node, "
-            "so 'mapped' cannot be asserted",
-            [f"nodes by claim: {facts['nodes']['by_claim']}", "node_dossier.py does not exist"],
+            "the dossier exists and regenerates in CI, so every node now carries "
+            "the evidence a person needs; what is missing is the person. "
+            f"{dossiers['ruled_on_by_a_person']} of {facts['nodes']['total']} rows "
+            "have been ruled on, and no machine may raise that number"
+            if dossiers["generator"]
+            else "507 nodes carry a claim, but a claim is not a dossier: nothing "
+            "yet records the evidence, candidates and containment direction per "
+            "node, so 'mapped' cannot be asserted",
+            [
+                f"nodes by claim: {facts['nodes']['by_claim']}",
+                f"node_dossier.py exists: {dossiers['generator']}",
+                f"DECISIONS.md rendered: {dossiers['rendered']}",
+                f"ruled on by a person: {dossiers['ruled_on_by_a_person']}",
+            ],
         ),
         "2_evidence": _gate(
             UNKNOWN,
-            "there is no claim or evidence registry yet, so 'important claims have "
-            "evidence' has nothing to measure against",
-            ["state/claims.jsonl does not exist", "state/evidence.jsonl does not exist"],
+            "the claim registry exists and is checked in CI, and status is "
+            "recomputed rather than stored — but a registry is not the gate: "
+            f"{unsettled} of {registry['claims']} claims are still UNKNOWN or "
+            "CONTRADICTED, so 'important claims have evidence' is not yet true"
+            if registry["present"]
+            else "there is no claim or evidence registry yet, so 'important "
+            "claims have evidence' has nothing to measure against",
+            [
+                f"claims registry present: {registry['present']}",
+                f"claims by derived status: {registry['by_status']}",
+            ],
         ),
         "3_implementation": _gate(
             UNKNOWN,
@@ -247,6 +319,8 @@ def derive() -> dict[str, Any]:
         "invariants": _invariants(),
         "extras": _extras(),
         "promise_integrity": {"licences": _licences()},
+        "dossiers": _dossiers(),
+        "registry": _registry(),
     }
     facts["gates"] = gates(facts)
     facts["blocked"] = [
