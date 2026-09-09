@@ -12,12 +12,12 @@ readme = "README.md"
 # installed, and the first `import citegate` raised ImportError. A metadata
 # floor is a promise about interpreters, and this one was not kept.
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 keywords = ["rag", "hallucination", "grounding", "citations", "llm", "evaluation"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -35,8 +35,8 @@ dependencies = []
 dev = ["pytest>=8.0", "ruff>=0.8"]
 
 [project.urls]
-Homepage = "https://github.com/RaveZona/omnex-factory/tree/master/oss/citegate"
-Issues = "https://github.com/RaveZona/omnex-factory/issues"
+Homepage = "https://github.com/Omnex-business-technologies/omnex-factory/tree/master/oss/citegate"
+Issues = "https://github.com/Omnex-business-technologies/omnex-factory/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/citegate"]

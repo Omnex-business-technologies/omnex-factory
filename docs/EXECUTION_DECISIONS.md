@@ -608,3 +608,71 @@ corrected rather than left stale). `C-014` is `SUPPORTED` (`E-014`). Three
 real, escalating-but-narrowing failures (90 → 24 → 0), each fixed on
 evidence from an actual dispatch rather than guessed in advance — the same
 discipline `R-0007`/`R-0008`'s wrong mechanism guesses argue for.
+
+---
+
+## D-013 · MIT → Apache-2.0, and the transfer that prompted asking
+
+**date:** 2026-09-09 · **status:** DECIDED — operator's explicit choice · **reversible:** partially
+
+**context.** The operator transferred `omnex-factory` from the personal
+account `RaveZona` to `Omnex-business-technologies` — steps 1, 2 and 3 of
+`docs/TRANSFER.md`, all `CREDENTIAL`/`DESTRUCTIVE`-class and irreducibly
+theirs. Verified rather than assumed: `search_repositories` on the new path
+returns the repo with `created_at: 2026-07-29` (the *original* creation date,
+not a fresh import's), and both `get_file_contents` and `git ls-remote`
+against the old `RaveZona/omnex-factory` path still resolve — GitHub's
+redirect, live, not just documented. In the same exchange the operator asked
+for a "more prestigious" license than MIT.
+
+**evidence and alternatives.** Four options were put to the operator, each
+with its real tradeoff stated plainly rather than a bare list of names:
+Apache-2.0 (adds an explicit patent grant and a NOTICE convention over MIT,
+fully OSI-permissive, no new restriction — the license of Kubernetes and
+TensorFlow); Business Source License 1.1 (source-available, blocks a
+commercial competitor for a fixed window before converting to Apache-2.0 —
+has real teeth here since OMNEX already sells access, but stops being "open
+source" by the OSI definition); AGPL-3.0 (copyleft strong enough to require a
+SaaS wrapper to publish its modifications — the most defensive option, at the
+cost of most integration-friendliness); or leaving MIT and writing down why.
+The operator chose **Apache-2.0**.
+
+**what changed.** `LICENSE` at `/`, `engine/` and `oss/citegate/` (identical
+text, matching the pre-existing convention of one copy per package) rewritten
+to the full Apache License 2.0 text, boilerplate notice reading "Copyright
+2026 Omnex Technologies" — the org name, not the prior personal-account
+holder, since the license file is being rewritten anyway at the same moment
+the repository changed hands; flagged here rather than assumed silently
+correct. Both `pyproject.toml` files: `license = { text = "MIT" }` →
+`{ text = "Apache-2.0" }`; citegate's classifier list and `[project.urls]`
+(the latter is what `release_check.py` actually compares against the git
+remote — TRANSFER.md's own step 5) updated to match, plus its README's
+licence line. `packs/LICENSE.txt` is untouched on purpose: a commercial EULA
+for sold image packs, not a code license, and never was MIT.
+
+**what this session could not do itself.** `add_repo` refused
+`Omnex-business-technologies/omnex-factory` outright — "cross-tier adds are
+not supported in v1... session already has repos from owner(s) [ravezona]".
+This session started scoped to `ravezona/*` and cannot widen to a different
+owner mid-conversation; a fresh session sourced from the new path is what
+regains full tool access (PR creation, CI-check reads) under the new org.
+`git remote set-url origin <new path>` was tried, and inconsistently held —
+present at the end of one tool call, reverted to `RaveZona/omnex-factory` by
+the next, then observed holding again later, with no local action between
+the checks that would explain either transition. Rather than assume either
+state, this is left to the environment: the actual push in this same batch
+of work is the real test, recorded as `R-0011`'s observation, not asserted
+here in advance.
+
+**reversible how.** The license swap is reversible only forwards, not back:
+Apache-2.0 code already distributed under that grant cannot be un-licensed
+for whoever received it, though nothing here has shipped to PyPI yet
+(`C-011` is still `UNKNOWN`), so the practical exposure today is zero. The
+org transfer keeps a redirect from `RaveZona/omnex-factory`, which is a
+courtesy GitHub can remove, not a guarantee — `git remote set-url origin
+<path>` is the documented recovery in `docs/TRANSFER.md` if it ever is.
+
+**what is still open.** `docs/TRANSFER.md` step 6 — a ruleset requiring
+status checks on `master` — is unchanged by any of this and remains the one
+step that pays immediately: nothing today stops a red-CI merge to the new
+canonical repository any more than it stopped one on the old.
