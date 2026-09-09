@@ -1,4 +1,4 @@
-"""Metrics, computed in-process, with adapters for DeepEval and RAGAS.
+"""Metrics, computed in-process. No judge-model adapter — see below.
 
 The metrics here are deliberately the cheap deterministic ones. That is not a
 claim that they are better than a judge model — they are not — but a claim about
@@ -11,9 +11,12 @@ and teams respond to a flaky gate by disabling it.
 
 A **judge** metric is more faithful to human judgement and costs a model call
 per case, with variance between runs. That belongs in a weekly quality review
-over a large sample, not in the path of every pull request. The adapters exist
-for exactly that, and `LlmJudge` takes a `LanguageModel` so its cost lands in
-the same ledger as everything else.
+over a large sample, not in the path of every pull request — but no adapter for
+that exists in this module, or anywhere in this repository. `LlmJudge`, DeepEval
+and RAGAS were never built; a model call scored against `omnex.llm.LanguageModel`
+so its cost lands in the same ledger as everything else is the shape it would
+take, not a shipped one. Named here rather than left silent, the same reason
+`pyproject.toml`'s `[tool.omnex.extras]` names what an extra does not deliver.
 
 The four RAG metrics below are the standard set, and each answers a different
 question about a different half of the system:
