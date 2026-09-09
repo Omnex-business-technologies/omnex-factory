@@ -33,8 +33,14 @@ services:
 
   engine:
     build:
-      context: ../../engine
-      dockerfile: ../deploy/local/Dockerfile
+      # The repository root, not engine/ alone (D-012). The engine's own test
+      # suite reads lib/, oss/, corpus/, state/, .github/workflows/, CLAUDE.md
+      # and execution_state.json by design — a context of engine/ alone could
+      # never supply them, and the build's baked test run failed on exactly
+      # that the first time anyone ran it. .dockerignore at the repo root
+      # keeps this from also copying in node_modules/, .next/ and .git/.
+      context: ../..
+      dockerfile: deploy/local/Dockerfile
     depends_on:
       ollama:
         condition: service_healthy
@@ -47,9 +53,13 @@ services:
       ANTHROPIC_API_KEY: ""
       GROQ_API_KEY: ""
     volumes:
-      - ../../engine:/app
-      - omnex-data:/app/.omnex
-    working_dir: /app
+      # /repo/engine, not /app: the container's own root-finding idiom
+      # (Path(__file__).resolve().parents[2] from a test in engine/tests/)
+      # only lands on something real if engine/ sits inside a repo root
+      # rather than being the container's top-level directory.
+      - ../../engine:/repo/engine
+      - omnex-data:/repo/engine/.omnex
+    working_dir: /repo/engine
     command: ["sleep", "infinity"]
 
 volumes:

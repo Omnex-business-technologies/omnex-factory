@@ -1,0 +1,48 @@
+# deploy/local's engine image now builds from the repository root (D-012:
+# a context of engine/ alone left ~90 of the engine's own tests unable to
+# find the repo-root files they read by design). This file is what keeps
+# that build from also copying in everything the .gitignore excludes plus
+# the local caches nothing in a fresh checkout should have anyway.
+#
+# .git/ is deliberately NOT excluded here, even though it is repository
+# history rather than source: business_map.py, release_check.py, runs.py
+# and state_map.py all shell out to `git` and need real history present to
+# answer (business_map.py's day-count-since-first-commit in particular).
+# Excluding it was the first version of this file and cost a build — the
+# baked test run failed a second time, narrower, on exactly the tests that
+# needed it. node_modules/ and .next/ are the two heaviest directories in
+# this repository (519 MB and 17 MB measured here) and neither the engine
+# image nor its test suite touches either.
+
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Python — every interpreter's own venv and bytecode cache, never a build
+# input. engine/.venv/ was 91 MB measured here and was never excluded by
+# name before this file existed.
+**/.venv/
+**/__pycache__/
+*.pyc
+
+# Secrets and local generated output — mirrors .gitignore. A build input
+# is not the place a credential should be reachable from even if it never
+# ends up in a layer; refusing to look is cheaper than checking after.
+.env
+.env.local
+.env*.local
+.n8n/
+.searxng/
+.hfcache/
+.insightface/
+packs/*/images/
+packs/ambassador-out/
+packs/flux-out/
+packs/flux-v2/
+packs/flux-faces/
+packs/*.zip
+packs/*.log
+
+.DS_Store
+.vercel

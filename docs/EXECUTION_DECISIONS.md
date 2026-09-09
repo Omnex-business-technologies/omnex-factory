@@ -505,7 +505,7 @@ was assumption, not measurement, that made it wrong.
 
 ## D-012 · deploy/local's Dockerfile has never worked, and why the fix is not obvious
 
-**date:** 2026-09-08 · **status:** OPEN — measured, not resolved · **reversible:** yes
+**date:** 2026-09-08 · **status:** RESOLVED — chosen fix built and verified · **reversible:** yes
 
 **context.** `C-014` claimed `deploy/local/Dockerfile` builds the engine image
 and its build-time test suite passes. `docker.yml` (added and rehearsed in
@@ -580,3 +580,31 @@ expected a system-library gap. The actual failure was architectural. Both
 right that something would fail — worth noting as its own small pattern:
 guessing the failure shape from a document written about a *different* image
 class (GPU, `omnex/flux:1`) was less reliable than it read at the time.
+
+**resolution.** Option 1 (widen the build context to the repository root) was
+chosen, not picked blind: checking first found 19 test files across `engine/`,
+`packs/`, `oss/` and `state/` using the `parents[2]` repo-root idiom — too
+broad and cross-cutting for option 2's "principled subset" to carve out
+without the exact risk `CLAUDE.md`'s own lab notes warn about, a test suite
+that quietly stops being run. `compose.yaml`'s `engine` service now builds
+with `context: ../..`; the whole repo copies in, `.dockerignore` keeps out
+`node_modules/` and `.next/` (519 MB and 17 MB, the two real weight
+offenders); runtime paths moved from `/app` to `/repo/engine` to match.
+`R-0009`'s dispatch (run `34277217838`) cut the failure from ~90 tests to
+~24, all one new, narrower cause: `python:3.12-slim` has no `git` binary, and
+`business_map.py`, `release_check.py`, `runs.py` and `state_map.py` all shell
+out to it. The first version of the new root `.dockerignore` had also
+excluded `.git/` itself on the reasoning that history is "never a build
+input" — wrong here, disproven by this exact failure, and corrected along
+with a `fetch-depth: 0` fix to `docker.yml`'s checkout (shallow history would
+have starved `business_map.py`'s day-count even with `git` installed and
+`.git/` present — `release.yml`'s own gate job already carries this fix for
+the same reason). `R-0010`'s dispatch (run `34277853648`) built clean: `git`
+installed, the full 1,230-test suite passed baked into the image in 15.4s,
+tagged `omnex-local-engine:latest` at 349,489,234 bytes (~333 MB — bigger
+than the Dockerfile's un-measured "~120 MB" comment, since the context is now
+the whole repository, not `engine/` alone, and that comment has been
+corrected rather than left stale). `C-014` is `SUPPORTED` (`E-014`). Three
+real, escalating-but-narrowing failures (90 → 24 → 0), each fixed on
+evidence from an actual dispatch rather than guessed in advance — the same
+discipline `R-0007`/`R-0008`'s wrong mechanism guesses argue for.

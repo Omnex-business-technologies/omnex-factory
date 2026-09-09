@@ -394,7 +394,7 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   recorded, which is not 0 earned" — never €0.00.** It reads the repository and
   cannot see Stripe, Supabase, Etsy or Lemon Squeezy, and says so in its own
   last section; printing an unobservable as zero is the mistake `3766976`
-  already paid for. Today: **day 41, 102 commits, 80 of 170 images through QC,
+  already paid for. Today: **day 41, 116 commits, 80 of 170 images through QC,
   0 listings live, 1 module enabled, no revenue log.**
 - `packs/build_pack.py` — QC-passed images → a file Etsy can deliver. Four
   ratios **cropped from the centre, never padded**: a background scene with bars
