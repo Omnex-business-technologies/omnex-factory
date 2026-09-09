@@ -679,3 +679,14 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   the session on real PR events, so the poll was redundant with a mechanism that
   costs nothing when nothing happens. Prefer the event; if a fallback is needed
   at all, make it daily.
+- **A merge can land before the next push does, twice in a row, on this
+  operator's cadence.** PR #8 was merged at its first green commit; a
+  follow-up fix pushed seconds later landed on the feature branch but never
+  reached `master`. Recovered by cherry-picking it back after restarting the
+  branch — and PR #9, opened for exactly that recovery, was merged at ITS
+  first green commit too, orphaning a second follow-up push the same way. The
+  fix each time was the same: after any merge notification, diff the file you
+  expect against what `origin/master` actually has before trusting the
+  restart — do not assume the last thing pushed is the thing that landed. If a
+  PR is likely to be merged fast, push everything intended for it in one shot
+  rather than iterating with pushes in between.
