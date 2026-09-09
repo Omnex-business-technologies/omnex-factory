@@ -6,8 +6,8 @@ every claim the other seventeen systems make about cost or latency is measured
 through this module rather than asserted.
 
 The whole layer runs in-process with no dependencies. OpenTelemetry and
-Prometheus are export adapters (`otel.py`), not the source of truth — so a test
-can assert on the exact spans and money a code path produced without a
+Prometheus are export adapters (`export.py`), not the source of truth — so a
+test can assert on the exact spans and money a code path produced without a
 collector, a scrape endpoint, or a container.
 """
 

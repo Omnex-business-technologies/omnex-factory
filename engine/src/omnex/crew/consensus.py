@@ -178,8 +178,10 @@ class Crew:
 
     The orchestration is a graph (see graph/runtime.py) so the budget ceilings,
     checkpointing and approval interrupts are the same ones every other system
-    here uses. CrewAI is an adapter for teams already committed to it; the
-    in-repo path is the default so this is testable without a framework.
+    here uses. Not a CrewAI adapter and does not claim to have one alongside it —
+    the `agents` extra installs crewai and langgraph, nothing here imports
+    either, and it is declared `unsupported` in `pyproject.toml` with that
+    reason, the same shape `graph/runtime.py` documents for LangGraph.
     """
 
     audit: object  # AuditTrail; loose to avoid an import cycle
