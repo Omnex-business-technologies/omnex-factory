@@ -13,3 +13,4 @@
 {"claim_id": "C-013", "claim": "release.yml publishes a GitHub Release carrying the attested artifacts", "type": "pipeline", "source": ".github/workflows/release.yml", "dependencies": ["C-005"]}
 {"claim_id": "C-014", "claim": "deploy/local/Dockerfile builds the engine image and its build-time test suite passes", "type": "pipeline", "source": "deploy/local/Dockerfile"}
 {"claim_id": "C-015", "claim": "GitHub CodeQL default setup is enabled on this repository", "type": "external", "source": ".github/workflows/codeql.yml (attempted, reverted)"}
+{"claim_id": "C-016", "claim": "astral-sh/setup-uv@v7.6.0 is a current major version", "type": "external", "source": ".github/workflows/engine.yml, release.yml, quality-gate.yml"}

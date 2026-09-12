@@ -212,11 +212,24 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
 - `engine/scripts/actions_pin_check.py` — **every `uses:` in every workflow
   pinned to a full commit SHA, never a version tag** (Phase 2: "pinned or
   controlled GitHub Actions"). A tag is the action's maintainer's to move; a
-  SHA is not. Resolving each tag found `actions/attest-build-provenance` and
-  `astral-sh/setup-uv` use *annotated* tags, where the bare tag's own SHA is
-  the tag object, not the commit it points to — pinning to that would have
-  shipped a `uses:` line that parses and does not resolve. **20 of 20**
-  currently pinned, each with a `# vX.Y.Z` comment for the next version bump.
+  SHA is not. Resolving each tag found `actions/attest-build-provenance`
+  (at `@v2`, before it was bumped) used an *annotated* tag, where the bare
+  tag's own SHA is the tag object, not the commit it points to — pinning to
+  that would have shipped a `uses:` line that parses and does not resolve.
+  **20 of 20** currently pinned, each with a `# vX.Y.Z` comment for the next
+  version bump. **A pin does not verify its own currency** — `actions_pin_
+  check.py` only proves a `uses:` line resolves to a real commit, never that
+  the commit is recent. `astral-sh/setup-uv` sat at `v7.6.0` (2026-03-16)
+  three major versions behind `v10.1.0`, found the same way `C-008` found
+  `attest-build-provenance@v2` two majors stale: cloning the action's own
+  public repository through this session's git proxy read lane and reading
+  its tags, not trusting the pin's age to be visible from inside this
+  repository. Recorded as **C-016** (`CONTRADICTED` via `E-016`) before
+  bumping — the same order C-008 was handled in, evidence first, fix
+  second. `v10.1.0`'s tag is lightweight (`git rev-parse` already gives the
+  commit; `v7.6.0`'s was annotated and needed `^{commit}`), so which
+  dereference a given tag needs is not something to assume from the last
+  action checked.
 - **CodeQL default setup is confirmed enabled** (`state/claims.jsonl` C-015,
   `SUPPORTED`) — not by reading the repository, which cannot see a GitHub
   *setting*, but by GitHub's own service refusing an advanced-setup workflow

@@ -2553,3 +2553,80 @@ anything").
 
 **reversible how.** One new test file, no production code changed.
 `git revert` removes it with no effect on `eval_gate.py` or `omnex.evals`.
+
+## D-034: a pin does not verify its own currency — astral-sh/setup-uv, three majors stale
+
+**context.** `actions_pin_check.py` proves every `uses:` line resolves to a
+full commit SHA. It has never claimed, and cannot claim, that the commit is
+*recent* — a SHA that never moves is exactly as valid a pin the day it is
+written as three years later, and nothing about the string itself says which.
+`C-008` already found this exact class of drift once (`attest-build-
+provenance@v2`, two majors stale) via the same technique: read the action's
+own public repository rather than trust anything visible from inside this
+one. Re-running that same technique against the other pinned action this
+repository actually depends on for its own build step (`astral-sh/setup-uv`,
+used in every workflow that runs Python) was the obvious next check nobody
+had repeated since.
+
+**what was found.** Cloning `astral-sh/setup-uv` through this session's git
+proxy public-repository read lane and reading its tags: the pin (`v7.6.0`,
+released 2026-03-16) is three major versions behind the current tag
+(`v10.1.0`). Read the intervening `action.yml` history rather than assuming
+compatibility: `enable-cache` and `cache-dependency-glob` — the two inputs
+every workflow here actually sets — are unchanged in both name and meaning
+at `v10.1.0`. The one behavioural change found (commit `f451684`, "disable
+automatic caching for sensitive events") only narrows what the `auto` default
+does on `pull_request_target`/`workflow_run`/`release`/tag-push events; every
+workflow here sets `enable-cache: true` explicitly, which that same commit's
+own description states is preserved as an override. `v10.1.0`'s tag is
+**lightweight** (`git cat-file -t` says `commit`, not `tag`) — the opposite
+shape from `v7.6.0`'s annotated tag, so `git rev-parse v10.1.0` already gives
+the pinnable commit with no `^{commit}` dereference needed. Assuming every
+tag needs the same handling as the last one checked would have been the
+mistake here; checking each one's actual type, again, is what Phase 2 already
+established as the discipline.
+
+**what was built.** Bumped all six `astral-sh/setup-uv` uses (two in
+`engine.yml`, three in `release.yml`, one in `quality-gate.yml`) to
+`@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0`. Recorded **C-016**
+("astral-sh/setup-uv@v7.6.0 is a current major version") with **E-016**
+(`network_probe`, `contradicts`, `reverify_after: 90`) *before* making the
+change — the same order C-008 was handled in: evidence lands in the ledger
+first, the fix follows it, so the record shows what was found and why rather
+than a fix with no trace of the finding that motivated it.
+
+**what was verified.** `actions_pin_check.py` still reports 20 of 20 pinned
+(the count does not change; only which commits six of them point to).
+`claims.py --check` shows C-016 `CONTRADICTED` (1 live evidence, 1 against),
+recomputed rather than typed. Full engine gate green: ruff/format/mypy, all
+invariants, `env_check.py`, `extras_check.py`, `release_check.py --target
+engine`, claims/runs/spine, `actions_pin_check.py`, `n8n_bindings_check.py`,
+`readme_check.py --check` (1,313, unchanged — no test added or removed),
+`capability_map.py --check`, `state_map.py --check`, `node_dossier.py` +
+diff, `apply_decisions.py --dry-run`, full `pytest tests/`, `mutate.py`
+(29/29 killed), `eval_gate.py`. The actual CI behaviour of `setup-uv@v10.1.0`
+on this repository's runners can only be confirmed once these workflows run
+for real on GitHub — read-and-reason verification of the action's own
+history, not a local execution, same boundary D-030's CodeQL rehearsal was
+explicit about. `release_check.py --target citegate` still fails on the
+same pre-existing, previously-documented git-remote reversion, unrelated.
+
+**what else was considered.** Checking every action pinned anywhere in the
+repository for staleness in one pass, building a standing script for it —
+deferred, not rejected: a script that re-derives "is this the latest tag"
+needs the same public-repo git-clone lane this round used by hand, and
+turning that into a repeatable, non-network-dependent CI check is a larger
+piece of work than this round's scope (the network read only works in this
+kind of sandboxed session with the proxy allowlist, not from a locked-down
+CI runner with no such lane). Bumping only `setup-uv` and leaving the other
+five actions unchecked this round rather than re-verifying all seven —
+accepted deliberately: the other six were already read in D-030 and D-033's
+adjacent rounds within the last few hours of repository time and nothing has
+tagged since; re-cloning six repositories to re-confirm a fact unlikely to
+have changed in that window is not a good use of the one external read this
+round needed.
+
+**reversible how.** Six one-line `uses:` changes plus one claim/evidence
+pair, additive only. `git revert` restores the old pin; the claim and
+evidence rows stay on file either way, since evidence is never deleted, only
+superseded.
