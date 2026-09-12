@@ -839,3 +839,77 @@ running the suite, not by inspection, which is the same lesson `D-013` and
 `D-014` already paid for about this file's own quoted figures: a status
 this file asserts is a claim with a date, and the check that catches it
 drifting is the test suite, not a second read.
+
+---
+
+## D-016 · What replaces C-001 and C-008's bug class, not just the instance
+
+**date:** 2026-09-12 · **status:** ACCEPTED · **reversible:** yes, a config file
+
+**context.** Closing `C-001` and `C-008` settles two instances. The operator
+asked the sharper question: what stops the same class of bug from coming
+back, and is there something more durable than a rejected row in a ledger.
+
+**C-001's class was already closed, before this session touched it.**
+`release_check.py::_check_floor` (built in `0c0d426`, the same commit that
+found the original bug) does three things on every push, for both targets:
+checks the declared `requires-python` floor against what the code's imports
+actually need (`required_floor`, an `ast` scan for version-gated stdlib —
+`enum.StrEnum` among them), imports on that floor's real interpreter when
+one is present on the runner, and — the part that matters here —
+`_floor_in_matrix` refuses if the CI job actually running the suite does
+not name that exact floor version in its matrix. Proven live rather than
+read and trusted: reverting `citegate`'s `requires-python` to the old
+`>=3.10` in memory and re-running `_check_floor` against the real,
+committed `engine.yml` job produces the exact refusal the original bug
+should have produced — *"requires-python is >=3.10 and the code needs 3.11
+(enum.StrEnum) — pip resolves, installs, and the first import raises."* The
+C-001 class cannot recur silently; it was never insufficiently guarded, it
+was guarded by something this investigation hadn't gone and read yet.
+
+**C-008's class had no guard, and now does.** Dependabot's *security*
+alerts are automatic for supported ecosystems with zero configuration —
+that is how the 13 npm advisories behind `D-014` surfaced with no
+`dependabot.yml` on file. A stale-but-not-vulnerable pin is invisible to
+that channel: `actions/attest-build-provenance@v2` carried no CVE, so
+nothing flagged it, and the only reason it was found at all was a manual
+`git clone` of the action's own public repository during the release
+rehearsal, reading tags by hand because `docs.github.com` is blocked at
+this environment's proxy. That is not a repeatable process, it is a thing
+that happened once because someone went looking.
+
+Added `.github/dependabot.yml`, `version: 2`, four `updates` entries
+matching every package manifest actually in the repository —
+`github-actions` (directory `/`, which GitHub resolves against every
+workflow regardless of where they live), `npm` (root), and `pip` for
+`engine/` and `oss/citegate/` separately, mirroring how `release_check.py
+--target` already treats them as two packages rather than one. Each groups
+minor/patch bumps into one weekly PR per ecosystem so this does not trade
+"nobody is watching" for "thirty PRs nobody reads"; a major bump still
+opens its own PR, since that is where a breaking change is most likely to
+hide. This does not re-detect the `@v2` staleness this session already
+fixed by hand — it means the next one, on any action in any workflow, or
+any dependency in any of the four manifests, surfaces as a PR instead of
+requiring someone to go looking again.
+
+**what else was considered.** Writing a bespoke checker (mirroring
+`_check_floor`'s shape) that clones each pinned action's repository and
+compares tags, run inside `release_check.py` or CI. Rejected: it would
+duplicate a mechanism GitHub already runs for exactly this ecosystem, cost
+a network call per pinned action on every push rather than a scheduled
+weekly check, and be one more piece of this repository's own code to keep
+correct — the same reasoning `extras_check.py` uses to prefer an honest
+`unsupported` over a decorative adapter nobody needed.
+
+**what was verified.** `.github/dependabot.yml` parses as the schema
+Dependabot expects (`yaml.safe_load`, checked structurally). It sits
+outside `.github/workflows/`, so `release_check.py`'s workflow scanner
+(`_workflow_text`, globbing `.github/workflows/*.yml` only) does not see it
+and none of its drift checks change. No test in the suite reads this file
+or `EXECUTION_DECISIONS.md`'s own content directly, so — unlike the
+`state/**` gap `D-012` found — there is no CI-coverage claim this addition
+could be silently outside of.
+
+**reversible how.** Deleting `.github/dependabot.yml` returns to today's
+state exactly; Dependabot's security-alert channel is unaffected either
+way, since that one needs no config file to begin with.
