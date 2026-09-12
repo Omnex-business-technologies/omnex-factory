@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const limit = checkRateLimit(req, 'stripe_checkout')
+  const limit = checkRateLimit(req, 'stripe_checkout', user.id)
   if (!limit.allowed) return NextResponse.json({ error: 'Too many attempts.' }, { status: 429 })
 
   const key = cleanKey(process.env.STRIPE_SECRET_KEY)

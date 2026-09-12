@@ -58,10 +58,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 89 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 94 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 89 TypeScript tests now run in CI; until recently, seven of them did.
+All 94 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -487,6 +487,25 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   of outcome), confirmed the fix resolves it, and fired 5 truly concurrent
   `psql` processes at one failed event to confirm exactly 1 wins the retry
   and 4 read `duplicate` — the property a mock cannot prove.
+- `lib/core/security/ratelimit.ts` — **keyed by the verified user, never by a
+  header alone, whenever one is available.** Every route this repository
+  wires to `checkRateLimit` (`studio_generate`, `studio_upload`,
+  `copilot_stream`, `stripe_checkout`) already authenticates the caller with
+  Supabase before checking the limit, but the check itself keyed purely on
+  `x-forwarded-for` / `x-real-ip` — headers the calling client sets on its
+  own request. An authenticated attacker who cannot forge a session can
+  trivially forge a header, so every one of those four limits was bypassable
+  by rotating a fresh spoofed IP on each call. `checkRateLimit` now takes an
+  optional `identity` that outranks the header entirely when passed; all four
+  call sites pass `user.id`. No test file existed for this module at all
+  before this round. Proven by sabotage: `lib/__tests__/ratelimit.test.ts`'s
+  bypass test — same user, a brand-new IP on every call — was confirmed to
+  fail against the header-only code before the fix was confirmed to pass it.
+  Deliberately does not claim `x-forwarded-for` is trustworthy on any
+  particular deployment platform (Vercel's edge or otherwise) for the two
+  configured limits (`email_send`, `auth`) nothing in this repository calls
+  yet — that claim is unverifiable from here and stays the header's fallback
+  behaviour, not something this fix asserts.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential

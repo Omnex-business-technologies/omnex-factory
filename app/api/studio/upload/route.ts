@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const limit = checkRateLimit(req, 'studio_upload')
+  const limit = checkRateLimit(req, 'studio_upload', user.id)
   if (!limit.allowed) return NextResponse.json({ error: 'Too many uploads. Try again shortly.' }, { status: 429 })
 
   let file: File | null = null

@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const limit = checkRateLimit(req, 'copilot_stream')
+  const limit = checkRateLimit(req, 'copilot_stream', user.id)
   if (!limit.allowed) {
     return NextResponse.json({ error: 'Too many runs started. Try again shortly.' }, { status: 429 })
   }

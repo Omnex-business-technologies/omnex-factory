@@ -3228,3 +3228,78 @@ raw insert/update, four new tests in an existing suite. `git revert` returns
 harmless and unreferenced if left in place, or a follow-up migration can
 drop them. Nothing downstream depends on the new outcomes beyond the one
 route that already calls them.
+
+## D-040: every wired rate limit was bypassable by an authenticated attacker rotating one header
+
+**context.** Continuing the truth pass into the money/security path after
+D-039, this round read `lib/core/security/ratelimit.ts` against §11 (MCP /
+Tool Security — "rate controls") and §22 (Adversarial Verification — the
+question is not "does it work" but "how would this fail under attack"). No
+test file existed for this module at all before this round, on the
+mechanism that is supposed to stop a single caller from hammering paid
+provider calls, storage uploads, streaming connections and Stripe checkout
+creation.
+
+**what was found.** `checkRateLimit()` derived its key entirely from
+`getClientId()`, which reads `x-forwarded-for` or `x-real-ip` — headers the
+calling client sets on the request it sends. Every route that actually
+calls `checkRateLimit` — `studio_generate`, `studio_upload`,
+`copilot_stream`, `stripe_checkout` — already authenticates the caller with
+Supabase (`supabase.auth.getUser()`) *before* the rate-limit check, so a
+verified, non-spoofable `user.id` was sitting one line above every single
+call and never used. An authenticated attacker who cannot forge a session
+can trivially forge a header: sending a fresh `x-forwarded-for` value on
+every request landed each call in its own IP-keyed sliding window, so the
+limit never engaged no matter how many requests the same authenticated
+account sent. This is exploitable regardless of any question about which
+deployment platform's edge does or does not sanitize that header for
+anonymous traffic — the identity that matters here (the authenticated user)
+was never consulted at all.
+
+**what was built.** `checkRateLimit(request, route, identity?)` gained a
+third, optional parameter. When passed, it is the key, full stop, and the
+header is never read — `const clientId = identity || getClientId(request)`.
+All four call sites now pass `user.id`. The module docstring states plainly
+what this fix does and does not claim: it does not assert that
+`x-forwarded-for` is trustworthy on any particular host for the two
+configured limits (`email_send`, `auth`) nothing in this repository calls
+yet — an unverifiable claim about a deployment platform's edge behaviour
+from an environment with no way to check it — only that every limit
+actually wired to a route now keys on an identity nothing but a valid
+session can produce.
+
+**what was verified.** `lib/__tests__/ratelimit.test.ts` — the first test
+file for this module — proves the exact bypass is closed: the same
+identity, a brand-new spoofed IP on every one of `MAX` calls, still hits
+the limit on call `MAX + 1`. Proven not decorative by sabotage, the
+established discipline this repository already applies elsewhere
+(`mutate.py`, `eval_gate.py`'s regression test, the copilot integration
+test's `spendCredits` sabotage): reverted `ratelimit.ts` to the
+header-only pre-fix version and confirmed 4 of 5 new tests fail, the bypass
+test among them, with the exact assertion this fix exists to make true —
+then restored the fix and confirmed all 5 pass again. Root gate green:
+`npm audit` (0 vulnerabilities), `tsc --noEmit`, `vitest run` (94 tests,
++5), `next build` (17 routes, clean).
+
+**what else was considered.** Fixing `getClientId()` itself — e.g.
+preferring the last comma-separated entry over the first, on the RFC 7239
+convention that intermediate proxies append their own observed peer address
+to the end of the chain — considered and rejected for this round: whether
+that convention holds depends on how many hops sit between a real client
+and this process, which is a property of the deployment topology (Vercel's
+edge vs. the self-hosted `DOCKER.md`/`compose.yaml` path this repository
+also documents), not something a general rewrite of the parsing order can
+get right for every topology at once, and asserting one platform's behavior
+as fact would be exactly the claim this decision explicitly declines to
+make elsewhere. Left as a named, honest gap rather than a rewrite that
+swaps one unverified trust assumption for another. Making `identity`
+required rather than optional — rejected: two configured limits have no
+route wired to them yet, and forcing every future caller to supply an
+identity forecloses ever adding a genuinely anonymous rate-limited route
+without a signature change.
+
+**reversible how.** One optional parameter added to an exported function,
+four call sites updated to pass it, one new test file, no schema or API
+surface change elsewhere. `git revert` returns to header-only keying — a
+regression in kind (the exact defect this closes), not a break, since
+nothing downstream depends on the parameter's presence.
