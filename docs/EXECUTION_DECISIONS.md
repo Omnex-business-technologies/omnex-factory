@@ -1128,3 +1128,89 @@ CI.
 returns to `vitest@4.1.11`, `@vitest/mocker@4.1.11`, `@types/node@^20`,
 `typescript@^5` exactly; `package-lock.json` regenerates identically from
 a clean `npm install` either direction.
+
+---
+
+## D-019 · Eight CodeQL alerts, read before either accepted or dismissed
+
+**date:** 2026-09-12 · **status:** ACCEPTED · **reversible:** yes, workflow config
+
+**context.** The operator pasted GitHub's own Security tab: three `High`
+"Clear-text logging of sensitive information" alerts and five `Medium`
+"Workflow does not contain permissions" alerts, all opened the same day.
+Copilot Autofix had already proposed a fix for the first one. Neither
+accepted nor dismissed anything without reading the flagged code first —
+a bot's severity label is not evidence, the same standard this repository
+already holds itself to for every other claim.
+
+**the three "clear-text logging" alerts are false positives, and the
+finding is the same shape three times.** `engine/scripts/runs.py:420`,
+`engine/scripts/env_check.py:160`, and
+`engine/src/omnex/pipeline/__main__.py:53`:
+
+- `runs.py`'s `--check` loop prints `f"{run.run_id}: carries {leak}"` where
+  `leak` comes from `looks_like_a_secret()`
+  (`omnex/factory/compile/bindings.py:74`). That function's own docstring
+  states the reason it returns a description rather than a boolean: `"this
+  file contains a secret" is not actionable and "line contains an inline
+  bearer token" is`. Read the five entries in `_SECRET_SHAPES` directly —
+  each pairs a fixed string ("an API key prefix", "an inline bearer
+  token", …) with a compiled pattern, and the function returns the fixed
+  string on a match. No `.group()` call anywhere. The worst that print
+  statement can ever emit is `carries an inline bearer token` — never the
+  token.
+- `env_check.py:160` prints `secrets = sum(1 for e in documented.values()
+  if e.get("secret"))` — a count of how many manifest entries are *marked*
+  secret, never a name or a value.
+- `pipeline/__main__.py:53` prints `SECRET_ENV` (the literal string
+  `"OMNEX_WEBHOOK_SECRET"`) inside the branch that only runs `if not
+  secret:` — the actual value is empty in every code path that reaches
+  this print, and the local variable holding it (`secret`) is never
+  referenced in the message at all.
+
+CodeQL's taint tracker most plausibly flags all three because a
+value *associated* with a secret — by name, by being a description of
+one, or by co-existing in the same function as a variable called `secret`
+— reaches a `print()`, without modeling that `looks_like_a_secret`'s
+return value is a closed set of five safe strings. **Not applying
+Copilot's proposed fix**: redacting `runs.py`'s output would actively
+undo the documented reason the function returns a description at all.
+Recommended to the operator: dismiss all three as false positive, with
+the `_SECRET_SHAPES` read above as the reason on file. This session has
+no tool that dismisses a GitHub code-scanning alert, so the dismissal
+itself is the operator's action.
+
+**the five "workflow does not contain permissions" alerts are real, and
+fixed.** `ci.yml`, `engine.yml`, `docker.yml` and `quality-gate.yml` had
+no top-level `permissions:` block at all — `release.yml` already does
+(`contents: read`, widened per-job only where a job actually reaches
+outside the repository), which is why `release.yml` was never flagged and
+is the pattern this fix mirrors exactly. Checked what every flagged job
+actually does before choosing a scope, rather than defaulting to a
+guess: `ci.yml`'s one job checks out, audits, type-checks, tests and
+builds; `engine.yml`'s two jobs (`check`, `citegate`) lint, type-check and
+test; `docker.yml`'s one job builds and inspects an image, never pushes
+it anywhere; `quality-gate.yml`'s one job runs the eval gate and uploads
+an artifact — `actions/upload-artifact` authenticates with its own
+runtime token, not the `permissions:` block, so this needs no write
+scope either. None of the four writes to the repository, comments on a
+PR, or reaches outside it. `contents: read` — the least a workflow can
+declare — is correct for all four, not a guess narrowed down from
+something broader.
+
+**what was verified.** All four edited files still parse as valid YAML
+with the new key read back correctly. `test_ci_contract.py` and
+`test_release_check.py` — the two suites that read these exact workflow
+files (`covers_changes()`, `jobs()`, `_uncommented()`, `ci_job_running()`)
+— stay green, confirming a new top-level `permissions:` key does not
+confuse either reader. Full engine gate re-verified: ruff check/format,
+invariant_map, state_map --check, full pytest all green — no Python
+source changed, so this was expected rather than newly discovered.
+
+**what else was considered.** Widening any job's permissions beyond
+`contents: read` "to be safe" — rejected; a permission nothing uses is
+exactly the shape this alert exists to catch, one level up.
+
+**reversible how.** Four one-line `permissions:` blocks; `git revert`
+removes them and returns each workflow to implicit default permissions,
+which is the state that was flagged in the first place.

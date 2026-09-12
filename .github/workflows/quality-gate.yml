@@ -28,6 +28,11 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
+# Read by default. The artifact upload below uses its own runtime token, not
+# this permission set, so contents: read is all this workflow needs.
+permissions:
+  contents: read
+
 concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true

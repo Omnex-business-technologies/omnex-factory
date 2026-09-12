@@ -28,6 +28,11 @@ name: Docker
 on:
   workflow_dispatch:
 
+# Read by default. The image is built and inspected, never pushed anywhere,
+# so nothing here needs to write.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build the engine image (deploy/local)
