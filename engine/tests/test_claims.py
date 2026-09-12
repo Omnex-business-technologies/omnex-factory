@@ -255,7 +255,7 @@ def test_the_committed_registry_records_what_is_not_known() -> None:
 @pytest.mark.parametrize(
     ("claim_id", "expected"),
     [
-        ("C-001", Status.CONTRADICTED),
+        ("C-001", Status.REJECTED),
         ("C-005", Status.SUPPORTED),
         ("C-013", Status.UNKNOWN),
         ("C-011", Status.UNKNOWN),
@@ -263,6 +263,15 @@ def test_the_committed_registry_records_what_is_not_known() -> None:
 )
 def test_the_findings_this_session_made_are_on_file(claim_id: str, expected: str) -> None:
     """C-001: citegate did not import on 3.10, proven by running it.
+
+    That evidence (E-001) is still on file and still CONTRADICTS — 3.10 was
+    never going to import, on purpose. What changed is the promise it was
+    checking: `oss/citegate/pyproject.toml` raised its floor to `>=3.11` in
+    `0c0d426`, so the claim, as worded, can never become true again by any
+    further code change. D-015 names that distinction and why more evidence
+    would be noise; a person (not this test, not a script) rejected the claim
+    with a name and a date, which is the only way `status()` lets a claim this
+    permanently false stop reading as an open problem.
 
     C-005 read UNKNOWN here for as long as `release.yml` had never run. Run
     34237298583 — dispatched, not tagged — ran the gate, built the artifacts and

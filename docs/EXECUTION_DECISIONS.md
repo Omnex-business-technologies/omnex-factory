@@ -822,3 +822,20 @@ undoes it with no behavioral change either direction. The `claims.jsonl`
 edit this entry asks for is additive (two fields on an existing row) and
 `claims.py`'s own rule — a rejection keeps what it overturned — means even a
 mistaken reject is legible and correctable later, never a silent overwrite.
+
+**closed, 2026-09-12.** Ronaldo Čudina reviewed both findings and accepted
+the resolution above. `rejected_by: "Ronaldo Čudina"` and
+`rejected_on: "2026-09-12"` are now on the `C-001` and `C-008` rows in
+`state/claims.jsonl` — a real name, not a machine-shaped one, exactly what
+`apply_decisions.py`'s rule for `nodes.json` would have required if
+`claims.jsonl` had the same script enforcing it. `claims.py --check`
+recomputes both as `REJECTED`, which outranks the live contradicting
+evidence per `status()`'s own documented order; `E-001` and `E-011` stay on
+file untouched, because a rejection is not a deletion. `R-0014` records the
+edit and its verification. One knock-on: `tests/test_claims.py`'s
+`test_the_findings_this_session_made_are_on_file` hard-coded `C-001` to
+`Status.CONTRADICTED` and had to be updated to `Status.REJECTED` — found by
+running the suite, not by inspection, which is the same lesson `D-013` and
+`D-014` already paid for about this file's own quoted figures: a status
+this file asserts is a claim with a date, and the check that catches it
+drifting is the test suite, not a second read.
