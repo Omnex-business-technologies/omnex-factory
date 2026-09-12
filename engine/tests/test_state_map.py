@@ -257,3 +257,19 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
     distribution = " ".join(str(e) for e in gates["10_distribution"]["evidence"])
     assert "release_check.py present: True" in distribution
     assert "release.yml present: True" in distribution
+
+    implementation = " ".join(str(e) for e in gates["3_implementation"]["evidence"])
+    assert "capability registry" in implementation
+    assert "E4_INTEGRATED" in implementation or "E3_TESTED" in implementation
+
+
+def test_gate_3_never_claims_more_capabilities_than_the_registry_holds() -> None:
+    """Gate 3 used to say 'no capability registry' as a literal. Once one
+    exists, the gate must move WITH it, not past it -- claiming coverage the
+    registry itself does not carry would be the same defect one level up."""
+    import capability_map
+
+    state = state_map.derive()
+    gate_evidence = " ".join(str(e) for e in state["gates"]["3_implementation"]["evidence"])
+    real_total = capability_map.summarise(capability_map.derive_all())["total"]
+    assert str(real_total) in gate_evidence
