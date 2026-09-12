@@ -1,24 +1,27 @@
 /**
- * The rate limiter, and the bypass this file exists to close.
+ * The rate limiter, and the two bypasses this file exists to close.
  *
  * Every route that actually calls `checkRateLimit` — studio_generate,
- * studio_upload, copilot_stream, stripe_checkout — authenticates the caller
- * with Supabase first, so a verified, non-spoofable user id is sitting one
- * line above the call. `checkRateLimit` used to ignore it and key purely on
- * `x-forwarded-for` / `x-real-ip`, headers the calling client sets on its own
- * request. An authenticated attacker who cannot forge a session can trivially
- * forge a header, so the limit was bypassable by anyone willing to send a
- * fresh `x-forwarded-for` value on every request — no test caught this
- * because no test for this module existed at all.
+ * studio_upload, copilot_stream, stripe_checkout, stripe_portal —
+ * authenticates the caller with Supabase first, so a verified, non-spoofable
+ * user id is sitting one line above the call. `checkRateLimit` used to
+ * ignore it and key purely on `x-forwarded-for` / `x-real-ip`, headers the
+ * calling client sets on its own request. An authenticated attacker who
+ * cannot forge a session can trivially forge a header, so the limit was
+ * bypassable by anyone willing to send a fresh `x-forwarded-for` value on
+ * every request. Separately, any request carrying a leaked `CRON_SECRET`
+ * bearer token used to exempt itself from every limit at once, for a
+ * scheduled-job caller that does not exist anywhere in this repository. No
+ * test caught either shape because no test for this module existed at all.
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@/lib/core/security/ratelimit'
 
-function request(ip: string): NextRequest {
+function request(ip: string, extraHeaders?: Record<string, string>): NextRequest {
   return new NextRequest('http://localhost/api/studio/generate', {
     method: 'POST',
-    headers: { 'x-forwarded-for': ip },
+    headers: { 'x-forwarded-for': ip, ...extraHeaders },
   })
 }
 
@@ -98,5 +101,38 @@ describe('checkRateLimit', () => {
     expect(headers['Retry-After']).toBeDefined()
     expect(Number(headers['Retry-After'])).toBeGreaterThan(0)
     expect(headers['X-RateLimit-Remaining']).toBe('0')
+  })
+
+  it('a valid CRON_SECRET bearer token no longer exempts a caller from its limit', () => {
+    // Reproduces the removed bypass with the actual condition it needed: an
+    // Authorization header matching the REAL configured CRON_SECRET, exactly
+    // what a leak would hand an attacker. The old code checked this before
+    // touching the sliding window at all, so setting the env var here and
+    // sending the matching header is the only way to exercise (and prove
+    // closed) the real vulnerable path, not just an unrelated header.
+    const secret = 'test-cron-secret-value'
+    const previous = process.env.CRON_SECRET
+    process.env.CRON_SECRET = secret
+    try {
+      const user = `user-cron-${n}`
+      const headers = { authorization: `Bearer ${secret}` }
+      for (let i = 0; i < MAX; i++) {
+        const result = checkRateLimit(request(`10.5.${n}.${i}`, headers), 'studio_generate', user)
+        expect(result.allowed).toBe(true)
+      }
+      const blocked = checkRateLimit(request(`10.5.${n}.over`, headers), 'studio_generate', user)
+      expect(blocked.allowed).toBe(false)
+    } finally {
+      process.env.CRON_SECRET = previous
+    }
+  })
+
+  it('stripe_portal is rate-limited the same way stripe_checkout already is', () => {
+    const user = `user-portal-${n}`
+    const portalMax = 10 // see RATE_LIMITS['stripe_portal']
+    for (let i = 0; i < portalMax; i++) {
+      expect(checkRateLimit(request(`10.6.${n}.${i}`), 'stripe_portal', user).allowed).toBe(true)
+    }
+    expect(checkRateLimit(request(`10.6.${n}.over`), 'stripe_portal', user).allowed).toBe(false)
   })
 })

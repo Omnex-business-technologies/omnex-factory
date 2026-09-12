@@ -3303,3 +3303,104 @@ four call sites updated to pass it, one new test file, no schema or API
 surface change elsewhere. `git revert` returns to header-only keying — a
 regression in kind (the exact defect this closes), not a break, since
 nothing downstream depends on the parameter's presence.
+
+## D-041: a second bypass sitting right next to the first — an exemption for a caller that does not exist
+
+**context.** Same file, same round as D-040, continuing straight through
+rather than stopping at the first finding: `ratelimit.ts` still carried
+`isCronAuthorized(request)` as an unconditional exemption at the top of
+`checkRateLimit`, checked *before* the identity-keying fix even runs. The
+module's own comments had already named the shape of this problem once —
+`RATE_LIMITS`' docstring calls itself "the inherited list [naming] routes
+that do not exist here" (`email_send`, `auth`) — without anyone asking
+whether the cron exemption sitting a few lines below was inherited the
+same way and equally unmoored from anything this repository actually runs.
+
+**what was found.** Grepping for every caller of `isCronAuthorized`,
+`isCronKeyValid` and `cronSecret` across `app/` and `lib/` found exactly
+one: the exemption inside `checkRateLimit` itself. No route under
+`app/api/cron/*` exists. No `vercel.json` exists at all, so no `crons`
+entry can be scheduling anything. `deploy/env.json`'s own `why` field for
+`CRON_SECRET` states "every scheduled job is rejected [when unset], so
+nothing scheduled ever runs" — a claim about scheduled jobs that, checked
+against the actual routes in this repository, describes a feature that has
+never been built. The exemption's only realized effect in the codebase as
+it stands is a full bypass of every rate limit `checkRateLimit` enforces:
+any request carrying a valid `CRON_SECRET` bearer token — including one
+obtained through a leak, since this is exactly the class of secret that
+ends up in a log line or a support ticket — gets unlimited calls to
+`studio_generate`, `studio_upload`, `copilot_stream` and `stripe_checkout`,
+undoing D-040's identity-keying fix in the same breath for whoever holds
+it. A structural feature with a real, named leak scenario and zero present
+legitimate callers is pure downside, not forward-looking infrastructure
+worth keeping "just in case."
+
+**what was built.** The `isCronAuthorized` import and the exemption branch
+removed outright from `checkRateLimit`. The module docstring gained a
+section stating plainly what was removed and why, and the standing rule
+for anyone tempted to re-add it: if a genuine scheduled job needs to call
+one of these routes without the normal per-user limit, that is a reason to
+build the cron route and exempt *it* specifically, never to leave a
+blanket exemption in front of every customer-facing route on the chance it
+is useful someday — the same "controlled autonomy over autonomy" preference
+§38 of the Sovereign Execution Standard states directly. `lib/core/
+cron-auth.ts` itself was left in place, deliberately: its `CRON_SECRET`
+manifest entry is still justified by `env_check.py`'s own bidirectional
+scan (the env var is genuinely read, just not consumed by anything wired to
+a route today), and removing forward-looking auth infrastructure that
+might back a real future cron route is a materially bigger, more
+speculative call than removing a proven-dangerous exemption with zero
+current callers — the two are not the same decision and this round only
+made the second one.
+
+A smaller, related gap closed in the same pass: `app/api/stripe/portal/
+route.ts` had no rate limit at all, unlike its sibling `stripe_checkout`,
+despite authenticating the same way and calling the same external paid
+API. Nothing documented why the two routes were treated differently — the
+likeliest explanation is that `checkRateLimit` predates one of the two
+routes and nobody circled back. Added a `stripe_portal` config entry and
+wired it the same way as every other route this round touches.
+
+**what was verified.** `lib/__tests__/ratelimit.test.ts` gained a test
+that sets the REAL `process.env.CRON_SECRET` (not a plausible-looking but
+wrong header, which the old code would have rejected too and proven
+nothing) and sends a matching `Authorization: Bearer` header — the exact
+condition the old code needed to exempt a caller — then asserts the
+request is rate-limited exactly like any other. **Sabotage-verified**, the
+same discipline every fix this round and the last three rounds have used:
+temporarily restored the removed exemption code, ran the suite, and
+confirmed this one test failed with `expected true to be false` —
+`checkRateLimit` reporting the ninth request `allowed` when it should have
+been refused — while the other six tests in the file stayed green (proof
+the sabotage was narrowly targeted, not a broken test harness). Restored
+the fix and confirmed all seven tests pass. Root gate green after both
+fixes: `npm audit` (0 vulnerabilities), `tsc --noEmit`, `vitest run` (96
+tests, +2), `next build` (17 routes, clean). `env_check.py` re-run and
+confirmed `CRON_SECRET`'s manifest entry still agrees in both directions
+(the variable is still genuinely read in `cron-auth.ts`).
+
+**what else was considered.** Deleting `cron-auth.ts` and its `CRON_SECRET`
+manifest entry entirely, since removing the one call site leaves the whole
+module without an importer — rejected as a larger, more opinionated
+architectural decision than this round's finding calls for: `deploy/
+env.json`'s `why` field reads as intentional pre-provisioning for a
+scheduled-job feature that has not been built yet, not as an already-dead
+claim nobody would miss, and treating "nothing calls this today" as
+license to delete forward-looking security infrastructure is a different
+kind of judgment than removing a proven-dangerous exemption with a
+documented leak scenario. A follow-up round that decides to actually build
+a cron route, or decides this infrastructure should go, can make that call
+on its own evidence. Adding a rate limit to `app/api/leads` (a public,
+unauthenticated endpoint with no protection at all) — considered and left
+out of this round: it has no verified identity to key on, so any limit
+would fall back to the same `x-forwarded-for` trust question D-040 already
+declined to resolve generally, and bolting on a limit that provides no
+real protection would be decorative rather than a fix.
+
+**reversible how.** One import and one exemption branch removed from an
+existing function, one new config entry (`stripe_portal`) added to an
+existing map, one route file gaining a rate-limit check identical in shape
+to four already in the codebase, two new tests. `git revert` restores the
+exemption exactly as it was — a regression in kind (the exact defect this
+closes), not a break, since nothing in this repository currently depends
+on the exemption existing.
