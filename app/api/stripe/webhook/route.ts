@@ -3,10 +3,19 @@
  *
  * Two properties matter more than anything else here:
  *
- * 1. IDEMPOTENCY. Stripe retries deliveries, and a double-processed renewal
- *    would hand out free credits forever. Every event id is inserted into
- *    `webhook_events` first; a primary-key conflict means "already handled" and
- *    the handler returns 200 without granting anything.
+ * 1. IDEMPOTENCY THAT SURVIVES A FAILED FIRST ATTEMPT. Every event id is
+ *    claimed via `claim_webhook_event` (migration 003) before processing.
+ *    "Already claimed" is not the same as "already succeeded": Stripe retries
+ *    on any non-2xx response, and a first attempt can fail after claiming the
+ *    row (a transient DB error, a timeout). Treating that retry as a
+ *    duplicate would silently and permanently drop a paid customer's
+ *    credits — the handler used to do exactly that, closed only once this
+ *    distinction existed. `claim_webhook_event` returns 'new' (process),
+ *    'retry' (a prior attempt at this exact event failed; process again) or
+ *    'duplicate' (already succeeded, or another request currently owns it;
+ *    do nothing) — the atomicity of that three-way decision lives in the
+ *    database, not here, so two concurrent retries of the same failed event
+ *    cannot both win.
  *
  * 2. SIGNATURE VERIFICATION on the RAW body. Parsing before verifying would let
  *    anyone mint credits by POSTing JSON.
@@ -59,12 +68,15 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
 
-  // Idempotency gate — insert first, act only if this id was new.
-  const { error: dupe } = await admin.from('webhook_events').insert({ id: event.id, type: event.type })
-  if (dupe) {
-    if (dupe.code === '23505') return NextResponse.json({ received: true, duplicate: true })
-    return NextResponse.json({ error: 'Could not record event' }, { status: 500 })
-  }
+  // Idempotency gate — 'new' or 'retry' proceed to processing below;
+  // 'duplicate' means this exact event already succeeded (or is being
+  // handled by a concurrent request right now) and must not run again.
+  const { data: claim, error: claimErr } = await admin.rpc('claim_webhook_event', {
+    p_id: event.id,
+    p_type: event.type,
+  })
+  if (claimErr) return NextResponse.json({ error: 'Could not record event' }, { status: 500 })
+  if (claim === 'duplicate') return NextResponse.json({ received: true, duplicate: true })
 
   try {
     switch (event.type) {
@@ -92,9 +104,10 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ received: true })
   } catch (e) {
-    // Returning 500 asks Stripe to retry; the idempotency row already exists, so
-    // record the failure rather than silently swallowing money-affecting errors.
-    await admin.from('webhook_events').update({ type: `${event.type}:failed` }).eq('id', event.id)
+    // Returning 500 asks Stripe to retry. Marking the row failed (rather than
+    // leaving it claimed) is what makes that retry actually reach the switch
+    // above instead of being turned away as a duplicate next time.
+    await admin.rpc('mark_webhook_event_failed', { p_id: event.id, p_type: event.type })
     return NextResponse.json({ error: e instanceof Error ? e.message.slice(0, 200) : 'handler failed' }, { status: 500 })
   }
 }

@@ -58,10 +58,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 85 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 89 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 85 TypeScript tests now run in CI; until recently, seven of them did.
+All 89 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -468,6 +468,25 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly all run as real production code. Proven not vacuous by sabotage:
   commenting out the route's `spendCredits` call was confirmed to fail the
   test before the fix was confirmed to pass it.
+- `app/api/stripe/webhook/route.ts` + `supabase/migrations/003_webhook_retry.
+  sql` — **idempotency that survives a failed first attempt.** Migration 001's
+  gate inserted the event id and treated any primary-key conflict as "already
+  handled" — correct for a genuine duplicate delivery, wrong for Stripe's own
+  retry of an event whose first attempt claimed the row and then failed (a
+  transient DB error, a timeout): the retry hit the same conflict and was
+  silently swallowed, so a customer who paid could never receive credits and
+  Stripe stopped retrying because the handler answered 200. `claim_webhook_
+  event()` returns three outcomes instead of one boolean — `new`, `retry` (a
+  prior attempt at this exact event failed) or `duplicate` — with the
+  three-way decision made inside one PL/pgSQL function so the atomicity is a
+  database property, the same reasoning `consume_credits`' row lock already
+  uses. Verified against a real local PostgreSQL 16 (this sandbox has no
+  Docker daemon, so the committed `credits.db.test.ts` suite — which spins up
+  its own container — could not run here): reproduced the original bug
+  directly (a failed-and-retried event id reads as an existing row regardless
+  of outcome), confirmed the fix resolves it, and fired 5 truly concurrent
+  `psql` processes at one failed event to confirm exactly 1 wins the retry
+  and 4 read `duplicate` — the property a mock cannot prove.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential
