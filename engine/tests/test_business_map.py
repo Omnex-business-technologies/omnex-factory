@@ -202,7 +202,9 @@ def test_the_document_names_what_it_cannot_see() -> None:
 
 
 # ── --check: masked for elapsed time, not for anything else ───────────────
-def test_stable_text_ignores_elapsed_time_and_commit_counts() -> None:
+def test_stable_text_ignores_elapsed_time_and_commit_counts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """The property `--check` depends on: two renders of the same underlying
     facts on two different days must compare equal once the elapsed-time line
     is masked out, or `--check` would be red on every calendar day nothing
@@ -210,7 +212,28 @@ def test_stable_text_ignores_elapsed_time_and_commit_counts() -> None:
     names as a mistake, and the same trap `mutation_probe.json`'s
     `source_commit` fell into on a `pull_request` CI run before it was
     removed. Asserted against real renders, not the regex in isolation, so a
-    change to `_elapsed()`'s wording that broke the mask would show here."""
+    change to `_elapsed()`'s wording that broke the mask would show here.
+
+    Forces a non-shallow git state rather than reading the real checkout:
+    this test's first version passed on this machine's full clone and then
+    failed on every CI leg, because `engine.yml`'s checkout is shallow
+    (depth 1, `Age`'s own docstring names exactly this hazard) -- `age()`
+    takes the shallow-refusal branch there regardless of `today`, so both
+    renders produced the identical string and `early != later` was false
+    before either side of the property under test ever ran. Forcing the
+    non-shallow branch makes the property checked on every checkout depth,
+    not skipped on the one (CI's) where a regression here matters most.
+    """
+    real = business_map._git
+
+    def not_shallow(*args: str) -> str:
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "false"
+        if args[:2] == ("log", "--reverse"):
+            return "2026-07-29"
+        return real(*args)
+
+    monkeypatch.setattr(business_map, "_git", not_shallow)
     early = business_map.render(datetime(2026, 8, 1, tzinfo=UTC))
     later = business_map.render(datetime(2026, 9, 12, tzinfo=UTC))
     assert early != later, "the premise is stale -- the two renders already agree"
