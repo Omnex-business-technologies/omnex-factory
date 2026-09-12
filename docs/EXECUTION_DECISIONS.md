@@ -3128,3 +3128,103 @@ in the same change, no new file, no schema or API surface change outside
 returns to provider-only pricing — a regression in kind (the exact defect
 this closes), not a break, since nothing downstream depends on the new
 parameter's presence beyond the two files that already call the function.
+
+## D-039: the Stripe webhook could not tell a duplicate delivery from a retry of a failure — a paid customer could lose their credits silently
+
+**context.** Continuing the truth pass into the money path after D-038,
+this round read `app/api/stripe/webhook/route.ts` — "the only place credits
+are granted for money," per its own docstring — against §9 (Credit /
+Billing Integrity) and §22 (Adversarial Verification) of the Sovereign
+Execution Standard: not "does it work" but "how would this fail under a
+retry, a partial failure, a race." No test file existed for this route at
+all before this round — an E1/E2 capability (code-present, declared) with
+no E3 (tested) evidence, on the one route that moves real money.
+
+**what was found.** The idempotency gate inserted `event.id` into
+`webhook_events` and treated any primary-key conflict as "already handled."
+That is correct for a genuine duplicate delivery. It is wrong for the other
+case migration 001's own comment names but does not handle: a webhook that
+claims its row and then fails mid-processing (a transient Supabase outage,
+a timeout, anything after the insert) leaves that row behind with no
+distinguishing mark. Stripe retries on any non-2xx response — the handler's
+own catch block returns 500 specifically to trigger that retry — but the
+retry's insert hits the identical conflict and is silently answered
+`{received: true, duplicate: true}`. The customer paid, `grantCredits` never
+ran, and Stripe stops retrying because the handler just told it the delivery
+succeeded. Reproduced directly against a real Postgres before writing any
+fix: inserted a row, marked it `:failed` (exactly what the catch block
+does), then confirmed the old check (`exists(select 1 from webhook_events
+where id = ...)`) reads `true` regardless of whether the prior attempt
+succeeded or failed — the two states this repository's own `webhook_events`
+schema records are indistinguishable to the code that reads it.
+
+**what was built.** Migration 003 adds `claim_webhook_event(id, type)`,
+returning `'new'` (never seen), `'retry'` (a prior attempt at this exact
+event failed) or `'duplicate'` (already succeeded, or another request
+currently owns it) — three outcomes where the route previously had one
+boolean. The insert-then-conditional-update happens inside a single
+PL/pgSQL function (`insert` in the main body, `unique_violation` caught,
+then an `update ... where id = p_id and type = p_type || ':failed'`), so
+the atomicity is a database property rather than an application-level
+check-then-act — the identical reasoning `consume_credits`' `FOR UPDATE`
+row lock already uses one function up in the same migration file, applied
+here to a conditional `UPDATE`'s implicit row lock instead. A companion
+`mark_webhook_event_failed(id, type)` replaces the route's raw `update`.
+`route.ts` now branches on the RPC's three outcomes: `'duplicate'` returns
+early exactly as before; `'new'` and `'retry'` both proceed into the
+existing `switch` unchanged.
+
+**what was verified.** This sandbox has no Docker daemon, so the committed
+`credits.db.test.ts` suite — which starts its own disposable Postgres
+container via testcontainers, the established pattern for anything whose
+correctness IS a database constraint or lock — could not run here; its own
+docstring states plainly why a mock cannot substitute (`consume_credits`'
+row lock, and now `claim_webhook_event`'s, are database properties, not
+application logic a fake client could reproduce). Four new tests were added
+to that suite in the same style (new / duplicate / retry / concurrent
+retry), which CI's real Postgres container will run — but "will run in CI"
+is not "was verified now." Rather than stop at that limitation, a real
+local PostgreSQL 16 turned out to be installed in this environment (`psql`,
+`pg_ctlcluster` present via `postgresql-16`, independent of Docker): started
+it, applied the same sanitized migration 001 the test harness applies plus
+the new migration 003, and ran the exact scenarios directly. Confirmed, in
+order: a never-seen event returns `'new'`; a second claim of a
+never-marked-failed event returns `'duplicate'`; a claim marked `:failed`
+and reclaimed returns `'retry'` and resets the row so a THIRD claim
+correctly reads `'duplicate'` again; and — the property no sequential test
+can establish — five genuinely concurrent OS processes (`psql &` five times,
+`wait`) claiming the same failed event returned exactly one `'retry'` and
+four `'duplicate'`, proving the row-lock atomicity holds under real
+concurrency, not simulated sequencing. The original bug was reproduced on
+the same database before any fix existed, confirming the finding was real
+and not a misreading of the code. Root gate green after the fix: `npm audit`
+(0 vulnerabilities), `tsc --noEmit`, `vitest run` (89 tests, +4 — all
+passing, the four new ones a graceful no-op here exactly like the existing
+suite's own Docker-unavailable path, per its established convention), `next
+build` (17 routes, clean).
+
+**what else was considered.** Flipping to "insert after successful
+processing" instead of "insert before, retry on failure" — rejected: that
+reopens the exact race `webhook_events`' insert-first design was built to
+close (migration 001's own comment: "so two concurrent requests can never
+double-spend the same credits"). Two truly concurrent deliveries of a
+not-yet-failed event would both pass a check-then-insert gate and could
+both grant credits. Handling this at the application level (read the row,
+branch on its `type` in TypeScript, then conditionally update) — rejected
+for the same reason a TypeScript-level fix was rejected for
+`consume_credits` originally: the three-way decision needs to be atomic
+across concurrent requests, and that atomicity is a single-statement
+database property, not something two round-trips from Node can guarantee
+without introducing a second lock of its own. Writing a NEW test file with
+its own container instead of extending `credits.db.test.ts`'s — rejected:
+both exercise tables from the same migration, and a second 240-second image
+pull in CI for schema this size is cost with no isolation benefit gained.
+
+**reversible how.** One new migration file (`003_webhook_retry.sql`,
+additive — matches the existing `001`/`002` numbering convention, neither
+edited in place), one route file changed to call two new RPCs instead of a
+raw insert/update, four new tests in an existing suite. `git revert` returns
+`route.ts` to the raw insert/update pattern; the two new SQL functions stay
+harmless and unreferenced if left in place, or a follow-up migration can
+drop them. Nothing downstream depends on the new outcomes beyond the one
+route that already calls them.
