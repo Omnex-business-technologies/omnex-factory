@@ -2,6 +2,29 @@
  * BATCH J — Sovereign Rate Limiter
  * Sliding window rate limiter. Per-route limits.
  * Returns Retry-After header on 429. Exempts CRON_SECRET requests.
+ *
+ * ## Identity: prefer the verified user id, never trust the header alone
+ *
+ * `getClientId()` reads `x-forwarded-for` / `x-real-ip` — headers a client
+ * sets on the request it sends. Whether the value a route ends up seeing is
+ * trustworthy depends entirely on what sits in front of this process: a
+ * platform edge that overwrites the header before forwarding makes it safe,
+ * a bare reverse proxy that blindly forwards it does not, and this codebase
+ * documents more than one deployment shape (`DOCKER.md` + `compose.yaml`,
+ * a self-hosted target with no such edge). Every route this repository
+ * actually wires to `checkRateLimit` — `studio_generate`, `studio_upload`,
+ * `copilot_stream`, `stripe_checkout` — already authenticates the caller
+ * with Supabase before checking the limit, so all four had a non-spoofable
+ * identity sitting unused one line above the call. `checkRateLimit`'s
+ * optional `identity` parameter is that user id: when passed, it is the key,
+ * full stop, and the header is never consulted — an attacker who cannot
+ * forge a verified session cannot rotate their way around their own limit
+ * by rewriting a header on every request. `getClientId()` remains the
+ * fallback for the two configured routes (`email_send`, `auth`) nothing in
+ * this repository calls yet, and inherits whatever trust the deployment
+ * platform actually provides for it — a claim this file makes about itself,
+ * not about Vercel's or any other host's edge, which this environment
+ * cannot verify from here.
  */
 import { NextRequest } from 'next/server'
 import { isCronAuthorized } from '@/lib/core/cron-auth'
@@ -54,6 +77,9 @@ function getClientId(request: NextRequest): string {
 export function checkRateLimit(
   request: NextRequest,
   route: RateLimitRoute,
+  /** The verified caller, when the route has one — see the module docstring
+   * on why this outranks any header-derived id whenever it is available. */
+  identity?: string,
 ): RateLimitResult {
   // CRON_SECRET requests are exempt. Strict check via cron-auth (no hardcoded
   // fallback — the old default string is public in git history, so accepting it
@@ -63,7 +89,7 @@ export function checkRateLimit(
   }
 
   const config  = RATE_LIMITS[route]
-  const clientId = getClientId(request)
+  const clientId = identity || getClientId(request)
   const key      = `${config.keyPrefix}:${clientId}`
   const now      = Date.now()
   const windowStart = now - config.windowMs
