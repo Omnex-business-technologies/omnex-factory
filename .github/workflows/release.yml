@@ -126,11 +126,41 @@ jobs:
         # live listing nobody can read, discovered after publishing.
         run: uvx twine check --strict dist/*
 
+      - name: Generate the SBOM, and read it back
+        working-directory: oss/citegate
+        # A CLEAN venv with only the package itself installed — never the venv
+        # running cyclonedx-py. That was tried first, locally, before this step
+        # existed: scanning cyclonedx-bom's own venv reported its ~30 transitive
+        # dependencies (lxml, jsonschema, packageurl-python...) as if they were
+        # citegate's own runtime dependencies, which would have described this
+        # dependency-free package as depending on a JSON schema validator.
+        # `uvx --from cyclonedx-bom` runs the tool from an isolated location and
+        # points it at the CLEAN venv's interpreter instead, so only what is
+        # actually installed there is described.
+        #
+        # The clean venv's own Python (3.11+, from `uv venv`'s default) runs
+        # `sbom_check.py` too, right before it is deleted: that script has zero
+        # third-party dependencies, so it needs nothing this job set up beyond
+        # `uv`'s own managed interpreter, and generating a file nothing reads
+        # back is the exact "a signed artifact is not automatic production
+        # security" trap the operator's standard names directly.
+        run: |
+          uv venv .sbom-venv
+          uv pip install --python .sbom-venv .
+          uvx --from cyclonedx-bom cyclonedx-py environment \
+            --pyproject pyproject.toml --of JSON -o dist/citegate.cdx.json \
+            .sbom-venv/bin/python3
+          .sbom-venv/bin/python3 ../../engine/scripts/sbom_check.py \
+            dist/citegate.cdx.json pyproject.toml
+          rm -rf .sbom-venv
+
       - name: Attest what built these
         # Signed provenance tying each artifact to this commit, this workflow and
         # this run, verifiable by anyone with `gh attestation verify`. That is
         # what §3.1 asked for: provenance somebody else can check, rather than a
-        # file in which we describe ourselves.
+        # file in which we describe ourselves. Runs after SBOM generation, so
+        # `dist/*` also covers `citegate.cdx.json` — the SBOM itself is attested,
+        # not just the wheel and sdist.
         #
         # `docs.github.com` is 403 at this environment's egress proxy, so this
         # pin could not be checked against GitHub's documentation — but the
