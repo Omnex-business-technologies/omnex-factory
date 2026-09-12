@@ -2914,3 +2914,110 @@ from the set `test_ci_runs_every_gate_script_the_document_names` and its
 mirror check. `git revert` restores the two literal sentences exactly as
 they were — a regression in kind, not a break, since nothing downstream
 depends on the new `business` fact block existing.
+
+## D-037: BUSINESS.md's freshness gap, closed the way D-036 said it should be
+
+**context.** D-036 diagnosed a real gap and deliberately did not fix it in
+the same round: `BUSINESS.md` is the one derived-and-committed document in
+this repository that nothing regenerates or diffs anywhere — unlike
+`DECISIONS.md`, `CAPABILITIES.md`, `INVARIANTS.md`, `execution_state.json`
+and `mutation_probe.json`, all five of which fail CI when they disagree
+with a fresh run. Measured directly at the time: 11 commits stale (`195`
+committed vs `206` live), moving to `208` by the time this round started —
+proof the gap was still open, not a one-time measurement that had since
+self-corrected.
+
+**why it was not a same-round fix.** A naive `git diff --exit-code
+BUSINESS.md` step, copying the pattern already used for `DECISIONS.md` and
+`mutation_probe.json`, would have been *worse* than the gap it closed.
+Every other diff-checked document here is a pure function of the
+checked-out commit — run the generator twice against the same tree and it
+produces the same bytes. `BUSINESS.md` is not: `business_map.age()`'s
+`days` field is `(now - started).days` and `recent_commits` counts commits
+in a rolling "30 days ago" window, both keyed to `datetime.now(UTC)` at the
+moment the script runs, not to the commit alone. A raw diff would go red
+the calendar day after every regeneration even with zero repository
+changes — the same "permanently red build is one people ignore" failure
+CLAUDE.md already names for `live_listings_are_covered`, and structurally
+the same trap `mutation_probe.json`'s `source_commit` field fell into on a
+`pull_request` CI run (D-035's addendum) before that field was removed
+outright. `BUSINESS.md` cannot drop the volatile content the way
+`mutation_probe.json` did, though — the elapsed-time line is the document's
+whole first paragraph, not an optional field — so the fix had to be a
+comparison that ignores it rather than a schema that omits it.
+
+**what was built.** `business_map.py` gained `--check` (mirroring
+`readme_check.py`'s and `state_map.py`'s existing `--check` convention) and
+two module-level pieces: `_VOLATILE`, a regex matching `_elapsed()`'s
+sentence in either of its two shapes (the normal day-count line and the
+shallow-clone refusal, which also embeds a bare commit count and needed the
+same treatment), and `_stable()`, which substitutes both shapes with a
+fixed placeholder before comparing. `--check` renders the current facts,
+reads the committed file, and fails only when the *masked* versions
+disagree — the same "drop the volatile field before comparing" move
+`state_map.py`'s own `differences()` already makes for `source_commit`,
+`branch` and `tree_clean`, applied to a markdown sentence via regex
+substitution instead of a JSON key exclusion, because there is no
+structured field here to drop. Wired into `engine.yml` (a new "Business
+figures are current" step, placed beside "Capability registry" in the
+cluster of derived-document checks) and into CLAUDE.md's gate block
+(`business_map.py --check`, between `capability_map.py --check` and
+`state_map.py --check`) — required to be in both by
+`test_ci_runs_every_gate_script_the_document_names` and its mirror, the
+same bidirectional test that has caught this exact class of drift for
+`node_dossier.py` and `eval_gate.py` in earlier rounds.
+
+**what was verified.** The masking property directly, not assumed from
+reading the regex: `render(2026-08-01)` and `render(2026-09-12)` produce
+different text (`early != later`, ruling out a vacuous test) but identical
+text once both pass through `_stable()`. The shallow-clone shape
+separately, since it carries its own bare commit count with no day count
+alongside it — masked exactly like the normal sentence, proven by
+asserting the phrase survives in the raw render and disappears after
+`_stable()`. A structural sabotage test (renaming a section heading, never
+a current figure, so the test does not go stale as real numbers move)
+confirms `--check` still exits `1` on a genuine disagreement — the check
+that proves the mask has not swallowed more than it was built to. A
+missing-file case, and the real committed `BUSINESS.md` held to its own
+new standard (`test_the_committed_business_md_passes_check`). One test
+bug caught while writing this: the shallow-clone test's first version
+asserted the refused phrase *survived* masking, backwards from what the
+fix requires, and a second version used a rendering date before the
+repository's first commit, producing a negative day count `\d+` could not
+match — the regex was tightened to `-?\d+` for robustness even though a
+real invocation cannot run before the repository it measures existed.
+Full documented gate sequence run start to finish: ruff/format/mypy, every
+invariant, `env_check.py`, `extras_check.py`, `release_check.py --target
+engine`, claims/runs/spine, `actions_pin_check.py` (20/20),
+`n8n_bindings_check.py`, `readme_check.py --check` (1,327, up from 1,320 —
+7 new tests), `node_dossier.py` + diff, `apply_decisions.py --dry-run`,
+full `pytest tests/`, `mutate.py` (29/29 killed, unchanged) + its diff
+check, `capability_map.py --check`, `business_map.py --check`,
+`state_map.py --check`, `eval_gate.py`. `release_check.py --target
+citegate` still fails on the same pre-existing, previously-documented
+git-remote reversion, and `tests/test_mcp.py::test_a_rate_limited_tool_
+refuses_the_call_it_cannot_afford` reproduced its own already-documented
+flake (see PR #50's own comment thread) — reran clean in isolation both
+times, unrelated to anything this round touched.
+
+**what else was considered.** A tuned staleness threshold ("fail if more
+than N commits old") instead of a masked comparison — rejected: this
+repository's own conventions prefer a structural fix to a tuned threshold
+(`Fleet.assign()`'s refusal is the named precedent), and a threshold would
+still be red or green somewhat arbitrarily rather than tracking whether the
+*content that matters* actually disagrees. Parsing the rendered numbers
+back out of the markdown table with a second reader, the way
+`readme_check.py` extracts one quoted figure — rejected as more surface
+than needed: `readme_check.py` owns exactly one sentence in a file it does
+not otherwise generate, while `business_map.py` already owns the entire
+render path, so masking the one volatile paragraph and diffing the rest
+verbatim is simpler than re-deriving a parser for content the same module
+already produces.
+
+**reversible how.** One new CLI flag on an existing script, one new CI
+step, two new module-level helpers (`_VOLATILE`, `_stable`), no new
+committed file, no schema change to `BUSINESS.md` itself. `git revert`
+returns `business_map.py` to write-only, and removing the matching
+`engine.yml` step and CLAUDE.md line keeps
+`test_ci_runs_every_gate_script_the_document_names` and its mirror
+satisfied on the reverted set.

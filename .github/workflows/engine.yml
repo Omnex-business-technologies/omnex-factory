@@ -180,6 +180,16 @@ jobs:
         # resolution and test/production references, never typed by hand.
         run: uv run python scripts/capability_map.py --check
 
+      - name: Business figures are current
+        # BUSINESS.md was, until this check existed, the one derived-and-
+        # committed document nothing regenerated or diffed anywhere -- found
+        # stale by 11 commits with nothing reporting so (D-036). Masks the
+        # elapsed-time line before comparing (business_map.py's own
+        # docstring explains why a raw diff here would be red every day
+        # nothing else changed) so this only fails on a real disagreement:
+        # goods against the promise, what is live, the ask log.
+        run: uv run python scripts/business_map.py --check
+
       - name: Derived execution state
         # execution_state.json is derived, never authored. This fails when the
         # committed file and the repository disagree in either direction —

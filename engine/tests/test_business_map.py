@@ -16,6 +16,7 @@ measurement.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -198,3 +199,125 @@ def test_the_document_names_what_it_cannot_see() -> None:
         assert outside in page
     assert "recorded here" in page
     assert "3766976" in page, "the precedent for this exact mistake is unnamed"
+
+
+# ── --check: masked for elapsed time, not for anything else ───────────────
+def test_stable_text_ignores_elapsed_time_and_commit_counts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The property `--check` depends on: two renders of the same underlying
+    facts on two different days must compare equal once the elapsed-time line
+    is masked out, or `--check` would be red on every calendar day nothing
+    else changed -- the exact "permanently red build" shape CLAUDE.md already
+    names as a mistake, and the same trap `mutation_probe.json`'s
+    `source_commit` fell into on a `pull_request` CI run before it was
+    removed. Asserted against real renders, not the regex in isolation, so a
+    change to `_elapsed()`'s wording that broke the mask would show here.
+
+    Forces a non-shallow git state rather than reading the real checkout:
+    this test's first version passed on this machine's full clone and then
+    failed on every CI leg, because `engine.yml`'s checkout is shallow
+    (depth 1, `Age`'s own docstring names exactly this hazard) -- `age()`
+    takes the shallow-refusal branch there regardless of `today`, so both
+    renders produced the identical string and `early != later` was false
+    before either side of the property under test ever ran. Forcing the
+    non-shallow branch makes the property checked on every checkout depth,
+    not skipped on the one (CI's) where a regression here matters most.
+    """
+    real = business_map._git
+
+    def not_shallow(*args: str) -> str:
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "false"
+        if args[:2] == ("log", "--reverse"):
+            return "2026-07-29"
+        return real(*args)
+
+    monkeypatch.setattr(business_map, "_git", not_shallow)
+    early = business_map.render(datetime(2026, 8, 1, tzinfo=UTC))
+    later = business_map.render(datetime(2026, 9, 12, tzinfo=UTC))
+    assert early != later, "the premise is stale -- the two renders already agree"
+    assert business_map._stable(early) == business_map._stable(later)
+
+
+def test_a_shallow_clones_refusal_is_masked_too(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The other honest shape `_elapsed()` can produce -- a shallow-clone
+    refusal naming the visible commit count -- must be masked exactly like
+    the normal sentence, or `--check` would be red on every CI checkout
+    whose commit count moves without a day count to change alongside it."""
+    real = business_map._git
+
+    def shallow(*args: str) -> str:
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "true"
+        return real(*args)
+
+    monkeypatch.setattr(business_map, "_git", shallow)
+    page = business_map.render(datetime(2026, 9, 4, tzinfo=UTC))
+    assert "not measurable from this checkout" in page
+    assert business_map._VOLATILE.search(page) is not None
+    assert "not measurable from this checkout" not in business_map._stable(page), (
+        "the shallow-clone refusal must be masked exactly like the normal "
+        "sentence, or --check would be red on every shallow CI checkout"
+    )
+
+
+def test_check_passes_against_its_own_fresh_render(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    output = tmp_path / "BUSINESS.md"
+    output.write_text(business_map.render(), encoding="utf-8")
+    monkeypatch.setattr(business_map, "OUTPUT", output)
+    monkeypatch.setattr(sys, "argv", ["business_map.py", "--check"])
+    assert business_map.main() == 0
+
+
+def test_check_ignores_a_stale_elapsed_time_line(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The whole point: a `BUSINESS.md` committed yesterday must not fail
+    `--check` today just because the calendar moved, as long as nothing else
+    about the business changed."""
+    output = tmp_path / "BUSINESS.md"
+    output.write_text(business_map.render(datetime(2026, 8, 5, tzinfo=UTC)), encoding="utf-8")
+    monkeypatch.setattr(business_map, "OUTPUT", output)
+    monkeypatch.setattr(sys, "argv", ["business_map.py", "--check"])
+    assert business_map.main() == 0
+
+
+def test_check_fails_on_a_substantive_difference(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Not everything is exempt -- only elapsed time and commit counts are.
+    Sabotage a structural, non-time-dependent marker (never a current figure,
+    which would make this test fragile to real progress) and confirm `--check`
+    still refuses, proving the mask has not swallowed more than it was built
+    to swallow."""
+    fresh = business_map.render()
+    assert "## Goods against the promise" in fresh
+    sabotaged = fresh.replace(
+        "## Goods against the promise", "## Goods against the promise (sabotaged)"
+    )
+    output = tmp_path / "BUSINESS.md"
+    output.write_text(sabotaged, encoding="utf-8")
+    monkeypatch.setattr(business_map, "OUTPUT", output)
+    monkeypatch.setattr(sys, "argv", ["business_map.py", "--check"])
+    assert business_map.main() == 1
+
+
+def test_check_fails_honestly_when_business_md_does_not_exist(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(business_map, "OUTPUT", tmp_path / "does-not-exist.md")
+    monkeypatch.setattr(sys, "argv", ["business_map.py", "--check"])
+    assert business_map.main() == 1
+
+
+def test_the_committed_business_md_passes_check() -> None:
+    """The real file, held to the same standard CI will hold it to."""
+    monkeypatch_argv = sys.argv[:]
+    sys.argv = ["business_map.py", "--check"]
+    try:
+        assert business_map.main() == 0
+    finally:
+        sys.argv = monkeypatch_argv

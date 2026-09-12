@@ -1,11 +1,38 @@
 """What the business actually is, derived from files rather than remembered.
 
-    python scripts/business_map.py
+    python scripts/business_map.py            # rewrite BUSINESS.md
+    python scripts/business_map.py --check     # fail if it disagrees
 
 `INVARIANTS.md` made the code's rules checkable. This does the same one level
 out: every number in `BUSINESS.md` is read from git, from `packs/listing.json`,
 from the QC manifests and from `lib/modules/registry.ts`. Nothing is typed in,
 so nothing can be optimistic by accident.
+
+## Why `--check` masks the elapsed-time line instead of diffing the whole file
+
+Every other derived-and-committed document this repository diffs after
+regeneration (`DECISIONS.md`, `CAPABILITIES.md`, `execution_state.json`,
+`ontology/mutation_probe.json`) is a pure function of the checked-out
+commit: run the generator twice against the same tree and it produces the
+same bytes. `BUSINESS.md` is not — `_elapsed()`'s headline depends on
+`datetime.now(UTC)` and a rolling "30 days ago" window, so two runs against
+the identical commit on two different days produce two different files. A
+`git diff --exit-code BUSINESS.md` step would therefore be red the day
+after every regeneration even with zero repository changes — the exact
+"a permanently red build is one people ignore" failure this file's own
+sibling checks (`live_listings_are_covered`) are already built to avoid,
+and the same trap `mutation_probe.json`'s `source_commit` field fell into
+on a `pull_request` CI run before that field was removed.
+
+So `--check` compares everything BUT that one line: `_stable()` masks the
+day-count/commit-count sentence out of both the committed file and a fresh
+render before comparing, the same "drop the volatile field" move
+`state_map.py`'s own `differences()` already makes for `source_commit`,
+`branch` and `tree_clean`, applied to prose instead of JSON keys. A
+mismatch anywhere else — goods against the promise, what is live, the ask
+log — still fails, because those come from files that do not change
+without a commit: `packs/listing.json`, the QC manifests, `lib/modules/
+registry.ts`, `REVENUE_LOG.json`.
 
 ## Why this exists at all
 
@@ -38,6 +65,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -46,6 +74,17 @@ ENGINE = Path(__file__).resolve().parents[1]
 REPO = ENGINE.parent
 OUTPUT = REPO / "BUSINESS.md"
 REVENUE_LOG = REPO / "REVENUE_LOG.json"
+
+#: `_elapsed()`'s sentence, in either of its two shapes (measurable or
+#: refused). Matches through the end of its paragraph so day count, commit
+#: count and recent-commit count are all masked together -- the whole
+#: clause depends on wall-clock time or a value that grows on every push,
+#: never on anything `--check`'s other comparisons already cover.
+_VOLATILE = re.compile(
+    r"(\*\*Day -?\d+\*\* since the first commit.*|"
+    r"\*\*Elapsed time is not measurable from this checkout\*\*.*)"
+)
+_MASK = "<elapsed time -- not compared, see business_map.py's own docstring>"
 
 
 @dataclass(frozen=True)
@@ -265,8 +304,38 @@ def render(today: datetime | None = None) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _stable(text: str) -> str:
+    """`text` with the wall-clock-dependent elapsed-time line masked out.
+
+    The property `--check` needs: two renders of the same underlying facts on
+    two different days must compare equal once this line is removed, or the
+    check would be red on every calendar day nothing else changed.
+    """
+    return _VOLATILE.sub(_MASK, text)
+
+
 def main() -> int:
-    OUTPUT.write_text(render(), encoding="utf-8")
+    check = "--check" in sys.argv
+    rendered = render()
+
+    if check:
+        if not OUTPUT.exists():
+            print("FAIL BUSINESS.md does not exist; run without --check to generate it")
+            return 1
+        committed = OUTPUT.read_text(encoding="utf-8")
+        if _stable(committed) != _stable(rendered):
+            print(
+                "FAIL BUSINESS.md disagrees with the repository on something other "
+                "than elapsed time or commit counts -- run `python scripts/business_map.py`"
+            )
+            return 1
+        print(
+            "BUSINESS.md agrees with the repository (elapsed time and commit "
+            "counts excepted -- those move on their own and are not diffable)."
+        )
+        return 0
+
+    OUTPUT.write_text(rendered, encoding="utf-8")
     when = age()
     rows, promised, passed = goods()
     print(
