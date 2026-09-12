@@ -156,6 +156,14 @@ jobs:
         # to anything but a full 40-character SHA.
         run: uv run python scripts/actions_pin_check.py
 
+      - name: README test count agrees with the repository
+        # §14 CLAIM PURGE / §33 Documentation Standard: README.md quoted
+        # "1,231 tests" through this session's Phases 1-5 while the real
+        # count moved to 1,286 -- the same drift CLAUDE.md's own "Lab
+        # notes" already record happening to itself, in a file nothing was
+        # checking.
+        run: uv run python scripts/readme_check.py --check
+
       - name: Capability registry
         # The canonical capability registry (Sovereign Execution Standard,
         # Phase 1): evidence level per capability derived from symbol
