@@ -51,16 +51,36 @@ describe('RunBudget', () => {
 
   it('proves a free run spent nothing rather than assuming it', () => {
     const b = new RunBudget()
-    b.record({ tokens: 5000, costEur: estimateCostEur('groq', 4000, 1000) })
-    b.record({ tokens: 3000, costEur: estimateCostEur('ollama', 2000, 1000) })
+    b.record({ tokens: 5000, costEur: estimateCostEur('groq', 'llama-3.3-70b-versatile', 4000, 1000) })
+    b.record({ tokens: 3000, costEur: estimateCostEur('ollama', 'llama3.1', 2000, 1000) })
     expect(b.wasFree()).toBe(true)
   })
 
   it('treats an unknown provider as paid, so real spend cannot hide', () => {
-    const known = estimateCostEur('groq', 1_000_000, 1_000_000)
-    const unknown = estimateCostEur('some-new-vendor', 1_000_000, 1_000_000)
+    const known = estimateCostEur('groq', 'llama-3.3-70b-versatile', 1_000_000, 1_000_000)
+    const unknown = estimateCostEur('some-new-vendor', 'whatever', 1_000_000, 1_000_000)
     expect(known).toBe(0)
     expect(unknown).toBeGreaterThan(0)
+  })
+
+  it('treats a hosted provider as paid once its model is not the free default', () => {
+    // GROQ_MODEL / GOOGLE_MODEL / HF_LLM_MODEL can point at any model
+    // independently of which provider is selected -- the provider name alone
+    // was never evidence the call was free, only the specific default model
+    // this codebase's own `providers()` configures is.
+    expect(estimateCostEur('groq', 'llama-3.3-70b-versatile', 1_000_000, 1_000_000)).toBe(0)
+    expect(estimateCostEur('groq', 'some-other-groq-model', 1_000_000, 1_000_000)).toBeGreaterThan(0)
+    expect(estimateCostEur('google', 'gemini-2.0-flash', 1_000_000, 1_000_000)).toBe(0)
+    expect(estimateCostEur('google', 'gemini-2.0-pro', 1_000_000, 1_000_000)).toBeGreaterThan(0)
+  })
+
+  it("prices an OpenRouter model by its own :free suffix, not by provider name", () => {
+    expect(
+      estimateCostEur('openrouter', 'meta-llama/llama-3.3-70b-instruct:free', 1_000_000, 1_000_000),
+    ).toBe(0)
+    expect(
+      estimateCostEur('openrouter', 'anthropic/claude-3.5-sonnet', 1_000_000, 1_000_000),
+    ).toBeGreaterThan(0)
   })
 
   it('reports remaining budget so a caller can shrink the next step', () => {

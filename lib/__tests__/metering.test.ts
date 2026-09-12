@@ -57,15 +57,36 @@ describe('pricing a call', () => {
     // `complete()` returns `cache:exact` as the provider. That name is not in
     // the rate table, so the unknown-provider fallback would charge the one
     // genuinely free path in the system at the most expensive rate it knows.
-    expect(estimateCostEur('cache:exact', 500_000, 500_000)).toBe(0)
-    expect(estimateCostEur('cache:semantic', 500_000, 500_000)).toBe(0)
+    expect(estimateCostEur('cache:exact', 'x', 500_000, 500_000)).toBe(0)
+    expect(estimateCostEur('cache:semantic', 'x', 500_000, 500_000)).toBe(0)
 
     // …while a genuinely unknown provider is still treated as paid.
-    expect(estimateCostEur('some-new-vendor', 1_000_000, 0)).toBeGreaterThan(0)
+    expect(estimateCostEur('some-new-vendor', 'x', 1_000_000, 0)).toBeGreaterThan(0)
   })
 
   it('treats a free provider as free', () => {
-    expect(estimateCostEur('ollama', 1_000_000, 1_000_000)).toBe(0)
+    expect(estimateCostEur('ollama', 'llama3.1', 1_000_000, 1_000_000)).toBe(0)
+  })
+
+  it('bills a real run when an operator override moves a hosted provider off its free default', () => {
+    // The exact shape of 3766976 recurring one layer down: a provider name
+    // was treated as proof a call cost nothing, while GROQ_MODEL / GOOGLE_MODEL
+    // / HF_LLM_MODEL let an operator point the same provider at a paid model.
+    // priceCall must see that through result.model, not just result.provider.
+    const free: LlmResult = {
+      text: 'x'.repeat(400),
+      provider: 'groq',
+      model: 'llama-3.3-70b-versatile',
+      usage: { promptTokens: 1_000_000, completionTokens: 1_000_000 },
+    }
+    const overridden: LlmResult = {
+      text: 'x'.repeat(400),
+      provider: 'groq',
+      model: 'some-other-groq-model',
+      usage: { promptTokens: 1_000_000, completionTokens: 1_000_000 },
+    }
+    expect(priceCall(free, 'y').costEur).toBe(0)
+    expect(priceCall(overridden, 'y').costEur).toBeGreaterThan(0)
   })
 })
 

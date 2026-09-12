@@ -3021,3 +3021,110 @@ returns `business_map.py` to write-only, and removing the matching
 `engine.yml` step and CLAUDE.md line keeps
 `test_ci_runs_every_gate_script_the_document_names` and its mirror
 satisfied on the reverted set.
+
+## D-038: the €0.00 cost-panel bug (3766976) recurring one layer down, in the rate table itself
+
+**context.** Every round this session had truth-passed `engine/` — the
+Python platform. The root TypeScript app, the actual commercial money path
+CLAUDE.md calls "the keystone," had not been exercised at all: `npm audit`,
+`tsc --noEmit`, `vitest run` and `next build` are the documented root gate
+and none had run this session before now. Running them found the suite
+green, which is exactly why reading the code they cover mattered more than
+trusting a green run — a passing test proves what it asserts, not what
+nobody thought to assert.
+
+**what was found.** `lib/core/agents/budget.ts`'s `estimateCostEur()` — the
+function `priceCall()` calls for every real customer-facing copilot run —
+priced `groq`, `google` and `huggingface` at zero unconditionally, keyed
+only by provider name. `lib/core/llm/provider.ts`'s `providers()` lets an
+operator override `GROQ_MODEL`, `GOOGLE_MODEL` or `HF_LLM_MODEL`
+independently of provider selection — verifiable from this repository's
+own source with no external pricing knowledge needed. Point one of those
+env vars at a different model on the same hosted API and the provider
+still bills whatever it actually bills, while `priceCall()` keeps returning
+`costEur: 0` for every such run because it only ever looked at
+`result.provider`, never `result.model` — despite `LlmResult` already
+carrying `model` on every result, unused by this one call site. Any
+customer run through that path would settle at the 1-credit floor no
+matter how much the provider actually charged: the exact "cost panel reads
+€0.00 while money moves" shape `3766976` already fixed once for missing
+`usage` wiring, recurring here in the rate table itself rather than in
+`usage` plumbing. `CLAUDE.md`'s own `budget.ts` bullet already documented
+the `cache:`-before-fallback rule this same function gets right one line
+later — the adjacent rule, model-scoping, had no bullet and no test.
+
+Deliberately not claimed: that Groq, Google AI Studio or Hugging Face's
+router are *not* free today for their current default models. This
+environment cannot reach their pricing pages to check (the open web is
+blocked here; only PyPI/npm/crates.io/GitLab/DockerHub and GitHub's git
+lane answer), and asserting a specific external billing fact without being
+able to verify it would be the same "NO EVIDENCE = NO CLAIM" violation in
+the opposite direction. What is fixed is narrower and needs no external
+verification: the codebase's *own* stated free defaults —
+`llama-3.3-70b-versatile` on Groq, `gemini-2.0-flash` on Google,
+`meta-llama/Llama-3.3-70B-Instruct` on Hugging Face, the exact strings
+`providers()` itself hardcodes — are what stays priced at zero. Any other
+model an operator points the same provider at now falls through to the
+existing "unknown, treated as paid" fallback, the identical principle this
+function already applied to an unrecognised provider name, now applied at
+model granularity too. OpenRouter needed no such table: its own `:free`
+model-id suffix is a structural, checkable fact, not a claim this codebase
+has to maintain.
+
+**what was built.** `estimateCostEur(provider, model, promptTokens,
+completionTokens)` — `model` is now a required parameter, not bolted on
+optionally, so no call site can silently keep pricing by provider name
+alone. `FREE_DEFAULT_MODEL` names the three (provider, model) pairs that
+are actually free by this codebase's own configuration; `isFreeCall()`
+special-cases OpenRouter's suffix convention and falls back to that table
+for everything else. `RATE_PER_MTOK` now holds only genuinely
+unconditional entries: `ollama` (self-hosted, never leaves this process's
+own host, free regardless of model) and the two image providers
+`pollinations`/`local` (no configurable model override, no paid tier this
+codebase talks to — left untouched, out of scope for this finding).
+`priceCall()` in `metering.ts` now threads `result.model` through both of
+its call sites (the reported-usage path and the length-estimate fallback).
+
+**what was verified.** `npx tsc --noEmit` did *not* catch the signature
+change at any test call site — `tsconfig.json` excludes `lib/__tests__/**`
+from the type-checked set, so the three existing call sites with the old
+3-argument shape passed a token count where `model` now belongs, sliding
+every subsequent argument one position and turning `NaN` into a silently
+wrong answer rather than a caught type error. Found this by running
+`npx vitest run` on the affected files directly (not assumed from `tsc`
+being clean): four tests failed with `NaN` and `false` where `0` and
+`true` were expected, the concrete cost of trusting a type check that does
+not cover test files. All four updated to pass a real model string. Two
+new tests added, at two levels: `estimateCostEur('groq', <default>, …)` is
+zero while `estimateCostEur('groq', <anything else>, …)` is paid (same
+for `google`), and a `priceCall()`-level test constructs two `LlmResult`s
+differing only in `model` and asserts one is free and the other is not —
+the level a real request actually goes through, not just the pricing
+function in isolation. Full root gate re-run end to end after the fix:
+`npm audit --audit-level=moderate` (0 vulnerabilities), `tsc --noEmit`
+(clean), `vitest run` (85 tests, up from 82 — all passing), `next build`
+(compiles, all 17 routes render/collect cleanly). `engine/tests/
+test_ci_contract.py` re-run since `CLAUDE.md` changed (unaffected;
+untouched by this PR's actual gate scripts).
+
+**what else was considered.** Hard-coding a specific non-zero rate for
+Groq/Google/Hugging Face's paid tiers instead of falling through to the
+generic unknown-provider estimate (`{in: 1.0, out: 3.0}`) — rejected: this
+environment cannot verify current published rates for any of the three, so
+a specific number would be exactly the unsupported claim this fix exists
+to remove, just moved from "free" to "a specific wrong price." The generic
+paid fallback is honest about what it is — a conservative placeholder, not
+a measurement — the same status quo already accepted for any other unknown
+provider. Extending the same model-scoping to the two image providers
+(`pollinations`, `local`) — not done: neither has a configurable model
+override env var, and both are genuinely free regardless of model (a
+public free API and self-hosted compute respectively), so there is no
+override loophole for them to close.
+
+**reversible how.** One required parameter added to an exported function
+(`estimateCostEur`), all three of its call sites in this repository updated
+in the same change, no new file, no schema or API surface change outside
+`lib/core/agents/budget.ts` and `lib/core/agents/metering.ts`. `git revert`
+returns to provider-only pricing — a regression in kind (the exact defect
+this closes), not a break, since nothing downstream depends on the new
+parameter's presence beyond the two files that already call the function.

@@ -60,6 +60,7 @@ export function priceCall(result: LlmResult, promptText: string): RunCost {
     return {
       costEur: estimateCostEur(
         result.provider,
+        result.model,
         result.usage.promptTokens,
         result.usage.completionTokens,
       ),
@@ -72,7 +73,7 @@ export function priceCall(result: LlmResult, promptText: string): RunCost {
   const promptTokens = Math.ceil(promptText.length / CHARS_PER_TOKEN)
   const completionTokens = Math.ceil(result.text.length / CHARS_PER_TOKEN)
   return {
-    costEur: estimateCostEur(result.provider, promptTokens, completionTokens),
+    costEur: estimateCostEur(result.provider, result.model, promptTokens, completionTokens),
     promptTokens,
     completionTokens,
     estimated: true,

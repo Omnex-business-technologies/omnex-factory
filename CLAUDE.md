@@ -58,10 +58,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 85 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 82 TypeScript tests now run in CI; until recently, seven of them did.
+All 85 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -150,7 +150,16 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   An estimate is never displayed as a measurement.
 - `lib/core/agents/budget.ts` — `estimateCostEur()` checks `cache:` **before**
   the unknown-provider fallback, or the one free path bills at the most
-  expensive rate.
+  expensive rate. **Free is priced per (provider, model), never per provider
+  name alone.** `groq`, `google` and `huggingface` all priced at zero
+  regardless of model until this was found: `providers()` lets `GROQ_MODEL` /
+  `GOOGLE_MODEL` / `HF_LLM_MODEL` override the model independently of which
+  provider is selected, so pointing one at a paid model billed the provider
+  real money while every customer run kept showing €0.00 — `3766976`
+  recurring one layer down, in the rate table rather than in `usage` wiring.
+  `FREE_DEFAULT_MODEL` now names the exact model each free default configures;
+  anything else on that provider falls through to the paid fallback, and
+  OpenRouter is checked by its own `:free` suffix rather than a guess.
 - `lib/modules/registry.ts` — module manifests. **Rule: module N+1 does not
   open until module N has taken a real payment.** Only `studio` is live;
   everything else is `enabled: false` on purpose, and `lib/__tests__/metering.
