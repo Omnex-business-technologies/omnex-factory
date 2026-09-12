@@ -1296,3 +1296,144 @@ this codebase yet has more than one caller identity, and a flat
 (`mcp/tools.py`, `mcp/server.py`, `tests/test_mcp.py`), all additive —
 every new parameter defaults to `None`/unrestricted. `git revert` removes
 the feature cleanly; no caller of the prior API needs to change.
+
+---
+
+## D-021: three more handbook gaps — found because the first pass was challenged
+
+**context.** D-020 called the review of `agentic-ai-handbook` complete after
+finding one gap (MCP permission scoping). The operator pushed back — "is that
+really all we can extract from all 21 chapters?" — and the honest answer, on
+inspection, was that the first pass had only read chapter READMEs for most
+chapters, not the substantive `.py` lesson code, which is not the thorough
+review the operator originally asked for. A second pass, done properly this
+time (every chapter's actual code read and compared against a specific
+`engine/` module, not a README skim), found three more genuine, small,
+concrete gaps. Two things are worth naming about the process itself: first,
+that a "prestige" audit is only worth the name if it can come back with zero,
+one, or many findings depending on what is actually there — the second pass
+was instructed explicitly not to pad the list to look more thorough, and it
+still surfaces exactly three, not a round or flattering number. Second, the
+operator's own separately-supplied full-repository audit (D-021's sibling
+work, see the state-sync commit) independently named "no vanity numbers,
+no assumed evidence" as its own operating rule — the same discipline applied
+from a different direction landed on the same three gaps, which is some
+evidence the discipline is doing real work rather than being a slogan.
+
+**gap 1 — LLM-as-judge eval metric.** `evals/metrics.py`'s own module
+docstring already said this adapter was never built and named the shape it
+would take: "a model call scored against `omnex.llm.LanguageModel` so its
+cost lands in the same ledger as everything else." `evals/judge.py` builds
+exactly that: `judge_quality()` sends one rubric prompt through a
+`LanguageModel`, parses a strict `SCORE: <0-10> REASON: <...>` reply (a
+malformed or out-of-range reply scores 0.0 with the raw text on file, never a
+best-effort guess — a judge model itself misbehaving is the one time a
+score most needs to look visibly wrong), and returns `JudgeResult{metric,
+cost}` so the spend is never dropped on the floor. It does not gate any run:
+no change was made to `runner.py`'s `Gate`/`EvalRunner` at all, because the
+per-metric threshold override those already read (`thresholds={"llm_judge":
+0.0}`) is the existing mechanism for exactly this, and adding a second one
+would be the kind of duplicate machinery `twin_splitters_agree` warns about
+at a different layer. Why it matters concretely: OMNEX's actual product
+(`lib/modules/registry.ts` — ad copy, email subject lines, landing-page
+headlines) generates content none of the four existing deterministic metrics
+can score, because all four need something to compare against (a relevant
+chunk id, an expected answer, a required citation) and there is no
+"reference ad" a new one can be F1-scored against.
+
+**gap 2 — concurrent MCP tool dispatch.** `McpClient.call_tool()` sends one
+request and blocks on that request's own reply before another can be
+issued. When one LLM turn returns several independent tool calls — the
+standard `parallel_tool_calls` shape — every call beyond the first today
+adds a full synchronous round trip directly to wall-clock time, which is
+exactly what `graph.runtime.Budget.max_seconds` exists to protect against.
+`call_tools()` sends every request in a batch before blocking on any reply,
+then demuxes incoming messages by id — reusing `_exchange()`'s own
+desynchronisation guard ("an id this client did not send is refused loudly,
+never accepted as the next thing off the wire"), extended from one
+outstanding id to a set. Results return in call order regardless of reply
+order. A protocol-level error aborts the whole batch, matching how a single
+call's own protocol error aborts; a tool-level failure (`isError`) stays a
+normal, billed result and does not abort its siblings, matching how
+`call_tool` already treats a tool-level failure. `MemoryTransport` still
+delivers everything in send order, so the test suite is honest about
+exercising the correlation logic rather than asserting a wall-clock
+speedup this transport cannot demonstrate — the saving is real only against
+a transport where the server can act on requests concurrently (a
+subprocess, a socket), which is the transport this method exists for.
+
+**gap 3 — reasoning-model output was never separated from the answer.**
+`Completion.text` is the one field every consumer in this engine treats as
+"the answer" — `rag.ground`, `evals.metrics`, `guard.output`, the router.
+Neither adapter (`llm/ollama.py`, `llm/litellm_adapter.py`) stripped or
+separated an inlined reasoning block, and this was not hypothetical:
+`llm/catalog.py`'s `Tier.REASONING` is already the router's top escalation
+tier, meaning real production traffic already lands on reasoning models at
+the router's most expensive step. A leaked `<think>...</think>` block would
+silently contaminate RAG grounding (checking citations against reasoning
+chatter), eval metrics (scoring faithfulness against polluted text) and any
+structured-output parser downstream — with nothing raising anywhere, the
+same silent-failure shape as the missing `usage` block that made cost
+panels read €0.00 on real runs. `llm/reasoning.py`'s `split_reasoning()`
+extracts every `<think>` block (not only the first — a model that reasons,
+narrates a tool call, and reasons again keeps all of it) into a new
+`Completion.reasoning` field. Both adapters prefer a provider's own
+separated field when one exists (Ollama's `thinking` key on newer daemon
+versions, LiteLLM's normalised `reasoning_content` on providers that report
+one) and fall back to tag-splitting only when the provider does not
+separate it — the same "trust the provider's own claim before parsing
+around it" instinct as `Usage.cached_input_tokens` being read from the
+provider rather than estimated.
+
+**what was verified.** 5 new tests for `judge_quality` (well-formed reply,
+malformed reply, out-of-range score, evidence included/omitted in the
+prompt), 6 for `call_tools` (empty batch, order-preserving results,
+tool-level failure billed without aborting, unpriced-tool refusal before
+any request is sent, over-budget refusal before any request is sent, a
+reply outside the batch refused), 5 for `split_reasoning` in isolation, and
+5 for the two adapters via `monkeypatch` at the actual network/library
+boundary (`urllib.request.urlopen` for Ollama, `sys.modules["litellm"]` for
+LiteLLM, since `litellm` is imported lazily inside `complete()` and is not
+installed in this environment — zero required dependencies, so faking it at
+`sys.modules` rather than as a module attribute was the only way to
+exercise that path without the extra). Full engine gate green: ruff
+check/format, mypy, all 9 enforced invariants, `env_check`, `extras_check`
+(the `evals` extra's `unsupported, 0/3 imported` status is unaffected —
+`judge.py` uses zero new dependencies, built entirely on the engine's own
+`LanguageModel`), `release_check.py` both targets (only the documented
+session-local citegate-URL artifact), `claims.py --check`, `runs.py
+--check`, `spine_check.py`, full `pytest tests/ -q`, and `mutate.py` at
+29/29. One expected side effect required its own two-script regeneration:
+`node_map.py`'s `refresh()` proposed `omnex.llm.split_reasoning` for a gap
+node the moment the symbol existed, which changed `nodes.json`'s
+gap/proposed counts (461/46 → 460/47) and required `node_dossier.py` and
+`state_map.py` to be re-run in that order (dossier reads `nodes.json`;
+state reads both) before their own committed-file tests passed again — the
+same "a symbol appearing anywhere in `engine/` moves the queue" behaviour
+CLAUDE.md already documents for the MCP module landing. Run recorded and
+closed as R-0021. Re-measured CLAUDE.md's test count again after landing
+all three: 1,256 (was 1,235 after D-020 alone).
+
+**what else was considered.** For gap 1, gating the judge metric by default
+and requiring an explicit opt-OUT — rejected, because the module docstring
+this whole feature is answering already states why a noisy metric must
+never be a default gate; opt-in-to-gate is the only direction that does not
+risk a variance-driven regression gate teaching a team to disable it. For
+gap 2, true `asyncio`-based concurrency — rejected as disproportionate: this
+engine has zero async code anywhere and introducing it for one method would
+mean either a sync/async split of `McpClient` or an event loop bridge, for a
+benefit (real OS-level concurrency) that `MemoryTransport`-backed tests
+cannot demonstrate anyway; the send-everything-then-drain pattern captures
+the actual saving (avoiding N sequential round trips) without the async
+surface. For gap 3, clamping an out-of-range provider score or silently
+discarding an unparseable block — rejected for the same reason judge.py
+refuses to guess: a provider or model behaving unexpectedly is exactly the
+moment a wrong-looking answer is more useful than a plausible-looking one.
+
+**reversible how.** Three independent, additive changes, each revertible on
+its own: `evals/judge.py` is a new file nothing else calls yet;
+`McpClient.call_tools()` is a new method beside the unmodified
+`call_tool()`; `Completion.reasoning` defaults to `""` and both adapters
+fall back to it being empty when `split_reasoning` finds nothing, so no
+existing caller's behaviour changes unless the model it talks to actually
+emits a `<think>` block.

@@ -585,9 +585,9 @@
       "verified": false
     },
     {
-      "alias": null,
+      "alias": "omnex.llm.split_reasoning",
       "branch": "III",
-      "claim": "gap",
+      "claim": "proposed",
       "name": "Reasoning",
       "note": "",
       "verified": false

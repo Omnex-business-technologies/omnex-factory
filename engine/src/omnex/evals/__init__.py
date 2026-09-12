@@ -9,7 +9,9 @@ Metrics are deterministic and in-process by default. Not because a judge model
 is worse — it is more faithful to human judgement — but because a gate whose own
 measurement is noisy either blocks good deploys or waves bad ones through, and a
 team's response to a flaky gate is to switch it off. Judge-based scoring belongs
-in a weekly review over a large sample; the adapters are there for that.
+in a weekly review over a large sample; `judge_quality` in `judge.py` is that
+metric, priced through the same `LanguageModel` every other call goes through
+and never gating a run by default.
 
 Four RAG metrics, kept separate because they name four different repairs:
 context recall (fix retrieval), context precision (fix ranking), faithfulness
@@ -17,6 +19,7 @@ context recall (fix retrieval), context precision (fix ranking), faithfulness
 """
 
 from .cases import ContaminationReport, GoldenCase, Suite, contamination_report, require_clean
+from .judge import JudgeResult, judge_quality
 from .metrics import (
     MetricResult,
     answer_correctness,
@@ -36,6 +39,7 @@ __all__ = [
     "Gate",
     "GateDecision",
     "GoldenCase",
+    "JudgeResult",
     "MetricResult",
     "RunReport",
     "Suite",
@@ -47,6 +51,7 @@ __all__ = [
     "context_precision",
     "context_recall",
     "faithfulness",
+    "judge_quality",
     "load_baseline",
     "refusal_accuracy",
     "require_clean",

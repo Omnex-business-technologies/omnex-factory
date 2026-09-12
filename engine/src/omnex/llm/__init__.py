@@ -8,6 +8,7 @@ interchangeable at every call site — and why the test suite needs no network.
 from .base import CallOptions, LanguageModel, compute_cost
 from .catalog import CATALOG_PATH, ModelCatalog, ModelSpec, Tier
 from .fakes import CapabilityModel, FlakyModel, ScriptedModel, SlowModel, Task, spec_for
+from .reasoning import split_reasoning
 from .tokens import HeuristicCounter, TiktokenCounter, TokenCounter
 from .types import Completion, FinishReason, Message, Role, Usage
 
@@ -33,4 +34,5 @@ __all__ = [
     "Usage",
     "compute_cost",
     "spec_for",
+    "split_reasoning",
 ]

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "106d42a0c5225abd4eb9c98de2c4654af30bf293",
+  "source_commit": "6702ec53d33707af0a775e6b0071b4c5419a01c0",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -11,8 +11,8 @@
   "nodes": {
     "total": 507,
     "by_claim": {
-      "gap": 461,
-      "proposed": 46
+      "gap": 460,
+      "proposed": 47
     },
     "verified_by_a_person": 0
   },
@@ -81,7 +81,7 @@
       "status": "UNKNOWN",
       "why": "the dossier exists and regenerates in CI, so every node now carries the evidence a person needs; what is missing is the person. 0 of 507 rows have been ruled on, and no machine may raise that number",
       "evidence": [
-        "nodes by claim: {'gap': 461, 'proposed': 46}",
+        "nodes by claim: {'gap': 460, 'proposed': 47}",
         "node_dossier.py exists: True",
         "DECISIONS.md rendered: True",
         "ruled on by a person: 0"
