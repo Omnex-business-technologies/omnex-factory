@@ -116,30 +116,66 @@ function round(n: number): number {
  * Rough EUR cost for a call. Free providers are zero by definition, which is why
  * `wasFree()` is meaningful: a run that touched only the free chain provably
  * spent nothing, rather than being assumed to have.
+ *
+ * `pollinations` and `local` are image providers with no configurable model
+ * override and no paid tier this codebase talks to — genuinely free regardless
+ * of what they are asked to generate. `ollama` is self-hosted and never leaves
+ * this process's own host, so it is free regardless of model too.
  */
 const RATE_PER_MTOK: Record<string, { in: number; out: number }> = {
   ollama: { in: 0, out: 0 },
   pollinations: { in: 0, out: 0 },
   local: { in: 0, out: 0 },
-  groq: { in: 0, out: 0 },
-  google: { in: 0, out: 0 },
-  huggingface: { in: 0, out: 0 },
-  openrouter: { in: 0, out: 0 },
   anthropic: { in: 0.8, out: 4.0 },
   openai: { in: 0.15, out: 0.6 },
 }
 
-export function estimateCostEur(provider: string, promptTokens: number, completionTokens: number): number {
+/**
+ * (provider, model) pairs this codebase's own defaults configure as free.
+ *
+ * A provider name alone used to be treated as evidence a call cost nothing:
+ * `groq`, `google` and `huggingface` all priced at zero regardless of model,
+ * while `providers()` in `lib/core/llm/provider.ts` lets an operator override
+ * `GROQ_MODEL` / `GOOGLE_MODEL` / `HF_LLM_MODEL` independently of provider
+ * selection. Point one of those at a paid model on the same hosted API and the
+ * provider still bills real money while every customer run kept showing €0.00
+ * — the cost panel reading €0.00 while money moves (3766976) recurring one
+ * layer down, in the rate table itself rather than in `usage` wiring. Free is
+ * now claimed only for the exact model these defaults name, never for
+ * "whatever this provider happens to be serving today."
+ */
+const FREE_DEFAULT_MODEL: Record<string, string> = {
+  groq: 'llama-3.3-70b-versatile',
+  google: 'gemini-2.0-flash',
+  huggingface: 'meta-llama/Llama-3.3-70B-Instruct',
+}
+
+function isFreeCall(provider: string, model: string): boolean {
+  // OpenRouter prices every model that is not itself suffixed `:free`; the
+  // suffix is OpenRouter's own naming convention, not this table's guess.
+  if (provider === 'openrouter') return model.endsWith(':free')
+  return FREE_DEFAULT_MODEL[provider] === model
+}
+
+export function estimateCostEur(
+  provider: string,
+  model: string,
+  promptTokens: number,
+  completionTokens: number,
+): number {
   // A cache hit made no provider call, so it cost nothing. This has to be
   // checked BEFORE the unknown-provider fallback: `complete()` returns
   // `cache:exact` / `cache:semantic` as the provider name, which is not in the
   // table, so the fallback would price the one genuinely free path in the
   // system at the most expensive rate it knows.
   if (provider.startsWith('cache:')) return 0
+  if (isFreeCall(provider, model)) return 0
 
   const rate = RATE_PER_MTOK[provider]
   // An unknown provider is treated as paid, not free: assuming zero would hide
-  // real spend behind a name this table has not been updated for.
+  // real spend behind a name this table has not been updated for. A hosted
+  // provider whose MODEL is unknown (an operator override away from the free
+  // default) falls through the same way, for the same reason.
   const { in: rin, out: rout } = rate ?? { in: 1.0, out: 3.0 }
   return round((promptTokens / 1_000_000) * rin + (completionTokens / 1_000_000) * rout)
 }
