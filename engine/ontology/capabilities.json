@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "$comment": "The canonical capability registry required by the operator's Sovereign Execution Standard (Phase 1, §5). Hand-authored fields only: what a person must state (name, symbol, contract, dependencies, security requirements, limitations, known risks, economic relevance). evidence_level, lifecycle_state, tests and integration are ALL derived by scripts/capability_map.py from what actually resolves and is actually referenced -- never typed here, for the same reason nodes.json's 'verified' is the one field a machine may not set. This is a first, deliberately small cut: 8 capabilities chosen because their evidence is unambiguous, not an attempt at completeness. Scope: engine/ (Python) only -- the TypeScript root app's own capabilities (credit ledger, module registry, budget/metering) are a known gap of this first version, stated rather than silently omitted.",
+  "capabilities": [
+    {
+      "id": "CAP-001",
+      "name": "Money as exact pico-dollar integers",
+      "description": "All currency is an int in 1e-12 USD, never a float, so a router that saves a fraction of a cent on a cheap-model call reports the saving instead of rounding it to zero.",
+      "symbol": "omnex.core.money.Money",
+      "owner_module": "omnex.core",
+      "contract": "Every arithmetic operation on Money returns Money; there is no float currency path anywhere in the package.",
+      "dependencies": [],
+      "security_requirements": [],
+      "limitations": "Exact only to the pico-dollar; does not model currencies other than USD.",
+      "known_risks": "A future contributor introducing a float intermediate in a new module would silently reintroduce the class of bug this exists to prevent -- money_is_int_picos in invariants.json is the structural guard against that.",
+      "economic_relevance": "Every priced call in the engine (router, MCP tools, factory economics) is denominated in this type; a defect here corrupts every cost figure the platform reports."
+    },
+    {
+      "id": "CAP-002",
+      "name": "Injected clock",
+      "description": "Nothing in the engine calls datetime.now() or time.monotonic() directly; every time-dependent component takes a Clock, so a FakeClock can advance an hour-long TTL in a test that runs in milliseconds.",
+      "symbol": "omnex.core.clock.Clock",
+      "owner_module": "omnex.core",
+      "contract": "A Clock exposes now() and monotonic(); FakeClock and SystemClock are interchangeable everywhere one is accepted.",
+      "dependencies": [],
+      "security_requirements": [],
+      "limitations": "Two files are allowlisted exceptions to direct time access, each naming the parameter that already provides injection -- see invariants.json's time_is_injected entry.",
+      "known_risks": "A new module calling time.monotonic() directly would make its behaviour untestable without real wall-clock waits, and would not be caught except by invariant_map.py's checker.",
+      "economic_relevance": "None directly; this is why the 1,200+ test suite runs in seconds rather than hours."
+    },
+    {
+      "id": "CAP-003",
+      "name": "Cost-aware model routing",
+      "description": "Routes a request cheap-first, verifies the cheap answer, escalates only on failure -- measured at 42.4% of always-strong spend at equal accuracy against a capability-modelled benchmark.",
+      "symbol": "omnex.router.router.Router",
+      "owner_module": "omnex.router",
+      "contract": "Router.route() returns a RoutedCompletion carrying which tier actually answered and what the same request would have cost on the reference tier.",
+      "dependencies": ["omnex.llm.LanguageModel", "CAP-001"],
+      "security_requirements": ["A verifier must not itself be escalated past what the routing policy allows."],
+      "limitations": "The 42.4% figure is measured against omnex.llm.fakes.CapabilityModel, a deterministic stand-in whose capability-is-monotone-in-tier assumption does not capture every real-provider failure mode.",
+      "known_risks": "A verifier that is too lenient makes the router look cheaper than it is by accepting wrong cheap answers; break_even() is three-valued specifically so an under-measured verifier reads UNKNOWN rather than a false PASS.",
+      "economic_relevance": "Directly: this is the single largest per-call cost lever the platform has."
+    },
+    {
+      "id": "CAP-004",
+      "name": "RAG citation grounding",
+      "description": "Checks each claim in a generated answer against the retrieved evidence and reports a support rate, at 25-30k sentences/sec flat with document size.",
+      "symbol": "omnex.rag.ground.Grounder",
+      "owner_module": "omnex.rag",
+      "contract": "Grounder.check(answer, evidence) returns which claims are supported and which are dropped, never a single aggregate score.",
+      "dependencies": ["omnex.vectors.store.HybridStore"],
+      "security_requirements": ["Citations are stripped before number extraction so a URL's date is never misread as an asserted figure."],
+      "limitations": "A stated, deliberately-preserved limitation: a paraphrase outside the corpus is missed (test_a_paraphrase_outside_the_corpus_is_missed is meant to stay green).",
+      "known_risks": "The sentence splitter exists twice (here and in citegate) and has diverged before; twin_splitters_agree in invariants.json is the guard.",
+      "economic_relevance": "Indirect: grounding failures are the most expensive kind of quality failure for a content-generation product to ship silently."
+    },
+    {
+      "id": "CAP-005",
+      "name": "Injection fence",
+      "description": "Detects prompt-injection attempts in untrusted content before it reaches a model, measured at 30/30 known attack patterns caught with 1/30 false positives.",
+      "symbol": "omnex.guard.injection.InjectionDetector",
+      "owner_module": "omnex.guard",
+      "contract": "Every tool result and retrieved chunk is tagged with a Provenance and only UNTRUSTED content passes through the detector before a prompt is assembled.",
+      "dependencies": [],
+      "security_requirements": ["A ToolResult can never be constructed with a trusted Provenance -- structural, not conventional (__post_init__ refuses it)."],
+      "limitations": "30 attack patterns is a fixed, committed benchmark corpus, not an exhaustive adversarial test; a genuinely novel injection technique is untested by construction.",
+      "known_risks": "The one false positive in the 30/30 benchmark is a known, accepted trade-off, not an unmeasured gap.",
+      "economic_relevance": "None directly measured; a bypassed fence is a security incident, not a cost line."
+    },
+    {
+      "id": "CAP-006",
+      "name": "MCP per-tool permission scoping",
+      "description": "A registered tool can require a named permission; an unauthorized tools/call is refused with the identical error and payload shape as calling a nonexistent tool, so a caller without a permission cannot learn the tool exists.",
+      "symbol": "omnex.mcp.server.McpServer",
+      "owner_module": "omnex.mcp",
+      "contract": "McpServer.available_to(granted) filters both tools/list and tools/call identically; granted=None stays fully unrestricted so no caller loses a tool it never opted into losing.",
+      "dependencies": [],
+      "security_requirements": ["An out-of-scope tool call must never return a distinguishable error from a nonexistent one.", "required_permission is never read from or written to the wire."],
+      "limitations": "Permissions are a flat frozenset[str], not a role hierarchy or wildcard system -- deliberate, since nothing in this codebase yet has more than one caller identity.",
+      "known_risks": "A future caller-identity system with roles would need to flatten roles to a permission set before calling available_to(), and a buggy flattening could over- or under-grant.",
+      "economic_relevance": "None directly; this is an access-control capability, not a priced one."
+    },
+    {
+      "id": "CAP-007",
+      "name": "Hybrid dense/lexical retrieval",
+      "description": "Combines dense vector similarity and lexical (BM25-style) search via reciprocal rank fusion, rather than relying on either alone.",
+      "symbol": "omnex.vectors.store.HybridStore",
+      "owner_module": "omnex.vectors",
+      "contract": "HybridStore.search() returns SearchHit objects ranked by fused score, never raw cosine similarity alone.",
+      "dependencies": [],
+      "security_requirements": [],
+      "limitations": "The qdrant-backed adapter is a partial extra (1 of 3 declared dependencies imported); the in-process store is what every test exercises.",
+      "known_risks": "A cross-embedding-space comparison (mixing chunks embedded by two different models) would produce a meaningless cosine score; guarded explicitly in fusion.py per its own docstring.",
+      "economic_relevance": "Indirect: retrieval quality is the ceiling on CAP-004's grounding rate."
+    },
+    {
+      "id": "CAP-008",
+      "name": "Eval regression gate",
+      "description": "Blocks a deploy on any case that passed and now fails, never on the mean -- because a flat aggregate hides five regressions behind five simultaneous improvements.",
+      "symbol": "omnex.evals.runner.Gate",
+      "owner_module": "omnex.evals",
+      "contract": "Gate.decide() compares a run to its baseline case-by-case and refuses to compare across a changed suite fingerprint.",
+      "dependencies": ["CAP-004"],
+      "security_requirements": [],
+      "limitations": "The default metrics are deterministic and in-process; judge_quality() in judge.py is a separate, non-gating metric by design (variance between runs would make a noisy gate teach a team to disable it).",
+      "known_risks": "Editing an expected answer and re-running looks identical to a real improvement unless the suite fingerprint is checked first -- which is why a fingerprint mismatch raises rather than silently comparing.",
+      "economic_relevance": "Indirect: this is what stands between a bad model swap and a live regression a customer sees."
+    }
+  ]
+}

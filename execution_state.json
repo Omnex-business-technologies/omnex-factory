@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "44f21f4889be33a43cf08e12e22dcdaa62891a7f",
+  "source_commit": "769756bf125e93e84cb43df0070d5792916a90dd",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -69,10 +69,10 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 41,
+    "runs": 43,
     "chain_intact": true,
     "by_level": {
-      "L3_REPOSITORY": 40,
+      "L3_REPOSITORY": 42,
       "L4_EXTERNAL": 1
     },
     "above_l3": 1,
@@ -87,6 +87,13 @@
     "dependabot_config": true,
     "build_provenance_attested": true,
     "sbom_generated": false
+  },
+  "capabilities": {
+    "total": 8,
+    "by_evidence_level": {
+      "E4_INTEGRATED": 8
+    },
+    "at_least_integrated": 8
   },
   "gates": {
     "0_integrity": {
@@ -118,10 +125,11 @@
     },
     "3_implementation": {
       "status": "UNKNOWN",
-      "why": "the suite is green and the mutation probe kills every mutation, but neither answers coverage per capability; measuring it needs a capability registry that does not exist",
+      "why": "the suite is green and the mutation probe kills every mutation, and the capability registry now measures coverage per capability: 8 capabilities at {'E4_INTEGRATED': 8}. What is still missing is scale — 8 is a first, deliberately small cut, not the platform's full surface, and E5-E7 are unreachable from a repository scan for every one of them",
       "evidence": [
         "mutate.py exists and is in CI",
-        "no capability registry"
+        "capability registry: 8 capabilities",
+        "by evidence level: {'E4_INTEGRATED': 8}"
       ]
     },
     "4_integration": {
@@ -156,11 +164,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 41 hash-chained run(s) (chain intact: True) at levels ['L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 1 run(s) are recorded above L3 and 0 of those recorded a successful outcome",
+      "why": "the run ledger holds 43 hash-chained run(s) (chain intact: True) at levels ['L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 1 run(s) are recorded above L3 and 0 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 41",
+        "runs recorded: 43",
         "chain intact: True",
-        "runs by autonomy level: {'L3_REPOSITORY': 40, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3_REPOSITORY': 42, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {

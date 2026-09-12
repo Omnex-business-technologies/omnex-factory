@@ -292,6 +292,21 @@ def denied_existing_files(text: str) -> list[str]:
     ]
 
 
+def _capabilities() -> dict[str, Any]:
+    """The capability registry's shape, recomputed from `capability_map.py`.
+
+    Gate 3 said "measuring coverage per capability needs a capability registry
+    that does not exist" until one did — the Sovereign Execution Standard's
+    Phase 1 requirement. Imported rather than re-derived here, for the same
+    reason `_registry()` imports `claims` instead of re-reading
+    `claims.jsonl`: two readers of one source are how the source and its
+    second copy quietly disagree.
+    """
+    import capability_map
+
+    return capability_map.summarise(capability_map.derive_all())
+
+
 def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"status": status, "why": why, "evidence": evidence or []}
 
@@ -320,6 +335,7 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     ledger = facts["run_ledger"]
     release = facts["release_tooling"]
     supply = facts["supply_chain"]
+    capabilities = facts["capabilities"]
     unsettled = sum(
         count
         for status, count in registry["by_status"].items()
@@ -378,10 +394,18 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "3_implementation": _gate(
             UNKNOWN,
-            "the suite is green and the mutation probe kills every mutation, but "
-            "neither answers coverage per capability; measuring it needs a "
-            "capability registry that does not exist",
-            ["mutate.py exists and is in CI", "no capability registry"],
+            "the suite is green and the mutation probe kills every mutation, and "
+            f"the capability registry now measures coverage per capability: "
+            f"{capabilities['total']} capabilities at "
+            f"{capabilities['by_evidence_level']}. What is still missing is scale "
+            f"— {capabilities['total']} is a first, deliberately small cut, not "
+            "the platform's full surface, and E5-E7 are unreachable from a "
+            "repository scan for every one of them",
+            [
+                "mutate.py exists and is in CI",
+                f"capability registry: {capabilities['total']} capabilities",
+                f"by evidence level: {capabilities['by_evidence_level']}",
+            ],
         ),
         "4_integration": _gate(UNKNOWN, "no integration evidence has been collected"),
         "5_production": _gate(
@@ -479,6 +503,7 @@ def derive() -> dict[str, Any]:
         "run_ledger": _run_ledger(),
         "release_tooling": _release_tooling(),
         "supply_chain": _supply_chain(),
+        "capabilities": _capabilities(),
     }
     facts["gates"] = gates(facts)
     facts["blocked"] = [

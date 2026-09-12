@@ -149,6 +149,12 @@ jobs:
         # point: a gate that can only print a passing chain is decorative.
         run: uv run python scripts/spine_check.py
 
+      - name: Capability registry
+        # The canonical capability registry (Sovereign Execution Standard,
+        # Phase 1): evidence level per capability derived from symbol
+        # resolution and test/production references, never typed by hand.
+        run: uv run python scripts/capability_map.py --check
+
       - name: Derived execution state
         # execution_state.json is derived, never authored. This fails when the
         # committed file and the repository disagree in either direction —

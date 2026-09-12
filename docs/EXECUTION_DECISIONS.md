@@ -1529,3 +1529,91 @@ catch it either.
 **reversible how.** `git revert` restores the three prose gates and the
 narrower guard. Nothing outside `state_map.py`, `test_state_map.py` and the
 regenerated `execution_state.json` changed.
+
+---
+
+## D-023: a capability registry, capped where a repository scan actually ends
+
+**context.** The operator's Sovereign Execution Standard, §8 Phase 1, calls
+for a "canonical capability registry" carrying an evidence ladder (E0
+UNKNOWN through E7 OUTCOME PROVEN) and the invariant "every material claim
+must resolve to an evidence object." D-022's truth lock had already found
+gate `3_implementation` saying "measuring coverage per capability needs a
+capability registry that does not exist" as a literal — this is what closes
+that literal, the same way `_run_ledger`/`_release_tooling`/`_supply_chain`
+closed the other three.
+
+**scope, stated rather than implied.** `ontology/capabilities.json` seeds
+**8** capabilities: money as pico-dollar integers, the injected clock, cost-
+aware routing, RAG citation grounding, the injection fence, MCP per-tool
+permission scoping, hybrid retrieval, and the eval regression gate. Chosen
+because each one's evidence is unambiguous, not as an attempt at the
+platform's full surface — the source file's own `$comment` says this in
+words, and `state_map.py`'s gate 3 now says it too ("8 is a first,
+deliberately small cut"). A registry padded to look complete on day one is
+exactly the shape §26's "Score Anti-Gaming Rule" exists to refuse.
+
+**what is derived, and what a person still states.** A person writes name,
+symbol, description, contract, dependencies, security requirements,
+limitations, known risks, economic relevance — the standard's own minimum
+field set, checked non-empty by `test_every_capability_states_dependencies_
+and_risks`. Everything the standard calls evidence is computed by
+`capability_map.py` from the current tree: `omnex.core.symbols.resolve`
+decides E1 (declared, does not import) versus code-present; a grep over
+`engine/tests/` for the bare symbol name decides E3 (tested); a grep over
+`engine/src` — excluding the symbol's own defining file, so a class is never
+evidence of its own integration — decides E4. This is the same discipline
+`nodes.json`'s `verified` field already enforces one level over: the
+interesting number is never typed by whoever wrote the entry.
+
+**the ladder stops at E4, on purpose and said so on every entry.** E5
+(operationally verified), E6 (production verified) and E7 (outcome proven)
+each require evidence from something this repository does not have — a
+running deployment, an operator, a payment. Gate `5_production` already
+carries this exact reason as UNKNOWN. Rather than omit the three rungs
+silently or guess at them, every capability's rendered entry states
+`E5_UNKNOWN_NOT_OBSERVABLE` against a single shared reason string —
+`NOT_OBSERVABLE_REASON` — so the sentence cannot drift into eight
+almost-identical copies the way the split gate literals did in D-022.
+`test_e5_through_e7_are_never_claimed` holds the ceiling in place.
+
+**what was verified.** All 8 declared symbols resolve (`test_every_declared_
+capability_actually_resolves`); `derive_all()` is idempotent, run twice in
+the same test; every `E4_INTEGRATED` capability's `integrated_by` list is
+under `src/omnex` and excludes its own defining file
+(`test_a_capability_is_not_integrated_by_its_own_defining_file` — written
+because excluding the defining file was the one detail in `_referencing_
+files` most likely to be forgotten by a future edit, not because an earlier
+version of this session's own code shipped without it; no such bug was
+observed here). The committed `CAPABILITIES.md` matches a fresh render, checked
+the same way `INVARIANTS.md` is. `state_map.py`'s gate 3 was wired to
+`capability_map.summarise()` — imported, not re-derived, the same reason
+`_registry()` imports `claims` rather than re-reading `claims.jsonl` — and
+`test_gate_3_never_claims_more_capabilities_than_the_registry_holds` checks
+the gate's own count against the registry's rather than a hard-coded
+number, so the two cannot quietly diverge the way D-022's gates did. Full
+engine gate green: ruff/mypy, all invariants, both release targets, claims/
+runs/spine, `state_map.py --check`, full `pytest` (1,267 tests, up from
+1,256), `mutate.py` 29/29. `capability_map.py --check` added to both
+CLAUDE.md's gate block and `engine.yml`, in that order, so
+`test_ci_contract.py`'s superset requirement holds without needing its own
+change. Run recorded and closed as R-0023.
+
+**what else was considered.** A capability's evidence stored as a boolean
+per E-level (`tested: true`, `integrated: true`) rather than one ladder
+value — rejected, because the standard's own ladder is explicitly ordinal
+("stronger evidence has a higher level") and a set of independent booleans
+can produce an incoherent state (integrated but not tested) that the
+ordinal design refuses by construction. A separate machine-readable JSON
+artifact alongside the rendered `CAPABILITIES.md` — deferred, not rejected:
+nothing yet consumes capability data as JSON outside `state_map.py`, which
+already imports `capability_map` directly, so a second serialisation format
+would be surface with no reader, the same objection `docstrings_name_the_
+failure` raises about padding for its own sake.
+
+**reversible how.** Four new/changed files
+(`ontology/capabilities.json`, `scripts/capability_map.py`,
+`tests/test_capability_map.py`, `ontology/CAPABILITIES.md`) plus additive
+changes to `state_map.py`, `test_state_map.py`, `CLAUDE.md` and
+`engine.yml`. `git revert` returns gate 3 to its D-022 wording; nothing
+outside these files and the regenerated `execution_state.json` changed.
