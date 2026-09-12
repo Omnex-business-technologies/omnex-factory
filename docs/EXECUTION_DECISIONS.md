@@ -2403,3 +2403,86 @@ readers silently disagreeing.
 `engine.yml`. `git revert` removes CI coverage and the test file; the checker
 itself is untouched either way, since this round added test and CI wiring,
 not new logic.
+
+## D-032: two CI checks a developer running the documented gate could never reproduce
+
+**context.** D-031 closed a gap by generalising a pattern: a real checker with
+no test and no CI wiring. This round generalised one more level up and asked
+the opposite question — not "does every documented script run in CI"
+(`test_ci_runs_every_gate_script_the_document_names` already holds that), but
+"does CI run anything the document never mentions." Nobody had asked that
+question in either direction until now; the existing test only checks
+`documented <= in_ci`.
+
+**what was found.** Computing both sets directly (`_gate_scripts` over
+CLAUDE.md's fenced block versus over every workflow's commands) found
+`{'node_dossier.py', 'eval_gate.py'} = in_ci - documented`, non-empty. Both are
+real, blocking CI checks:
+
+- `node_dossier.py` (`engine.yml`'s "Decision queue" step) regenerates
+  `corpus/universal-ai-os/DECISIONS.md` from all 507 node dossiers and the step
+  fails the build if `git diff --exit-code` finds drift — the same "derived,
+  never authored" rule `execution_state.json` and `CAPABILITIES.md` already
+  enforce, just never added to the document that lists how to check it
+  locally.
+- `eval_gate.py` (`quality-gate.yml`'s separate job) runs the golden RAG suite
+  against `suites/baseline.json` and blocks a pull request on a regression in
+  any previously-passing case.
+
+A developer who ran only the documented commands, saw everything green, and
+pushed could still watch CI turn red for a reason CLAUDE.md never named —
+exactly the failure mode the document's own preface warns about ("the
+document becomes advice again") and the exact class of gap D-028
+(`readme_check.py`) and D-031 (`n8n_bindings_check.py`) each closed once, for
+one script at a time, without ever closing the general case.
+
+**what was built.** Both commands added to CLAUDE.md's gate block:
+`node_dossier.py` followed by `git diff --exit-code
+../corpus/universal-ai-os/DECISIONS.md` (the exact two lines `engine.yml` already
+runs), placed immediately before `apply_decisions.py --dry-run` since a
+decision review depends on the dossier being current; `eval_gate.py --baseline
+suites/baseline.json --out .omnex/runs` appended at the end, matching
+`quality-gate.yml`'s own invocation exactly. New test
+`test_the_documented_gate_names_every_script_ci_runs` in `test_ci_contract.py`
+asserts `in_ci <= documented` — the mirror of the existing test — so the two
+sets are now held equal from both directions, closing the general case this
+time rather than the two specific scripts.
+
+**what was verified.** Both commands run for real, locally, exactly as
+written: `node_dossier.py` regenerated `DECISIONS.md` with zero diff against
+what was already committed (it was current); `eval_gate.py` ran the real
+golden suite and exited 0 (`PASS: no regressions; 0 improved`, 83% pass rate,
+matching the suite's known, accepted limitation on `multi_page`/`comparison`
+categories — not a new failure introduced by this change). Both new tests
+pass; the full existing `test_ci_contract.py` suite still passes with the
+stricter, bidirectional check in place. Full engine gate green end to end,
+including the two newly-documented steps: ruff/format/mypy, all invariants,
+`env_check.py`, `extras_check.py`, `release_check.py --target engine`,
+claims/runs/spine, `actions_pin_check.py` (20/20), `n8n_bindings_check.py`,
+`readme_check.py --check` (1,309, up from 1,308 — one new test), `capability_
+map.py --check`, `state_map.py --check`, `node_dossier.py` + diff,
+`apply_decisions.py --dry-run`, full `pytest tests/`, `mutate.py` (29/29
+killed), `eval_gate.py`. `BUSINESS.md` also regenerated during this round's
+truth pass (day 45, 195 commits — both re-measured, not restated) with no
+narrative change. `release_check.py --target citegate` still fails on the
+same pre-existing, previously-documented git-remote reversion, unrelated to
+this change.
+
+**what else was considered.** Loosening the new test to a documented
+allowlist of "known CI-only steps" (e.g. an explicit exemption list) rather
+than requiring equality — rejected: an allowlist is exactly the mechanism
+that let `node_dossier.py` and `eval_gate.py` go unnoticed for as long as
+they did, since nothing forced anyone to update it. Requiring equality means
+the only way to add a CI-only script gate in the future is to also document
+it, which is the property this round exists to establish. Inlining the
+`quality-gate.yml` suite-fingerprint pre-check (a raw Python one-liner in the
+workflow) into CLAUDE.md's block as well — not needed: `Gate.decide()`
+(`omnex/evals/runner.py`) already refuses on a `suite_fingerprint` mismatch
+internally, so the workflow's inline check is a friendlier early message
+about a failure `eval_gate.py` alone already catches, not a second gate.
+
+**reversible how.** Two lines added to CLAUDE.md's fenced block and one new
+test function. `git revert` removes both; the stricter test would then need
+its own revert too, or it would immediately fail on the next CI-only script
+someone adds and forgets to document — which is the property working as
+intended, not a bug in the revert.

@@ -27,9 +27,12 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/python scripts/readme_check.py --check \
   && .venv/bin/python scripts/capability_map.py --check \
   && .venv/bin/python scripts/state_map.py --check \
+  && .venv/bin/python scripts/node_dossier.py \
+  && git diff --exit-code ../corpus/universal-ai-os/DECISIONS.md \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
-  && .venv/bin/python scripts/mutate.py
+  && .venv/bin/python scripts/mutate.py \
+  && .venv/bin/python scripts/eval_gate.py --baseline suites/baseline.json --out .omnex/runs
 
 # citegate — from oss/citegate/
 ../../engine/.venv/bin/python -m pytest tests/ -q
@@ -53,7 +56,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,308 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,309 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.

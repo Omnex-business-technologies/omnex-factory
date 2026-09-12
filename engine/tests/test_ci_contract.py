@@ -307,6 +307,30 @@ def test_ci_runs_every_gate_script_the_document_names() -> None:
     )
 
 
+def test_the_documented_gate_names_every_script_ci_runs() -> None:
+    """The direction the sibling test above cannot see.
+
+    `node_dossier.py` (engine.yml's "Decision queue" step, regenerating and
+    diffing DECISIONS.md) and `eval_gate.py` (quality-gate.yml, blocking on a
+    golden-suite regression) both ran in CI with no equivalent command in
+    CLAUDE.md's gate block, found by generalising the exact class of gap this
+    session already closed twice for individual scripts
+    (`readme_check.py`, `n8n_bindings_check.py`): a real CI check a developer
+    running only the documented commands would never exercise locally, so a
+    push that is locally green can still turn CI red for a reason the
+    document never mentioned. `test_ci_runs_every_gate_script_the_document_
+    names` only ever checked the other direction (documented <= in_ci); this
+    closes the loop so the two sets must now be equal.
+    """
+    documented = _gate_scripts(_documented_gate())
+    in_ci = _gate_scripts([c for commands in _all_commands().values() for c in commands])
+    assert in_ci <= documented, (
+        f"CI runs {sorted(in_ci - documented)} and CLAUDE.md's gate does not — "
+        "a developer following only the documented commands cannot reproduce "
+        "this locally before pushing"
+    )
+
+
 @pytest.mark.parametrize("subcommand", ["ruff check", "ruff format --check"])
 def test_ci_covers_every_directory_the_documented_gate_covers(subcommand: str) -> None:
     """The document was stricter than CI, which is the direction that hurts.
