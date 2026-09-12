@@ -1007,3 +1007,45 @@ separately from ordinary branch pushes, checkable only from
 `https://github.com/settings/installations` (or the org's installed
 GitHub Apps page) → the app → Permissions, which is the operator's page,
 not this session's.
+
+**resolved, same day: root cause found, and it is none of the above.**
+The operator checked all three remaining candidates (org-level Rulesets,
+the legacy Tag protection rules page, and the App's own Permissions page)
+and none applied. `GIT_TRACE_CURL=1 git push origin citegate-v0.1.0`
+finally surfaced the response body git's own error handling had been
+swallowing (`unpack error` / `unexpected disconnect while reading
+sideband packet` was the *symptom*, not the cause — git cannot parse a
+plain-text error into a sideband packet and gives up before printing it):
+
+```
+ERR push contains a ref outside refs/heads/*; only branch updates are permitted.
+```
+
+This is GitHub's own git-receive-pack response, and it names the actual
+mechanism: **the credential this session's git access uses is scoped to
+`refs/heads/*` only**. Not a repository setting, not an org setting, not
+a ruleset of any kind — a property of the token itself, enforced by
+GitHub before any repository-level policy is even consulted. Every
+candidate in the update above (repo Rulesets, org Rulesets, Tag
+protection rules, App permissions as *read via the GitHub UI*) was a
+reasonable place to look and every one came back clean because none of
+them is where this restriction lives.
+
+**what this means, plainly.** No setting on `github.com` that either the
+operator or this session can reach will change this — the token
+Claude Code Remote's git integration uses for this session is, by
+design or by the platform's own default, branch-only. This reads as the
+same shape `policy.py`'s own `ALWAYS_ASKS` set encodes one layer up in
+this repository (`PUBLISH`, `DEPLOY`, `CREDENTIAL`, `FINANCIAL`,
+`DESTRUCTIVE` — "cleared by no level alone") — except enforced here by
+GitHub itself, on the actual credential, rather than by a document this
+repository writes about itself. A tag is exactly the kind of ref a
+platform would reasonably keep out of an agent's write scope: it is
+what turns a rehearsal into a release.
+
+**resolution.** `citegate-v0.1.0` needs pushing from the operator's own
+machine, with their own git credentials — not from this session, and not
+by any further diagnosis or retry here. `git tag citegate-v0.1.0
+<commit>` at `1a109e1` (or wherever `master` is by the time this is
+done) then `git push origin citegate-v0.1.0` from a real developer
+checkout completes what this session correctly could not.
