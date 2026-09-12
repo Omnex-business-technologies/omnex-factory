@@ -23,6 +23,7 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/python scripts/runs.py --check \
   && .venv/bin/python scripts/spine_check.py \
   && .venv/bin/python scripts/actions_pin_check.py \
+  && .venv/bin/python scripts/n8n_bindings_check.py \
   && .venv/bin/python scripts/readme_check.py --check \
   && .venv/bin/python scripts/capability_map.py --check \
   && .venv/bin/python scripts/state_map.py --check \
@@ -52,7 +53,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,299 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,308 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -451,6 +452,13 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   A binding whose `source` is `this repository` names a command the checker
   **resolves** — module, `__main__`, subcommand, or a real `.py` path — because
   the first version of this catalogue named two modules that did not exist.
+  **The checker itself had no test and did not run in CI** until this round —
+  the resolution logic that caught that original defect was, for the whole
+  time since, invisible to `test_ci_runs_every_gate_script_the_document_names`
+  because it was never named in this gate block either. `test_n8n_bindings_
+  check.py` now exercises `unresolved_commands()` and `required_env()` against
+  synthetic catalogues, plus one test holding the real committed catalogue to
+  the same standard.
 - `engine/src/omnex/pipeline/__main__.py` — the CLI an n8n `executeCommand` node
   runs: `verify` (signature, replay window, sender id; body on stdin) and `claim`
   (deliver once). **Exit codes are the interface**: `0` proceed, `1` refused,

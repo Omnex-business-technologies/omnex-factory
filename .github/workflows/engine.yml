@@ -156,6 +156,16 @@ jobs:
         # to anything but a full 40-character SHA.
         run: uv run python scripts/actions_pin_check.py
 
+      - name: n8n binding catalogue
+        # §12 n8n Binding Standard: every command a binding claims is "this
+        # repository's own code" must actually resolve -- the first version
+        # of this catalogue named two modules that never existed
+        # (verify_webhook, ...seen_before) and passed every schema check
+        # written for it, because those checks were all about shape. Exits
+        # non-zero only on an unresolvable command, never on an unconfirmed
+        # binding: unconfirmed is every entry's honest starting state.
+        run: uv run python scripts/n8n_bindings_check.py
+
       - name: README test count agrees with the repository
         # §14 CLAIM PURGE / §33 Documentation Standard: README.md quoted
         # "1,231 tests" through this session's Phases 1-5 while the real
