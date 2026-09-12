@@ -53,11 +53,20 @@ BYTES_PER_UNIT = 1024
 
 @dataclass(frozen=True)
 class ToolSpec:
-    """What a server says it can do. The schema is the server's claim, not ours."""
+    """What a server says it can do. The schema is the server's claim, not ours.
+
+    `required_permission` is checked against the caller's granted set, never
+    against the tool's own claim about itself — a tool cannot promote its own
+    access. `None` means every caller may see and call it, which keeps every
+    tool registered before this field existed exactly as open as it always
+    was; scoping a tool down is an opt-in per tool, not a default that
+    silently narrows an existing server.
+    """
 
     name: str
     description: str
     input_schema: dict[str, Any] = field(default_factory=dict)
+    required_permission: str | None = None
 
     def __post_init__(self) -> None:
         if not self.name:

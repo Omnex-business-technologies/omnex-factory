@@ -92,7 +92,12 @@ class McpServer:
 
     # ── registration ──────────────────────────────────────────────────────
     def tool(
-        self, name: str, description: str = "", input_schema: dict[str, Any] | None = None
+        self,
+        name: str,
+        description: str = "",
+        input_schema: dict[str, Any] | None = None,
+        *,
+        required_permission: str | None = None,
     ) -> Callable[[Handler], Handler]:
         """Register one tool. Re-registering a name is refused, not overwritten.
 
@@ -103,7 +108,7 @@ class McpServer:
         def register(handler: Handler) -> Handler:
             if name in self._handlers:
                 raise ConfigurationError(f"tool {name!r} is already registered", tool=name)
-            self._specs[name] = ToolSpec(name, description, input_schema or {})
+            self._specs[name] = ToolSpec(name, description, input_schema or {}, required_permission)
             self._handlers[name] = handler
             return handler
 
@@ -113,13 +118,36 @@ class McpServer:
     def tools(self) -> tuple[ToolSpec, ...]:
         return tuple(self._specs[name] for name in sorted(self._specs))
 
+    def available_to(self, granted: frozenset[str] | None) -> tuple[ToolSpec, ...]:
+        """The tools one caller may see. `None` grant means unrestricted.
+
+        Unrestricted-by-default is what keeps every existing caller of this
+        server — every test, every server that never opted into scoping —
+        seeing exactly the tool list it always saw. A caller only loses tools
+        once it is handed an actual (possibly empty) granted set.
+        """
+        if granted is None:
+            return self.tools
+        return tuple(
+            t
+            for t in self.tools
+            if t.required_permission is None or t.required_permission in granted
+        )
+
     @property
     def initialized(self) -> bool:
         return self._initialized
 
     # ── dispatch ──────────────────────────────────────────────────────────
-    def handle(self, raw: str) -> str | None:
-        """Answer one message. None means there is nothing to send back."""
+    def handle(self, raw: str, *, granted: frozenset[str] | None = None) -> str | None:
+        """Answer one message. None means there is nothing to send back.
+
+        `granted` names the permissions the caller on the other end of this
+        message actually holds. It is `None` by default — unrestricted,
+        matching every server's behaviour before scoping existed — because a
+        transport that never passes a caller identity has not opted into
+        scoping and must not be silently narrowed by it.
+        """
         try:
             message = decode(raw)
         except ValidationFailed as exc:
@@ -138,22 +166,23 @@ class McpServer:
                     error=RpcError(ErrorCode.INVALID_REQUEST, "this peer sends no requests"),
                 )
             )
-        return encode(self._on_request(message))
+        return encode(self._on_request(message, granted))
 
     def _on_notification(self, message: Notification) -> None:
         if message.method == "notifications/initialized":
             self._initialized = True
 
-    def _on_request(self, request: Request) -> Response:
+    def _on_request(self, request: Request, granted: frozenset[str] | None) -> Response:
         if request.method == "initialize":
             self._initialized = True
             return Response(id=request.id, result=self._handshake())
         if request.method == "tools/list":
             return self._require_handshake(request) or Response(
-                id=request.id, result={"tools": [spec.as_dict() for spec in self.tools]}
+                id=request.id,
+                result={"tools": [spec.as_dict() for spec in self.available_to(granted)]},
             )
         if request.method == "tools/call":
-            return self._require_handshake(request) or self._call(request)
+            return self._require_handshake(request) or self._call(request, granted)
         if request.method == "ping":
             return Response(id=request.id, result={})
         return Response(
@@ -181,15 +210,21 @@ class McpServer:
             ),
         )
 
-    def _call(self, request: Request) -> Response:
+    def _call(self, request: Request, granted: frozenset[str] | None = None) -> Response:
         name = request.params.get("name")
-        if not isinstance(name, str) or name not in self._handlers:
+        allowed = {spec.name for spec in self.available_to(granted)}
+        if not isinstance(name, str) or name not in self._handlers or name not in allowed:
+            # A tool this caller lacks the permission for is refused with the
+            # exact same error as a tool that does not exist — never
+            # "permission denied". Naming a scoped tool's existence to a
+            # caller who cannot use it discloses a capability for free; the
+            # `available` list already reflects only what this caller may see.
             return Response(
                 id=request.id,
                 error=RpcError(
                     ErrorCode.INVALID_PARAMS,
                     f"no tool named {name!r}",
-                    {"available": sorted(self._handlers)},
+                    {"available": sorted(allowed)},
                 ),
             )
         arguments = request.params.get("arguments") or {}
@@ -225,19 +260,28 @@ class McpServer:
         """
         return _Loopback(self)
 
-    def serve(self, transport: Transport, *, timeout: float = 30.0, limit: int = 0) -> int:
+    def serve(
+        self,
+        transport: Transport,
+        *,
+        timeout: float = 30.0,
+        limit: int = 0,
+        granted: frozenset[str] | None = None,
+    ) -> int:
         """Read, answer, repeat, until the peer goes quiet.
 
         `limit` bounds the number of messages handled and exists so a test can
         run the real loop rather than a reimplementation of it. Zero means no
-        bound.
+        bound. `granted` is fixed for the whole session, matching one
+        transport connection belonging to one caller — a caller who needs a
+        different grant reconnects rather than re-authenticating mid-stream.
         """
         handled = 0
         while not limit or handled < limit:
             raw = transport.receive(timeout)
             if raw is None:
                 break
-            reply = self.handle(raw)
+            reply = self.handle(raw, granted=granted)
             handled += 1
             if reply is not None:
                 transport.send(reply)

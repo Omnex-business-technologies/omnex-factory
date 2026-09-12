@@ -1214,3 +1214,85 @@ exactly the shape this alert exists to catch, one level up.
 **reversible how.** Four one-line `permissions:` blocks; `git revert`
 removes them and returns each workflow to implicit default permissions,
 which is the state that was flagged in the first place.
+
+---
+
+## D-020: MCP tool permission scoping — one real gap found in a handbook review
+
+**context.** The operator asked for a thorough review of
+`github.com/umang-algo/agentic-ai-handbook` — a 21-chapter coding
+handbook — for anything worth building into `engine/mcp`, after sharing
+architecture diagrams and a lesson on a "4-layer secure agent"
+(Security → Tools → Memory → LLM). The review was read in full, not
+skimmed for confirmation: most of the handbook's concepts are already
+implemented in `engine/`, several more rigorously than the lesson's own
+example code (`memory.ShortTermBuffer` is token-budgeted; the lesson's
+own in-memory buffer is turn-budgeted only), and several more are
+outside this product's current scope (healthcare/legal/finance vertical
+agent chapters). Reporting every chapter as a "win" to match the
+operator's framing would have been the same failure this file already
+warns against elsewhere — manufacturing prestige instead of measuring
+it. Exactly one concrete, actionable gap was found: `McpServer` had no
+notion of per-tool access control. Every registered tool was visible
+and callable by every caller of `tools/list` and `tools/call` — correct
+for a single-tenant server, wrong the moment one server exposes both a
+read-only tool and something destructive (the lesson's own example is
+`delete_all`) to callers who should not all see the same list. The
+operator confirmed building exactly this one gap ("Da, gradi to"), not
+a broader mandate to build everything the handbook mentions.
+
+**what was built.** `ToolSpec.required_permission: str | None = None` —
+deliberately never read from or written to `from_wire()`/`as_dict()`,
+because a remote server claiming its own permission scope over the wire
+would let a compromised or malicious server grant itself access it
+should not have; scoping is a local, server-side policy decision only.
+`McpServer.available_to(granted: frozenset[str] | None)` filters
+`self.tools`, with `granted=None` returning everything unfiltered — the
+same default `handle()`, `_on_request()`, `_call()` and `serve()` all
+carry, so every caller and every one of the 47 pre-existing tests keeps
+seeing exactly what it always saw. Scoping is opt-in per tool and
+opt-in per caller; nothing already deployed loses a tool by this
+landing.
+
+**the one real design decision: what an unauthorized call looks like.**
+The handbook's own example (`ToolOrchestrator.get_available_tools()`)
+filters the list a caller sees but says nothing about what happens if
+that caller tries to call a filtered-out tool by name anyway. Here,
+`_call()` refuses a scoped-and-unauthorized tool with the *exact* same
+error, code and `available` payload as a tool that does not exist at
+all — never a distinct "permission denied". A distinguishable refusal
+confirms a scoped tool's existence to a caller who is not supposed to
+know it is there, which is itself a capability disclosure. This is my
+own security-engineering judgment, not copied from the reference
+material, and it is the one place this feature goes further than the
+lesson it was prompted by.
+
+**what was verified.** Four new tests
+(`test_an_unscoped_caller_sees_and_calls_everything`,
+`test_a_scoped_tool_is_invisible_to_a_caller_without_the_permission`,
+`test_calling_a_scoped_tool_without_permission_reads_exactly_like_no_such_tool`,
+`test_a_caller_with_the_right_permission_gets_the_scoped_tool_back`) plus
+all 47 pre-existing `test_mcp.py` tests, green. Full engine gate run
+clean: ruff check/format, mypy, invariant_map (9/9), env_check,
+extras_check, `release_check.py` both targets (citegate's known
+session-local `[project.urls]` artifact is the only non-passing check,
+unchanged from every prior run this session), claims/runs/spine checks,
+`state_map.py` regenerated and agreeing in both directions,
+`apply_decisions.py --dry-run`, full `pytest tests/ -q`, and
+`mutate.py` at 29/29 killed. Recorded as R-0019.
+
+**what else was considered.** A boolean `is_allowed(tool, granted)`
+check exposed as a separate public method — rejected, because a second
+entry point for the same decision `available_to()` already makes is
+exactly the "two copies that can diverge" shape `twin_splitters_agree`
+exists to warn about; `_call()` derives `allowed` from `available_to()`
+directly instead. Encoding permissions as a hierarchy or a policy
+object (roles, wildcards) — rejected as unearned complexity: nothing in
+this codebase yet has more than one caller identity, and a flat
+`frozenset[str]` is the smallest structure that the one real requirement
+(a caller either holds a named permission or does not) needs.
+
+**reversible how.** Three files changed
+(`mcp/tools.py`, `mcp/server.py`, `tests/test_mcp.py`), all additive —
+every new parameter defaults to `None`/unrestricted. `git revert` removes
+the feature cleanly; no caller of the prior API needs to change.
