@@ -1617,3 +1617,92 @@ failure` raises about padding for its own sake.
 changes to `state_map.py`, `test_state_map.py`, `CLAUDE.md` and
 `engine.yml`. `git revert` returns gate 3 to its D-022 wording; nothing
 outside these files and the regenerated `execution_state.json` changed.
+
+---
+
+## D-024: every GitHub Action pinned to a commit — and a wrong pin caught before it shipped
+
+**context.** Sovereign Execution Standard, Phase 2, names "pinned or
+controlled GitHub Actions" as a required supply-chain control. A repository
+scan for D-022's `_supply_chain()` had already measured what security
+tooling exists here; it had not asked whether the workflows trust a moving
+target. They did: every one of the 19 `uses:` lines across all five
+workflow files pinned to a bare major-version tag (`@v7`, `@v8`, `@v4`),
+never a commit.
+
+**why a tag is not a pin.** `actions/checkout@v7` is a promise the workflow
+file cannot keep, because `v7` is a ref the action's own maintainer
+controls, not this repository. If that maintainer's GitHub account were
+compromised — this has happened to real, widely-used actions — `v7` could
+be moved to different code with no change here at all, and every workflow
+would run it on its next trigger with nothing in this repository's history
+showing why. A 40-character commit SHA is immutable by construction; a
+version tag is a claim about intent.
+
+**the mistake this caught before it shipped.** Resolving each tag meant
+cloning the action's own public repository (the git proxy's anonymous
+public-GitHub lane, the same one `add_repo` uses) and reading the commit
+`v7`/`v8`/`v4` currently points to. Doing this for all six distinct actions
+(`checkout`, `setup-node`, `upload-artifact`, `download-artifact`,
+`attest-build-provenance`, `setup-uv`) surfaced a real inconsistency:
+`git rev-parse v4` on `attest-build-provenance` and `git rev-parse v7` on
+`setup-uv` returned a **tag object** SHA, not the commit SHA the tag points
+to — those two repositories use *annotated* tags, where the other four use
+lightweight ones. `git cat-file -t <ref>` on all six showed `tag` for those
+two and `commit` for the rest; dereferencing with `<ref>^{commit}` gave the
+right answer in every case. Pinning to the tag-object SHA would have
+produced a workflow that parses as valid YAML, passes review at a glance,
+and fails the moment it runs — `uses:` requires a commit, and a tag object
+is not one. Checking uniformly across all six rather than assuming the
+first four generalised is what caught it; the standard's own §22
+("adversarial verification... how can this be proven to NOT work") is the
+posture that made checking the assumption worth doing at all.
+
+**what was done.** All 19 existing pins plus one new one (20 total) now
+name a full 40-character commit SHA with a `# vX.Y.Z` comment — not read by
+any checker, but the only way a future reviewer can run
+`git log <old>..<new>` in the action's own repository to see what a version
+bump actually changes. `scripts/actions_pin_check.py` derives this rather
+than trusting it stays true: it reuses `release_check._uncommented` and
+`._workflow_text` (no second comment-stripping reader — the
+`twin_splitters_agree` lesson), extracts every `uses: action@ref`, and
+fails on any `ref` that is not `^[0-9a-f]{40}$`. Added
+`actions/dependency-review-action` to `ci.yml`, gated to `pull_request`
+only (it has no base ref to diff against on a plain push) — reviews a
+PR's dependency *diff* against known vulnerabilities and licence
+incompatibilities, which is a different question from `npm audit`'s
+"is anything currently installed insecure."
+
+**wired in, not bolted on.** `state_map.py`'s `_supply_chain()` now also
+reports `actions_pinned_to_sha`/`actions_total` (via
+`actions_pin_check.summarise()`, imported) and
+`dependency_review_in_ci`; gate `6_security`'s evidence carries both.
+`test_gate_...` in `test_state_map.py` asserts `actions_pinned_to_sha ==
+actions_total > 0` directly against the live repository, so a future
+unpinned addition fails this test rather than only `actions_pin_check.py`
+itself — two readers of the same fact, deliberately, since one is the gate
+CI runs standalone and the other is the state the gate feeds.
+
+**what was verified.** `actions_pin_check.py` reports 20/20; every edited
+workflow file still parses as YAML; `test_ci_contract.py` still passes,
+so CI remains a superset of CLAUDE.md's gate block with no separate edit
+needed there; full engine gate green (ruff/mypy, all invariants, both
+release targets, claims/runs/spine, `state_map.py --check`,
+`capability_map.py --check`, full `pytest` — 1,276 tests, up from 1,267 —
+and `mutate.py` 29/29).
+
+**what else was considered.** Pinning to each action's `v7.0.0`-style
+first point release instead of whatever `v7` currently resolves to —
+rejected: that would silently roll every action *backward* to its first
+release under the major version, changing what the workflows actually run
+today rather than freezing it. Writing the pin-checker to also verify the
+SHA belongs to the named action's actual repository (fetch and confirm) —
+deferred: `actions_pin_check.py`'s own docstring says explicitly what it
+does not check ("whether the currently-pinned commit is itself
+trustworthy") rather than silently implying more coverage than it has.
+
+**reversible how.** Five workflow files with only `uses:` lines changed
+(no trigger, job, or step logic touched), plus
+`scripts/actions_pin_check.py`, its test, and the additive `state_map.py`/
+`CLAUDE.md`/`engine.yml` changes. `git revert` returns every action to its
+tag-pinned form.
