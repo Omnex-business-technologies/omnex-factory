@@ -913,3 +913,78 @@ could be silently outside of.
 **reversible how.** Deleting `.github/dependabot.yml` returns to today's
 state exactly; Dependabot's security-alert channel is unaffected either
 way, since that one needs no config file to begin with.
+
+---
+
+## D-017 · The citegate tag push was refused, and nothing public exists
+
+**date:** 2026-09-12 · **status:** ACCEPTED, blocked on the operator ·
+**reversible:** n/a (a finding; no tag exists anywhere but this sandbox)
+
+**context.** The operator gave explicit, specific authorization — after
+being shown exactly what it creates (a real, public, irreversible-once-
+pushed GitHub Release) — to cut `citegate-v0.1.0`. `release_check.py
+--target citegate --release` was run first and found only the documented
+session-local `[project.urls]` artifact; the dirty-tree, tag-not-taken,
+HEAD-on-remote-branch, license, version, floor and dependency checks all
+passed clean. `git tag citegate-v0.1.0` created the tag locally at `1a109e1`.
+
+**what happened.** `git push origin citegate-v0.1.0` was refused with a
+clean `HTTP 403 Forbidden` at the git-receive-pack layer itself — confirmed
+with `GIT_CURL_VERBOSE`: TLS handshake to `github.com` succeeded normally,
+the `POST /RaveZona/omnex-factory/git-receive-pack` request went through,
+and GitHub's own response was the 403, not this sandbox's proxy
+(`recentRelayFailures` was empty at the time). Retried once per the
+network-error protocol; same result.
+
+**ruled out, in order:**
+1. **A proxy problem.** `curl -sS "$HTTPS_PROXY/__agentproxy/status"`
+   showed zero recent relay failures, and the TLS/HTTP exchange completed
+   normally up to GitHub's own 403 response.
+2. **A general access regression.** An ordinary branch push to
+   `claude/production-ai-projects-bzz82l` on the same remote, in the same
+   minute, succeeded normally — ruling out "this session cannot reach
+   `RaveZona/omnex-factory` right now" as the explanation.
+3. **The already-known cross-owner limitation.** Pushing the same tag
+   directly to `Omnex-business-technologies/omnex-factory` was blocked
+   too, but with a *different*, already-documented failure: this session's
+   own proxy refuses it outright ("is not in this session's authorized
+   repository set"), the same `add_repo` cross-tier restriction `D-013`
+   already named. That is a different failure mode from the clean 403 on
+   the old path, which rules out "the new owner is simply unreachable"
+   as the explanation for the tag-specific refusal there.
+
+**what is left, honestly.** The refusal is specific to *creating this tag
+ref* — not the repository, not this branch, not this session's network
+path in general. The most consistent unconfirmed explanation is a tag
+protection rule or ruleset on the repository or organization restricting
+who may create a tag matching this pattern, distinct from the branch-
+protection ruleset `docs/TRANSFER.md`'s own step 6 already tracks as open.
+This session has no tool that reads GitHub rulesets or tag-protection
+settings (checked: the GitHub MCP toolset here has `get_tag`, `list_tags`,
+`get_release_by_tag` and the Actions tools, nothing that reads a
+repository's rule configuration) — so this cannot be confirmed from here,
+only reported.
+
+**not routed around.** No force, no alternate credential, no third push
+path attempted beyond the two legitimate diagnostic pushes above. The
+local tag object exists only in this sandbox's git store and was never
+accepted by GitHub — confirmed with `get_tag`, which returns `404`.
+Nothing public was created; `C-013` stays `UNKNOWN`, not `CONTRADICTED` —
+being unable to push is not evidence the workflow itself would fail, the
+same `UNKNOWN`-is-not-`FALSE` distinction `execution_state.json` already
+holds elsewhere.
+
+**what the operator can check, since this session cannot.** GitHub
+Settings → Rules → Rulesets (and the older Settings → Tags → "Tag
+protection rules") on `Omnex-business-technologies/omnex-factory`, for
+any rule matching `citegate-v*` or `*`. If one exists and is intended to
+block automated pushes, the tag needs pushing from a person's own
+machine, or the rule needs a bypass naming this integration. If no such
+rule exists, this is worth a second attempt from here — the failure was
+clean enough to retry once resolved, but not something to keep retrying
+blind.
+
+**reversible how.** Nothing to reverse — no tag, no release, no artifact
+exists anywhere outside this sandbox's local git store. `R-0016` records
+the attempt and this finding.
