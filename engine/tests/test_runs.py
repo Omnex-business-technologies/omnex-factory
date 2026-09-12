@@ -200,6 +200,24 @@ def test_recording_a_run_refuses_without_a_prediction(tmp_path: Path, monkeypatc
     assert ledger.main() == 1
 
 
+def test_recording_a_run_refuses_a_level_state_map_would_not_recognise(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """R-0029 was recorded with `--level L3` — one letter short of the real
+    `L3_REPOSITORY` — and state_map.py's gate 9 silently counted it as
+    autonomy above L3, because its check is `not in ("", "L3_REPOSITORY")`
+    rather than a membership test against every real level. The ledger is
+    append-only so that entry could not be fixed; this closes the gap so the
+    next one is refused at record time instead."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["runs", "--record", "--objective", "x", "--action", "y", "--expect", "z", "--level", "L3"],
+    )
+    monkeypatch.setattr(ledger, "LEDGER", tmp_path / "runs.jsonl")
+    assert ledger.main() == 1
+
+
 def test_the_committed_ledger_records_a_prediction_made_before_its_outcome() -> None:
     """R-0001 was written before the work it describes was finished. That is the
     only kind of row this file can honestly contain, and the reason none of the

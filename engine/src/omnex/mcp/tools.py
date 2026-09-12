@@ -61,16 +61,40 @@ class ToolSpec:
     tool registered before this field existed exactly as open as it always
     was; scoping a tool down is an opt-in per tool, not a default that
     silently narrows an existing server.
+
+    `timeout_seconds` and `dangerous` are Sovereign Execution Standard §11
+    (MCP/TOOL SECURITY): a bound on how long a caller waits for a handler, and
+    a flag naming an operation whose consequence is hard to undo (a write, a
+    send, a delete). Both default to the fully-open behaviour every tool
+    registered before these fields existed already had — `None` timeout,
+    `dangerous=False` — so existing callers see no change until a tool opts
+    in.
+
+    `dangerous` is wire-safe and travels in `as_dict()`/`from_wire()`, unlike
+    `required_permission`. The two look similar and are not: a forged
+    permission claim grants access, while `dangerous` grants nothing — it is
+    a caveat for whoever is about to invoke the tool, so a client (or the
+    model driving it) can be told which tools warrant more caution before
+    calling one. A tool cannot lie its way to more access by setting it, only
+    warn a caller who might otherwise call an irreversible operation blind.
     """
 
     name: str
     description: str
     input_schema: dict[str, Any] = field(default_factory=dict)
     required_permission: str | None = None
+    timeout_seconds: float | None = None
+    dangerous: bool = False
 
     def __post_init__(self) -> None:
         if not self.name:
             raise ValidationFailed("a tool needs a name")
+        if self.timeout_seconds is not None and self.timeout_seconds <= 0:
+            raise ValidationFailed(
+                "a non-positive timeout is not a bound, it is a guaranteed refusal",
+                tool=self.name,
+                timeout_seconds=self.timeout_seconds,
+            )
 
     @classmethod
     def from_wire(cls, payload: dict[str, Any]) -> ToolSpec:
@@ -78,6 +102,7 @@ class ToolSpec:
             name=str(payload.get("name", "")),
             description=str(payload.get("description", "")),
             input_schema=payload.get("inputSchema") or {},
+            dangerous=bool(payload.get("dangerous", False)),
         )
 
     def as_dict(self) -> dict[str, Any]:
@@ -85,6 +110,7 @@ class ToolSpec:
             "name": self.name,
             "description": self.description,
             "inputSchema": self.input_schema,
+            "dangerous": self.dangerous,
         }
 
 

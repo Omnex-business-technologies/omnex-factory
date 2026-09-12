@@ -29,11 +29,13 @@ server it has not spoken to, and the failure surfaces later as a missing tool.
 
 from __future__ import annotations
 
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
 from ..core.errors import ConfigurationError, ValidationFailed
+from ..guard.ratelimit import RateLimit, RateLimiter
 from .protocol import (
     ErrorCode,
     Notification,
@@ -88,6 +90,7 @@ class McpServer:
         self.protocol_version = protocol_version
         self._specs: dict[str, ToolSpec] = {}
         self._handlers: dict[str, Handler] = {}
+        self._limiters: dict[str, RateLimiter] = {}
         self._initialized = False
 
     # ── registration ──────────────────────────────────────────────────────
@@ -98,18 +101,38 @@ class McpServer:
         input_schema: dict[str, Any] | None = None,
         *,
         required_permission: str | None = None,
+        timeout_seconds: float | None = None,
+        dangerous: bool = False,
+        rate_limit: RateLimit | None = None,
     ) -> Callable[[Handler], Handler]:
         """Register one tool. Re-registering a name is refused, not overwritten.
 
         Silent replacement is how two versions of a tool end up in one process
         and the one that answers depends on import order.
+
+        `rate_limit`, when given, gets its own `RateLimiter` keyed by tool
+        name — reusing `guard.ratelimit`'s GCRA implementation rather than a
+        second one, per this repository's own `one_symbol_resolver` /
+        `twin_splitters_agree` rule against duplicate implementations of the
+        same thing. `timeout_seconds` and `dangerous` are stored on the
+        `ToolSpec`; see its docstring for what each means and, for
+        `timeout_seconds`, what kind of bound `_call` actually enforces.
         """
 
         def register(handler: Handler) -> Handler:
             if name in self._handlers:
                 raise ConfigurationError(f"tool {name!r} is already registered", tool=name)
-            self._specs[name] = ToolSpec(name, description, input_schema or {}, required_permission)
+            self._specs[name] = ToolSpec(
+                name,
+                description,
+                input_schema or {},
+                required_permission,
+                timeout_seconds,
+                dangerous,
+            )
             self._handlers[name] = handler
+            if rate_limit is not None:
+                self._limiters[name] = RateLimiter(rate_limit)
             return handler
 
         return register
@@ -233,8 +256,65 @@ class McpServer:
                 id=request.id,
                 error=RpcError(ErrorCode.INVALID_PARAMS, "arguments must be an object"),
             )
+
+        limiter = self._limiters.get(name)
+        if limiter is not None:
+            decision = limiter.check(name)
+            if not decision.allowed:
+                # A rate limit is the world saying "not yet", not a broken
+                # message — the same "tool that fails is a RESULT" rule this
+                # module is built around (see the module docstring), applied
+                # to a rejection this server issued rather than one the
+                # handler raised.
+                return Response(
+                    id=request.id,
+                    result={
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": (
+                                    f"rate limit exceeded for {name!r}; "
+                                    f"retry after {decision.retry_after:.3f}s"
+                                ),
+                            }
+                        ],
+                        "isError": True,
+                    },
+                )
+
+        timeout = self._specs[name].timeout_seconds
         try:
-            produced = self._handlers[name](arguments)
+            if timeout is None:
+                produced = self._handlers[name](arguments)
+            else:
+                produced = self._call_bounded(name, arguments, timeout)
+        except _HandlerTimedOut:
+            # A bound on how long THIS caller waits, not a preemptive kill of
+            # the handler thread — the same honest limitation
+            # `mcp.transport.StreamTransport.receive()` and `guard.sandbox`'s
+            # module docstring already document for an in-process deadline: a
+            # `Clock` cannot be injected into a running thread, so nothing at
+            # this layer can actually stop a genuinely hung handler, only stop
+            # waiting for it. `guard.sandbox`'s `subprocess.run(timeout=...)`
+            # is the stronger, OS-level guarantee, and is a different
+            # mechanism for a different case (an external process, not an
+            # in-process callable).
+            return Response(
+                id=request.id,
+                result={
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                f"tool {name!r} did not return within {timeout}s; "
+                                "the call is abandoned but the handler may still "
+                                "be running"
+                            ),
+                        }
+                    ],
+                    "isError": True,
+                },
+            )
         except Exception as exc:  # every exception — see the module docstring
             # Every exception, including ones this package did not define. A
             # third-party tool raising something unexpected must reach the model
@@ -247,6 +327,30 @@ class McpServer:
                 },
             )
         return Response(id=request.id, result=_as_content(produced))
+
+    def _call_bounded(self, name: str, arguments: dict[str, Any], timeout: float) -> Any:
+        """Run a handler on a worker thread and wait at most `timeout` seconds.
+
+        Bounds the caller's wait; does not bound the handler. See the
+        `_HandlerTimedOut` branch in `_call` for why that distinction is
+        honestly documented rather than papered over.
+        """
+        outcome: dict[str, Any] = {}
+
+        def run() -> None:
+            try:
+                outcome["result"] = self._handlers[name](arguments)
+            except BaseException as exc:  # re-raised on the caller's thread
+                outcome["error"] = exc
+
+        worker = threading.Thread(target=run, daemon=True)
+        worker.start()
+        worker.join(timeout)
+        if worker.is_alive():
+            raise _HandlerTimedOut(name)
+        if "error" in outcome:
+            raise outcome["error"]
+        return outcome.get("result")
 
     # ── serving ───────────────────────────────────────────────────────────
     def loopback(self) -> Transport:
@@ -286,6 +390,10 @@ class McpServer:
             if reply is not None:
                 transport.send(reply)
         return handled
+
+
+class _HandlerTimedOut(Exception):
+    """Internal signal: `_call_bounded`'s wait expired. Never reaches a caller."""
 
 
 class _Loopback:
