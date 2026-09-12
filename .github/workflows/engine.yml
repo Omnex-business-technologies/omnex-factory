@@ -43,6 +43,11 @@ on:
       - ".github/workflows/*.yml"
   workflow_dispatch:
 
+# Read by default. Both jobs below only lint, type-check and test — neither
+# writes back to the repository or reaches outside it.
+permissions:
+  contents: read
+
 concurrency:
   group: engine-${{ github.ref }}
   cancel-in-progress: true

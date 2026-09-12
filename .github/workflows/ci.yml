@@ -14,6 +14,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Read by default. Nothing in this workflow writes back to the repository,
+# comments on anything, or reaches outside it.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
