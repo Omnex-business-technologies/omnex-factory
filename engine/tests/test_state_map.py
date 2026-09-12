@@ -256,6 +256,13 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
         "every GitHub Action this repository runs must be pinned to a commit SHA"
     )
 
+    implementation = " ".join(str(e) for e in gates["3_implementation"]["evidence"])
+    assert "mutation_probe:" in implementation
+    assert "'present': True" in implementation, (
+        "mutate.py's committed result must be read, not asserted -- this is "
+        "the exact hard-coded-claim shape gates 1 and 2 already carried once"
+    )
+
     autonomy = " ".join(str(e) for e in gates["9_autonomy"]["evidence"])
     assert "chain intact: True" in autonomy
     assert "runs recorded: 0" not in autonomy, "the ledger is not empty"
@@ -283,3 +290,35 @@ def test_gate_3_never_claims_more_capabilities_than_the_registry_holds() -> None
     gate_evidence = " ".join(str(e) for e in state["gates"]["3_implementation"]["evidence"])
     real_total = capability_map.summarise(capability_map.derive_all())["total"]
     assert str(real_total) in gate_evidence
+
+
+def test_gate_3_reports_an_absent_mutation_probe_honestly(monkeypatch, tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """The defect this whole mechanism replaces: gate 3 used to say 'the
+    mutation probe kills every mutation' as a literal string, which stayed
+    true in the file's own text even if the probe had never run at all. Now
+    that the claim comes from a file, an absent file must produce an honest
+    absence -- proven here by pointing the reader at a path that does not
+    exist, the one state this repository's own history shows a hard-coded
+    gate cannot represent."""
+    import mutate
+
+    monkeypatch.setattr(mutate, "RESULT", tmp_path / "nonexistent.json")
+    facts = state_map._mutation_probe()
+    assert facts == {"present": False}
+    assert "absent" in state_map._mutation_clause(facts)
+
+
+def test_gate_3_flags_a_stale_probe_against_a_grown_catalogue(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """A mutation added to `CATALOGUE` with nobody re-running the probe is the
+    other honest-absence case: the file is present, but its `total` no longer
+    describes 'every mutation this repository has'."""
+    probe = {
+        "present": True,
+        "total": 1,
+        "killed": 1,
+        "survivors": [],
+        "catalogue_size_matches": False,
+    }
+    clause = state_map._mutation_clause(probe)
+    assert "stale" in clause
+    assert "re-run mutate.py" in clause

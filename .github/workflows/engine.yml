@@ -210,6 +210,15 @@ jobs:
         if: matrix.python == '3.12'
         run: uv run python scripts/mutate.py
 
+      - name: Mutation probe result committed
+        # mutate.py writes ontology/mutation_probe.json on every run, survivors
+        # included -- state_map.py's gate 3 reads it rather than the literal
+        # "the mutation probe kills every mutation" it used to carry (true the
+        # day it was typed, never re-verified since). This is that claim's own
+        # freshness check, the same shape as the Decision queue step above.
+        if: matrix.python == '3.12'
+        run: git diff --exit-code ontology/mutation_probe.json
+
       - name: Confirm the suite needs no credentials
         # The claim above is worth enforcing rather than trusting. Running with
         # the environment stripped catches the first test that quietly starts

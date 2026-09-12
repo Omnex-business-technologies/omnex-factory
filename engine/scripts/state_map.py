@@ -335,6 +335,67 @@ def _capabilities() -> dict[str, Any]:
     return capability_map.summarise(capability_map.derive_all())
 
 
+def _mutation_probe() -> dict[str, Any]:
+    """What `mutate.py` last found, read from its own committed result.
+
+    Gate 3 used to say "the mutation probe kills every mutation" as a literal
+    string in this file's own source — true the day it was typed, and nothing
+    afterward could make it false again even if a mutation started surviving.
+    The same shape `test_no_gate_claims_a_file_is_absent_while_it_sits_in_the_
+    repository` was written for, one level in: a hard-coded claim instead of a
+    hard-coded absence. `mutate.py` now writes `ontology/mutation_probe.json`
+    on every run, survivors included, and this reads it back rather than
+    asserting anything about mutation testing on its own.
+
+    `total` is compared against the live `mutate.CATALOGUE` length to catch a
+    mutation added to the catalogue with nobody re-running the probe since,
+    which the file's own `total` field would otherwise hide. No commit is
+    bound to this fact on purpose: an earlier version wrote `git rev-parse
+    HEAD` into the committed file, which a GitHub Actions `pull_request` run
+    checks out as a synthetic merge-preview commit that never matches
+    anything actually committed — `git diff --exit-code` on that field failed
+    on every single pull request, structurally, the first time it ran for
+    real. `DECISIONS.md` and `CAPABILITIES.md` already avoid this by binding
+    to no commit at all; only `execution_state.json` carries one, and only
+    because `differences()` explicitly drops it before comparing (see below).
+    Matching that pattern here without also copying its exclusion is exactly
+    what broke.
+    """
+    import mutate
+
+    if not mutate.RESULT.exists():
+        return {"present": False}
+    payload = json.loads(mutate.RESULT.read_text(encoding="utf-8"))
+    return {
+        "present": True,
+        "total": payload.get("total", 0),
+        "killed": payload.get("killed", 0),
+        "survivors": payload.get("survivors", []),
+        "catalogue_size_matches": payload.get("total", 0) == len(mutate.CATALOGUE),
+    }
+
+
+def _mutation_clause(mutation: dict[str, Any]) -> str:
+    """Gate 3's mutation sentence, honest about what the committed file says."""
+    if not mutation["present"]:
+        return (
+            "the mutation probe's committed result is absent — mutate.py has "
+            "not been run since this fact existed to check it"
+        )
+    clause = (
+        f"the mutation probe's committed result says {mutation['killed']}/"
+        f"{mutation['total']} mutations killed"
+    )
+    if not mutation["catalogue_size_matches"]:
+        import mutate
+
+        clause += (
+            f" — stale: the live catalogue now has {len(mutate.CATALOGUE)} "
+            f"mutations, not {mutation['total']}, so re-run mutate.py"
+        )
+    return clause
+
+
 def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"status": status, "why": why, "evidence": evidence or []}
 
@@ -364,6 +425,7 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     release = facts["release_tooling"]
     supply = facts["supply_chain"]
     capabilities = facts["capabilities"]
+    mutation = facts["mutation_probe"]
     health = facts["health_endpoints"]
     unsettled = sum(
         count
@@ -423,15 +485,15 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "3_implementation": _gate(
             UNKNOWN,
-            "the suite is green and the mutation probe kills every mutation, and "
-            f"the capability registry now measures coverage per capability: "
+            f"the suite is green, and {_mutation_clause(mutation)}. The "
+            f"capability registry measures coverage per capability: "
             f"{capabilities['total']} capabilities at "
             f"{capabilities['by_evidence_level']}. What is still missing is scale "
             f"— {capabilities['total']} is a first, deliberately small cut, not "
             "the platform's full surface, and E5-E7 are unreachable from a "
             "repository scan for every one of them",
             [
-                "mutate.py exists and is in CI",
+                f"mutation_probe: {mutation}",
                 f"capability registry: {capabilities['total']} capabilities",
                 f"by evidence level: {capabilities['by_evidence_level']}",
             ],
@@ -545,6 +607,7 @@ def derive() -> dict[str, Any]:
         "release_tooling": _release_tooling(),
         "supply_chain": _supply_chain(),
         "capabilities": _capabilities(),
+        "mutation_probe": _mutation_probe(),
         "health_endpoints": _health_endpoints(),
     }
     facts["gates"] = gates(facts)

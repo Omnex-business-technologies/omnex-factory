@@ -7,6 +7,19 @@ declining. What CAN be measured is the thing the question is really after: how
 much of this codebase is actually held by its tests. Nine hundred green
 assertions are evidence of nothing until breaking the code breaks them.
 
+## The result is committed, not just printed
+
+`state_map.py`'s gate 3 once said "the suite is green and the mutation probe
+kills every mutation" as a literal string in its own source — true the day it
+was typed and never re-verified since, the same shape as the hard-coded
+"node_dossier.py does not exist" gates 1 and 2 carried for weeks. A probe that
+prints to a terminal and writes nothing down is invisible to anything that
+runs later, so `main()` writes `ontology/mutation_probe.json` — committed,
+read by `state_map.py`, and checked for drift the same way
+`corpus/universal-ai-os/DECISIONS.md` is: `git diff --exit-code` after a run.
+Written on every run, survivors included — a probe with a hole on file is the
+useful one to keep, not one to hide by skipping the commit.
+
 This is `test_the_round_trip_check_can_actually_fail` generalised. That test
 breaks one emitter so the other fifteen are not comparing an artifact with
 itself. The concurrency suite does the same by removing a lock and requiring the
@@ -33,6 +46,7 @@ somebody's checkout, and the sabotage is designed to look plausible.
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -42,6 +56,39 @@ from pathlib import Path
 
 ENGINE = Path(__file__).resolve().parents[1]
 REPO = ENGINE.parent
+#: Committed, not in .omnex/ (gitignored, and read by state_map.py's derive()
+#: — a fact `execution_state.json` binds to needs to survive a fresh checkout
+#: the way `ontology/capabilities.json`'s derived output does).
+RESULT = ENGINE / "ontology" / "mutation_probe.json"
+
+
+def write_result(results: list[Result], path: Path = RESULT) -> dict[str, object]:
+    """The committed shape. Pulled out of `main()` so a test can exercise the
+    persistence itself against a handful of synthetic results, rather than
+    the only test being a full 29-mutation run this suite should not pay for
+    on every invocation (see `test_mutation.py`'s own docstring).
+
+    Deliberately carries no commit binding. A first version wrote `git
+    rev-parse HEAD`, which is stable in a person's own checkout but not in a
+    GitHub Actions `pull_request` run: that event checks out a synthetic
+    merge-preview commit GitHub creates fresh on every run, never a real
+    commit that could ever match what was committed — so `git diff --exit-
+    code` on this file failed the first time it actually ran there, on every
+    single PR, structurally. `DECISIONS.md` and `CAPABILITIES.md` already
+    avoid this by carrying no commit hash at all; `execution_state.json` is
+    the one exception, and only because `state_map.py`'s own `differences()`
+    explicitly drops `source_commit` before comparing. Matching that second,
+    more complicated pattern without also copying its exclusion was the
+    mistake — this file follows the first, simpler one instead.
+    """
+    survivors = [r.mutation.ident for r in results if not r.killed]
+    payload = {
+        "total": len(results),
+        "killed": len(results) - len(survivors),
+        "survivors": survivors,
+    }
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return payload
 
 
 @dataclass(frozen=True)
@@ -419,6 +466,9 @@ def main() -> int:
             f"  HOLE {result.mutation.ident}: nothing failed when "
             f"{result.mutation.path} broke '{result.mutation.rule}' — {result.detail}"
         )
+
+    write_result(results)
+    print(f"\nwrote {RESULT.relative_to(REPO)}")
     return 1 if survivors else 0
 
 

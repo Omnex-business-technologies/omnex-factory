@@ -25,13 +25,14 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/python scripts/actions_pin_check.py \
   && .venv/bin/python scripts/n8n_bindings_check.py \
   && .venv/bin/python scripts/readme_check.py --check \
-  && .venv/bin/python scripts/capability_map.py --check \
-  && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/node_dossier.py \
   && git diff --exit-code ../corpus/universal-ai-os/DECISIONS.md \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
   && .venv/bin/python -m pytest tests/ -q \
   && .venv/bin/python scripts/mutate.py \
+  && git diff --exit-code ontology/mutation_probe.json \
+  && .venv/bin/python scripts/capability_map.py --check \
+  && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/eval_gate.py --baseline suites/baseline.json --out .omnex/runs
 
 # citegate — from oss/citegate/
@@ -56,7 +57,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,313 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,317 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -532,13 +533,23 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly logic where every refusal lives is testable without it.
 - `engine/scripts/mutate.py` — **the honest answer to "how many bugs".** There
   is no integer for that. There is a measurable one for *how much of this is
-  actually held by its tests*: twenty-seven hand-written mutations against rules the
+  actually held by its tests*: twenty-nine hand-written mutations against rules the
   repo has already paid for, each naming the test that must go red. Currently
-  **27 of 27 killed**. On its first run it was 11 — the survivor showed that
+  **29 of 29 killed**. On its first run it was 11 — the survivor showed that
   `Run.margin` and `_summarise`'s total were independent paths that happened to
   agree, so changing one moved the median, p10 and worst while the total and the
   verdict stayed put. No dependency, no coverage threshold: a coverage gate
   invites padding, which is the Goodhart the whole `harness` is built against.
+  **`main()` now writes `ontology/mutation_probe.json`** — committed, survivors
+  included — because `state_map.py`'s gate 3 used to say "the mutation probe
+  kills every mutation" as a literal string in its own source, true the day it
+  was typed and never re-checked again, the exact shape gates 1 and 2 already
+  carried once ("node_dossier.py does not exist," hard-coded, for weeks after
+  the script existed). `git diff --exit-code ontology/mutation_probe.json`
+  guards its freshness the same way `node_dossier.py`'s output is guarded, and
+  `state_map.py` compares the file's `total` against the live `CATALOGUE`
+  length so a mutation added with nobody re-running the probe shows up as
+  stale rather than silently undercounted.
 - `engine/ontology/nodes.json` — all **507 nodes** against exported symbols.
   Three claims: `gap` (no candidate), `proposed` (an alias that imports,
   unconfirmed), `implemented` (**a person agreed**). A machine proposes and
