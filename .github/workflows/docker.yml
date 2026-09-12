@@ -3,25 +3,24 @@ name: Docker
 # The local-first stack's engine image, built the way `deploy/local/compose.yaml`
 # documents building it, rather than assumed.
 #
-# **This has never run.** `deploy/local/Dockerfile` and `deploy/local/compose.yaml`
-# are in the repository and no workflow has ever built either — the same
-# never-executed class `release.yml` was in until it was dispatched. `C-014`
-# ("deploy/local/Dockerfile builds the engine image and its build-time test suite
-# passes") carries zero evidence for the same reason.
+# **It has run, three times, and `C-014` is SUPPORTED (E-014).** The first
+# dispatch (34275113635, from master) failed: the build context was `engine/`
+# alone, so the ~90 tests that read `lib/`, `oss/`, `corpus/`, `state/`,
+# `.github/workflows/`, `CLAUDE.md` and `execution_state.json` by design
+# (CLAUDE.md's own `engine.yml` comment already says so) got a filesystem root
+# instead of a repository root. Widening the build context to the repo root
+# (D-012) fixed that but surfaced a second failure — `git` missing from the
+# image and `.git/` excluded from the build context, so the four scripts that
+# shell out to `git` for history-derived figures raised `FileNotFoundError`.
+# The third dispatch (34277853648, run_number 3) is the one that went green:
+# `git` installed, `.git/` un-excluded, `fetch-depth: 0` added below. That is
+# the version this file now is — the failures are history, not a warning about
+# what could still go wrong.
 #
 # `workflow_dispatch` only, on purpose, and not yet wired into `pull_request` or
-# `push`. This workflow is new and unproven, so every PR should not start paying
-# for a Docker build until it has actually run green at least once. Widening the
-# trigger is a separate, later decision.
-#
-# **Unlike `release.yml`'s attestation bump, this cannot be dispatched from the
-# branch that adds it.** `release.yml` already existed on the default branch
-# when `workflow_dispatch` was added to it, so a feature-branch commit adding a
-# *new trigger to an already-registered workflow* could be dispatched
-# immediately. `docker.yml` is a file GitHub has never seen: dispatching it
-# before this reaches the default branch returns `404 Not Found` and the
-# workflow does not even appear in the workflow list. The rehearsal here
-# happens on the first push to the default branch, not before.
+# `push`. Running green once settles whether the packaging works; it does not
+# by itself justify every PR paying for a Docker build. Widening the trigger is
+# a separate, later decision.
 #
 # The image is built, never pushed. Nothing here reaches a registry: this settles
 # whether the packaging works, not whether it should be distributed.
@@ -59,8 +58,13 @@ jobs:
         # compose synthesises one from `name: omnex-local`; read with
         # `docker compose build --print` (which resolves it without needing a
         # build to have run) rather than assumed, and confirmed to be
-        # `omnex-local-engine`. Size is a cheap sanity check against the
-        # Dockerfile's own claim of "~120 MB instead of ~8 GB".
+        # `omnex-local-engine`. Size is printed rather than asserted against a
+        # number: the Dockerfile deliberately does not repeat one (a repo-root
+        # context measures larger than an `engine/`-only one ever would, and
+        # the honest comparison was never run), and the one figure actually
+        # measured here (E-014: ~333 MB, run 34277853648) belongs in state, not
+        # pinned into a workflow step that would then need editing every time
+        # a dependency changes it.
         run: |
           docker inspect omnex-local-engine \
             --format 'built: {{.RepoTags}} size: {{.Size}} bytes'
