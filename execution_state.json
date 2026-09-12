@@ -1,9 +1,9 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "3c357831defd8ef6593fb45db35135ef68efacc5",
+  "source_commit": "2813423ef4536a611975eee43135b4a854db2be8",
   "branch": "claude/production-ai-projects-bzz82l",
-  "tree_clean": true,
+  "tree_clean": false,
   "corpus": {
     "figures": 509,
     "nodes": 507

@@ -80,5 +80,5 @@ about 25 microseconds per sentence, against 300–1500 ms for a judge call.
 
 ## Licence
 
-MIT. Extracted from the [OMNEX engine](https://github.com/RaveZona/omnex-factory),
+Apache-2.0. Extracted from the [OMNEX engine](https://github.com/Omnex-business-technologies/omnex-factory),
 where it runs in the request path of a production RAG pipeline.

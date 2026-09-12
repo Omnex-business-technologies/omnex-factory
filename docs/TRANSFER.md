@@ -1,5 +1,14 @@
 # Moving `omnex-factory` into an organization
 
+**Status: steps 1–5 done, step 6 open.** The repository lives at
+`Omnex-business-technologies/omnex-factory` as of 2026-09-09 — confirmed by
+`search_repositories` returning the original `created_at` (a genuine
+transfer, not a fresh import) and by the old path still resolving through
+GitHub's redirect on both the API and the git protocol. See `D-013` in
+`docs/EXECUTION_DECISIONS.md` for what that verification actually checked,
+and what this session could and could not do about the parts that followed.
+Step 6 (a ruleset requiring status checks on `master`) is still nobody's yet.
+
 **Every step here is yours.** Nothing in this repository can create an
 organization or transfer a repository, and this session has no tool that could.
 What it can do is name the order, and say what breaks if a step is skipped —

@@ -45,9 +45,11 @@ No action silently escalates its class. `PUBLISH`, `DEPLOY`, `FINANCIAL`,
 `CREDENTIAL` and `DESTRUCTIVE` need explicit authorisation.
 
 **Standing authorisations in this repository today:** commit and push to
-`claude/production-ai-projects-bzz82l` in `RaveZona/omnex-factory` (`GIT`), and
-nothing else. PyPI publication, storefront calls and GPU generation are held by
-the person, and each refuses by name rather than proceeding.
+`claude/production-ai-projects-bzz82l` in `Omnex-business-technologies/omnex-factory`
+(`GIT`, transferred from `RaveZona/omnex-factory` — GitHub keeps a redirect from
+the old path), and nothing else. PyPI publication, storefront calls and GPU
+generation are held by the person, and each refuses by name rather than
+proceeding.
 
 ## 3 · Information gain
 

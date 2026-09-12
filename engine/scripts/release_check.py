@@ -153,8 +153,15 @@ SINCE = {
 #: `license = { text = "MIT" }` is a claim about the file next to it.
 LICENSE_TEXT = {
     "MIT": ("MIT License", "Permission is hereby granted, free of charge"),
+    "Apache-2.0": (
+        "Apache License",
+        "TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION",
+    ),
 }
-LICENSE_CLASSIFIER = {"MIT": "License :: OSI Approved :: MIT License"}
+LICENSE_CLASSIFIER = {
+    "MIT": "License :: OSI Approved :: MIT License",
+    "Apache-2.0": "License :: OSI Approved :: Apache Software License",
+}
 
 
 @dataclass

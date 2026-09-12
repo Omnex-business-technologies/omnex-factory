@@ -49,7 +49,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,230 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,231 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
@@ -227,10 +227,13 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   whose docstring warns about exactly this. `test_no_gate_claims_a_file_is_absent_
   while_it_sits_in_the_repository` is the structural fix, keyed on paths rather
   than on the two cases that already bit.
-- `LICENSE` (`/`, `engine/`, `oss/citegate/`) — MIT. Both `pyproject.toml` files
-  declared `license = { text = "MIT" }` with **no licence file anywhere in the
-  repository**, which is the same shape `build_pack.py` already refuses in a
-  pack: a claim with no file behind it. No release was possible until this.
+- `LICENSE` (`/`, `engine/`, `oss/citegate/`) — **Apache-2.0**, moved from MIT
+  once the repository transferred to `Omnex-business-technologies`. Both
+  `pyproject.toml` files originally declared `license = { text = "MIT" }` with
+  **no licence file anywhere in the repository**, which is the same shape
+  `build_pack.py` already refuses in a pack: a claim with no file behind it. No
+  release was possible until that was fixed. `packs/LICENSE.txt` is unrelated —
+  a commercial EULA for the image packs, never touched by this.
 - `engine/scripts/extras_check.py` + `[tool.omnex.extras]` — **what
   `pip install omnex-engine[x]` actually delivers, measured per dependency.**
   Six of twelve extras had **zero** of their dependencies imported anywhere
@@ -302,17 +305,22 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   conversational memory. The chain is tamper-**evident**, not tamper-proof, and
   says so. Every run carries `expected_outcome` from the start because an
   expectation recorded after the result is a description, not a prediction.
-- `docs/TRANSFER.md` — **the runbook for moving this repo into an organization,
-  written and not performed.** Seven ordered steps, each naming what breaks if
-  skipped; granting the Claude GitHub App access to the new org comes *before*
-  the transfer, or the session loses the repository the moment its path changes,
-  and reconnecting Vercel comes after, or previews stop *quietly*. It opens with
-  the honest accounting: `omnex-factory` is public, so attestation, required
-  checks, secret scanning and environment gates are already reachable — the case
-  for moving is a portfolio argument, one ruleset and one token over three repos,
-  not a capability one. Every step is `CREDENTIAL`- or `DESTRUCTIVE`-class under
-  `policy.py` and cleared by no autonomy level alone, which is why it is a
-  runbook rather than a script.
+- `docs/TRANSFER.md` — **the runbook for moving this repo into an organization.**
+  Written, then performed: `omnex-factory` now lives at
+  `Omnex-business-technologies/omnex-factory`, moved from the personal account
+  `RaveZona`, with the old path redirecting (confirmed on both the API and the
+  git protocol, not assumed). Steps 1–4 were the operator's alone, by design —
+  every one is `CREDENTIAL`- or `DESTRUCTIVE`-class under `policy.py`, cleared
+  by no autonomy level. Step 5 (repointing `oss/citegate/pyproject.toml`'s
+  `[project.urls]` at the new path) and this file's own references are done.
+  **What this session cannot do itself is widen to the new owner mid-session**:
+  `add_repo` refused a cross-owner add outright ("cross-tier adds are not
+  supported"), so a session that started on `ravezona/*` stays scoped there —
+  only a fresh session sourced from the new path gets full tool access
+  (PR creation, CI checks) under the new org; git-level push through the old
+  remote URL keeps working via the redirect in the meantime. Step 6 (a ruleset
+  requiring status checks on `master`) is still open — the one that pays
+  immediately, since nothing today stops a red-CI merge.
 - `docs/EXECUTION_DECISIONS.md` — why something was built, what evidence forced
   it, what else was considered, whether it can be undone. `D-001` records the
   finding that a detailed execution report described fifteen artifacts of which
@@ -690,3 +698,17 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   restart — do not assume the last thing pushed is the thing that landed. If a
   PR is likely to be merged fast, push everything intended for it in one shot
   rather than iterating with pushes in between.
+- **A session's own git remote reverted once, unexplained, after `git remote
+  set-url`.** After `omnex-factory` transferred to `Omnex-business-technologies`,
+  setting `origin` to the new path was observed present at the end of one
+  Bash call and reverted to `RaveZona/omnex-factory` by the next, with no
+  local action between the two checks that would explain it — then, later in
+  the same session with still nothing done to it directly, observed holding
+  the new URL again, and `release_check.py --target citegate`'s
+  `[project.urls]` check (which compares the declared URLs against
+  `git remote get-url origin`) passed. One reversion is not a pattern; it is
+  named here because it happened at all, in an environment that also refuses
+  `add_repo` across owners for a session sourced elsewhere (`D-013`). Treat a
+  git remote as unverified until checked in the same breath as the command
+  that depends on it, not assumed stable from an earlier check in the
+  conversation.
