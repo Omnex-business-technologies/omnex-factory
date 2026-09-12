@@ -58,10 +58,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 94 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 96 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 94 TypeScript tests now run in CI; until recently, seven of them did.
+All 96 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -505,7 +505,18 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   particular deployment platform (Vercel's edge or otherwise) for the two
   configured limits (`email_send`, `auth`) nothing in this repository calls
   yet — that claim is unverifiable from here and stays the header's fallback
-  behaviour, not something this fix asserts.
+  behaviour, not something this fix asserts. **A second bypass sat right next
+  to the first**: any request carrying a valid `CRON_SECRET` bearer token
+  exempted itself from every limit at once, inherited from the same donor
+  codebase `RATE_LIMITS`' own comment already names — but this repository has
+  no `app/api/cron/*` route and no `vercel.json` `crons` entry, so nothing
+  legitimate ever sends that header to a customer-facing route. Its only live
+  effect was downside: a leaked `CRON_SECRET` would have handed an attacker
+  unlimited calls to every one of these routes, undoing the identity-keying
+  fix in the same breath. Removed outright rather than kept "just in case" —
+  a bypass with no legitimate caller and a real leak scenario is pure
+  liability. `stripe_portal` also gained the rate limit `stripe_checkout`
+  already had; nothing had documented why the sibling route lacked one.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential

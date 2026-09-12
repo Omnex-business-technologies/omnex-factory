@@ -1,7 +1,27 @@
 /**
  * BATCH J — Sovereign Rate Limiter
  * Sliding window rate limiter. Per-route limits.
- * Returns Retry-After header on 429. Exempts CRON_SECRET requests.
+ * Returns Retry-After header on 429.
+ *
+ * ## No CRON_SECRET exemption, on purpose
+ *
+ * An earlier version exempted any request carrying a valid `CRON_SECRET`
+ * bearer token from every limit below, inherited from the same donor
+ * codebase `RATE_LIMITS`' own comment already names ("the inherited list
+ * named routes that do not exist here"). Nothing in THIS repository sends
+ * that header to `studio_generate`, `studio_upload`, `copilot_stream` or
+ * `stripe_checkout` — there is no `app/api/cron/*` route, no `vercel.json`
+ * `crons` entry, nothing scheduled that would ever need to call a
+ * customer-facing route as an exempted caller. The exemption's only live
+ * effect was downside: if `CRON_SECRET` ever leaked, any one of those four
+ * routes could be called without limit — undoing every protection this file
+ * provides, including the identity-keying immediately below, for whoever
+ * holds it. A bypass with no legitimate caller and a real leak scenario is
+ * pure liability; removed rather than kept "just in case." If a genuine
+ * scheduled job needs to call one of these routes without the normal
+ * per-user limit, that is a reason to build the cron route and exempt IT
+ * specifically, not to leave a blanket exemption sitting in front of every
+ * customer-facing one on the chance it is useful someday.
  *
  * ## Identity: prefer the verified user id, never trust the header alone
  *
@@ -27,7 +47,6 @@
  * cannot verify from here.
  */
 import { NextRequest } from 'next/server'
-import { isCronAuthorized } from '@/lib/core/cron-auth'
 
 // In-memory sliding window (per Vercel Function instance)
 const windows = new Map<string, number[]>()
@@ -49,6 +68,7 @@ export const RATE_LIMITS = {
   'studio_generate': { windowMs: 60_000, maxReqs: 8,  keyPrefix: 'gen' },
   'studio_upload':   { windowMs: 60_000, maxReqs: 20, keyPrefix: 'up'  },
   'stripe_checkout': { windowMs: 60_000, maxReqs: 10, keyPrefix: 'st'  },
+  'stripe_portal':   { windowMs: 60_000, maxReqs: 10, keyPrefix: 'sp'  },
   'email_send':      { windowMs: 60_000, maxReqs: 20, keyPrefix: 'em'  },
   'auth':            { windowMs: 60_000, maxReqs: 15, keyPrefix: 'au'  },
   // Streaming holds a connection open for the length of a run, so the limit is
@@ -81,13 +101,6 @@ export function checkRateLimit(
    * on why this outranks any header-derived id whenever it is available. */
   identity?: string,
 ): RateLimitResult {
-  // CRON_SECRET requests are exempt. Strict check via cron-auth (no hardcoded
-  // fallback — the old default string is public in git history, so accepting it
-  // here was an open rate-limit bypass for anyone who sent it).
-  if (isCronAuthorized(request)) {
-    return { allowed: true, remaining: 9999, resetAt: 0, retryAfter: 0 }
-  }
-
   const config  = RATE_LIMITS[route]
   const clientId = identity || getClientId(request)
   const key      = `${config.keyPrefix}:${clientId}`
