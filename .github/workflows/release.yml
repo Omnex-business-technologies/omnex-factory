@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # `release_check.py` asks whether HEAD is on a remote branch. At depth
           # 1 it cannot know and answers UNKNOWN rather than refusing — correct,
@@ -112,7 +112,7 @@ jobs:
       id-token: write # the attestation is signed against this run's OIDC identity
       attestations: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v5
 
       - name: Build sdist and wheel
