@@ -404,6 +404,129 @@ def test_a_caller_with_the_right_permission_gets_the_scoped_tool_back() -> None:
     assert message.error is None
 
 
+def test_a_dangerous_tool_is_declared_on_the_wire_but_a_permission_is_not() -> None:
+    """`dangerous` is informational metadata a caller cannot exploit by seeing
+    it; `required_permission` is an access decision that must never be
+    client-forgeable, so it stays server-local. Same ToolSpec, opposite rule."""
+    server = McpServer("fx", "1.0")
+
+    @server.tool("delete_all", "delete everything", required_permission="admin", dangerous=True)
+    def delete_all(args: dict[str, object]) -> str:
+        return "deleted"
+
+    server.handle(encode(Request(id="0", method="initialize")))
+    listed = decode(server.handle(encode(Request(id="1", method="tools/list"))) or "")
+    assert isinstance(listed, Response)
+    assert listed.result is not None
+    [spec] = listed.result["tools"]
+    assert spec["dangerous"] is True
+    assert "required_permission" not in spec and "requiredPermission" not in spec
+
+
+def test_a_non_positive_timeout_is_refused_at_registration() -> None:
+    """A zero or negative bound is not a timeout, it is a tool nobody can call."""
+    from omnex.mcp.tools import ToolSpec
+
+    with pytest.raises(ValidationFailed):
+        ToolSpec("x", "x", timeout_seconds=0)
+    with pytest.raises(ValidationFailed):
+        ToolSpec("x", "x", timeout_seconds=-1)
+
+
+def test_a_handler_that_returns_in_time_is_unaffected_by_its_timeout() -> None:
+    server = McpServer("fx", "1.0")
+
+    @server.tool("fast", "returns immediately", timeout_seconds=5.0)
+    def fast(args: dict[str, object]) -> str:
+        return "done"
+
+    server.handle(encode(Request(id="0", method="initialize")))
+    reply = decode(
+        server.handle(encode(Request(id="1", method="tools/call", params={"name": "fast"}))) or ""
+    )
+    assert isinstance(reply, Response)
+    assert reply.result is not None
+    assert reply.result["content"][0]["text"] == "done"
+    assert reply.result["isError"] is False
+
+
+def test_a_hung_handler_is_bounded_by_its_configured_timeout() -> None:
+    """The caller's wait ends; the thread is not claimed to be killed — see the
+    inline comment in `_call` citing `StreamTransport`'s existing precedent
+    for exactly this kind of honest, non-preemptive, in-process bound."""
+    import threading as _threading
+    import time
+
+    released = _threading.Event()
+    server = McpServer("fx", "1.0")
+
+    @server.tool("hang", "blocks until released", timeout_seconds=0.05)
+    def hang(args: dict[str, object]) -> str:
+        released.wait(timeout=5.0)
+        return "eventually"
+
+    server.handle(encode(Request(id="0", method="initialize")))
+    started = time.monotonic()
+    reply = decode(
+        server.handle(encode(Request(id="1", method="tools/call", params={"name": "hang"}))) or ""
+    )
+    elapsed = time.monotonic() - started
+    assert elapsed < 2.0, "the caller waited far longer than the configured timeout"
+    assert isinstance(reply, Response)
+    assert reply.result is not None
+    assert reply.result["isError"] is True
+    assert "did not return within" in reply.result["content"][0]["text"]
+    released.set()  # let the background thread finish so it does not leak past the test
+
+
+def test_a_rate_limited_tool_refuses_the_call_it_cannot_afford() -> None:
+    from omnex.guard.ratelimit import RateLimit
+
+    server = McpServer("fx", "1.0")
+
+    @server.tool(
+        "scarce", "one call per long period", rate_limit=RateLimit(rate=1, period_seconds=3600.0)
+    )
+    def scarce(args: dict[str, object]) -> str:
+        return "ok"
+
+    server.handle(encode(Request(id="0", method="initialize")))
+    first = decode(
+        server.handle(encode(Request(id="1", method="tools/call", params={"name": "scarce"}))) or ""
+    )
+    assert isinstance(first, Response)
+    assert first.result is not None
+    assert first.result["isError"] is False
+
+    second = decode(
+        server.handle(encode(Request(id="2", method="tools/call", params={"name": "scarce"}))) or ""
+    )
+    assert isinstance(second, Response)
+    assert second.result is not None
+    assert second.result["isError"] is True
+    assert "rate limit exceeded" in second.result["content"][0]["text"]
+
+
+def test_a_rate_limit_rejection_is_a_result_not_a_protocol_error() -> None:
+    """Consistent with this module's central rule: the world saying 'not yet'
+    must reach the model as text it can adapt to, never an RpcError."""
+    from omnex.guard.ratelimit import RateLimit
+
+    server = McpServer("fx", "1.0")
+
+    @server.tool("scarce", "one call ever", rate_limit=RateLimit(rate=1, period_seconds=3600.0))
+    def scarce(args: dict[str, object]) -> str:
+        return "ok"
+
+    server.handle(encode(Request(id="0", method="initialize")))
+    server.handle(encode(Request(id="1", method="tools/call", params={"name": "scarce"})))
+    second = decode(
+        server.handle(encode(Request(id="2", method="tools/call", params={"name": "scarce"}))) or ""
+    )
+    assert isinstance(second, Response)
+    assert second.error is None, "a rate limit is a tool-level result, not an RpcError"
+
+
 def test_serve_runs_the_real_loop_and_honours_its_bound() -> None:
     server = _server()
     theirs, ours = MemoryTransport.pair()

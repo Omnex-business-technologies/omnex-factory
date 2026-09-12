@@ -52,7 +52,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,286 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,299 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -187,6 +187,24 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   rather than guessed. Currently **8 capabilities**, a deliberately small
   first cut. `state_map.py`'s gate 3 derives from `summarise()`, imported,
   never a second count.
+- `engine/src/omnex/mcp/tools.py` + `server.py` — **§11 MCP/TOOL SECURITY's
+  remaining three requirements**, added to a module that already had
+  permission scoping (D-020): timeout controls, rate controls, and
+  dangerous-operation classification. `ToolSpec` gained `timeout_seconds`
+  and `dangerous`; `dangerous` is wire-safe (`as_dict()`/`from_wire()`)
+  because it grants nothing and only warns a caller, while
+  `required_permission` stays server-local because a forged claim there
+  would grant access. Rate limiting reuses `guard.ratelimit.RateLimiter` —
+  no second implementation — one instance per rate-limited tool, keyed by
+  tool name. The timeout is a `threading.Thread` + `.join()` bound on the
+  **caller's wait**, not a preemptive kill: the same honest limitation
+  `mcp.transport.StreamTransport.receive()` and `guard/sandbox.py`'s module
+  docstring already document for an in-process deadline, cited by name in
+  `server.py`'s comment rather than restated differently. Both a timeout and
+  a rate-limit rejection return a normal errored `ToolResult`
+  (`isError: true`), never an `RpcError` — the module's own stated rule that
+  a tool failing is a result, not a protocol error, applied to a rejection
+  the server itself issues.
 - `engine/scripts/actions_pin_check.py` — **every `uses:` in every workflow
   pinned to a full commit SHA, never a version tag** (Phase 2: "pinned or
   controlled GitHub Actions"). A tag is the action's maintainer's to move; a

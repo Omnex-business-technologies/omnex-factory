@@ -2075,3 +2075,138 @@ same enforcement point every other check in this repository uses.
 additions to `CLAUDE.md` and `engine.yml`. `git revert` removes the check
 and leaves README.md at whatever count it last held — the file itself is
 untouched by the revert since the fix already landed as ordinary prose.
+
+## D-029: MCP tool security — timeout, rate, and danger classification, none of which existed
+
+**context.** §11 MCP/TOOL SECURITY names timeout controls, rate controls, and
+dangerous-operation classification alongside permission scoping. D-020 already
+covers permission scoping (`required_permission`, `available_to()`). The other
+three did not exist anywhere in `omnex.mcp`: `McpServer._call()` invoked a
+handler with no bound on how long it could run, no rate limiter existed in the
+package, and `ToolSpec` had no concept of "this operation is hard to undo."
+
+**what was found.** Confirmed by reading `server.py` and `tools.py` in full and
+grepping the package for `RateLimit`/`timeout` — nothing. `McpClient` already
+bounds how long it waits for a *reply* (`self.timeout`), which is a different
+thing from the server bounding how long it waits for its *own handler*.
+
+**what was built.**
+
+- `ToolSpec` gained `timeout_seconds: float | None = None` and
+  `dangerous: bool = False`. `dangerous` is wire-safe — `as_dict()` and
+  `from_wire()` both carry it — while `required_permission` deliberately stays
+  server-local, exactly as it already did. The two look like the same kind of
+  field and are not: a forged `required_permission` claim would grant access a
+  client should not have, while a forged `dangerous` claim grants nothing —
+  it is a caveat for whoever is about to call the tool, not a capability. A
+  non-positive `timeout_seconds` is refused at construction: zero is not a
+  bound, it guarantees the timeout branch fires on every call.
+- `McpServer.tool()` gained `timeout_seconds`, `dangerous`, and `rate_limit`
+  parameters. `rate_limit`, when given, allocates one
+  `omnex.guard.ratelimit.RateLimiter` keyed by tool name — the existing GCRA
+  implementation, not a second one, per this repository's own
+  `one_symbol_resolver` / `twin_splitters_agree` rule against duplicate
+  mechanisms for the same problem.
+- `_call()` now checks the tool's rate limiter (if any) before invoking the
+  handler, and — if a timeout is configured — runs the handler on a
+  `threading.Thread` and `.join(timeout)`s it rather than calling it directly.
+  Both a rate-limit rejection and a timeout return a normal `Response` with
+  `isError: true` and explanatory text, never an `RpcError` — consistent with
+  `server.py`'s own stated central rule ("a tool that fails is a RESULT, not a
+  protocol error") applied to two rejections the server itself issues rather
+  than ones a handler raises.
+
+**the honesty constraint, stated rather than glossed over.** A
+`threading.Thread.join(timeout)` bounds how long the *caller* waits. It does
+not kill the handler thread — Python has no safe mechanism to do that, and
+claiming otherwise would be the same overclaim `guard/sandbox.py`'s module
+docstring already warns against. `mcp.transport.StreamTransport.receive()`
+already documents exactly this limitation for its own `timeout` parameter
+("the parameter is documented as advisory here and the deadline is enforced by
+whoever owns the process, which is the only layer that can actually kill it"),
+and `guard/sandbox.py`'s docstring cross-references that same precedent when
+explaining why *its* timeout (`subprocess.run(timeout=...)`, genuinely
+preemptive because it kills an OS process) is a different, stronger
+guarantee. The new MCP timeout is the `StreamTransport` case, not the
+`sandbox` case, and `server.py`'s inline comment says so by name rather than
+inventing new language that would read as a stronger promise than the
+mechanism keeps. A test (`test_a_hung_handler_is_bounded_by_its_configured_
+timeout`) proves the caller-side bound actually holds — a handler blocked on
+an `Event` that is never set still returns within the configured timeout —
+while the still-blocked background thread is released at the end of the same
+test so it does not leak into the next one.
+
+**what was verified.** `test_a_handler_that_returns_in_time_is_unaffected_by_
+its_timeout` and `test_a_hung_handler_is_bounded_by_its_configured_timeout`
+prove the timeout only fires when it should. `test_a_rate_limited_tool_
+refuses_the_call_it_cannot_afford` and `test_a_rate_limit_rejection_is_a_
+result_not_a_protocol_error` prove the limiter is wired and its rejection
+shape matches the module's own stated rule.
+`test_a_dangerous_tool_is_declared_on_the_wire_but_a_permission_is_not` proves
+the wire-safety split holds in both directions at once — one spec, one
+serialization, opposite behaviour for the two new-adjacent fields.
+`test_a_non_positive_timeout_is_refused_at_registration` covers the
+construction-time refusal. 6 new tests, all green;
+`engine/ontology/CAPABILITIES.md` regenerated (`Clock`'s integration count
+moved 26→27 because `server.py` now reaches it transitively through
+`RateLimiter`, confirmed by re-running `capability_map.py`, not hand-edited);
+`README.md`'s test count re-synced twice by `readme_check.py` — 1,292→1,298
+for the six MCP tests, then 1,298→1,299 for the `runs.py` test added below —
+the same mechanism D-028 built. Full engine gate green: ruff/format/mypy, all
+invariants, `actions_pin_check.py` 20/20, `readme_check.py --check`,
+`capability_map.py --check`, `state_map.py --check`, both release targets,
+claims/runs/spine, full `pytest` (1,299 tests), `mutate.py` 29/29 — including
+every pre-existing `omnex.mcp` test, unchanged.
+
+**a second, self-caught defect: `runs.py --level` accepted a string
+`state_map.py` does not recognise.** Recording R-0029 with `--level L3`
+instead of the canonical `L3_REPOSITORY` (`policy.Autonomy`'s actual member
+names are `L2_LOCAL`, `L3_REPOSITORY`, `L4_EXTERNAL`, `L5_UNSUPERVISED`)
+landed silently, because `runs.py` never validated `--level` against
+anything. `state_map.py`'s gate 9 counts autonomy "above L3" with
+`r.autonomy_level not in ("", "L3_REPOSITORY")` — a string that merely fails
+to equal the canonical spelling reads as an *escalation past* it, not as a
+typo. R-0029's record and observation are now permanently in the ledger
+mis-labelled `L3` (append-only; there is no path that edits a past row), so
+`execution_state.json`'s gate 9 now honestly reports 3 runs above L3 and 1
+successful, where the true figure is 1 and 0. That is the correct behaviour
+of a derived file reading an actual, if mistaken, ledger entry — the fix
+belongs in `runs.py`, not in disguising what is on file. Added
+`VALID_LEVELS = frozenset(a.name for a in Autonomy)` and a refusal at
+`--record` time when `--level` is not a member, plus
+`test_recording_a_run_refuses_a_level_state_map_would_not_recognise` in
+`test_runs.py` naming this exact incident so it cannot recur silently.
+Consistent with the structural-fix-over-allowlist convention this repository
+already follows elsewhere (`denied_existing_files()`, `checkReadiness()`):
+the fix is a membership check against the one real source of level names
+(`policy.Autonomy`), not a special case for the string `"L3"`.
+
+**a pre-existing, unrelated flake observed and left alone.** `release_check.py
+--target citegate` failed locally on `[project.urls]` pointing at
+`omnex-business-technologies/omnex-factory` while `git remote get-url origin`
+answered `RaveZona/omnex-factory` at the moment of the check — the exact,
+previously-documented git-remote reversion in CLAUDE.md's lab notes ("A
+session's own git remote reverted once, unexplained"). Re-checked
+independently of this change (same failure on a `git stash` of this work);
+not a regression this PR introduces, and not something this PR fixes, since
+the actual fix is whatever is causing the remote to revert, which is outside
+this session's control. Noted here rather than silently worked around.
+
+**what else was considered.** A protocol-level error code for rate limiting
+and timeouts, mirroring how some MCP implementations signal these — rejected
+for the reason above: this module's whole design is built against exactly
+that shape, because a protocol error kills the calling agent's ability to
+read what happened and adapt. A configurable *default* timeout applied to
+every tool with no explicit setting — rejected as a silent behaviour change:
+every tool registered before this field existed had no bound, and a global
+default would time some of them out for the first time with no code change
+visible at their call sites. Killing the handler thread via
+`ctypes.pythonapi.PyThreadState_SetAsyncExc` or similar — rejected outright:
+it is unsafe (can corrupt interpreter state mid-operation) and exactly the
+overclaim `guard/sandbox.py` was written to avoid making.
+
+**reversible how.** Two files change shape (`tools.py`, `server.py`), both by
+addition — every new field defaults to the fully-open behaviour that already
+existed (`None` timeout, `dangerous=False`, no rate limiter unless
+requested). `git revert` removes the capability with no change to any
+existing tool's registration.

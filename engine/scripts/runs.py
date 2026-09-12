@@ -72,8 +72,17 @@ sys.path.insert(0, str(ENGINE / "src"))
 from claims import Status  # noqa: E402
 from claims import load as load_claims  # noqa: E402
 from next_action import queue  # noqa: E402
+from policy import Autonomy  # noqa: E402
 
 from omnex.factory.compile.bindings import looks_like_a_secret  # noqa: E402
+
+#: The only autonomy-level spellings `state_map.py`'s gate 9 and `policy.py`
+#: itself recognise. `--level` took any string until R-0029 was recorded as
+#: "L3" — one letter short of `L3_REPOSITORY` — and silently landed in the
+#: ledger counted as an autonomy level *above* L3, because gate 9's check is
+#: `not in ("", "L3_REPOSITORY")`. The ledger is append-only, so that entry
+#: cannot be fixed; this can only stop the next one.
+VALID_LEVELS = frozenset(a.name for a in Autonomy)
 
 #: Written into `observed_outcome` until something measures it. Never `False`:
 #: an unmeasured result is unmeasured, not a failure.
@@ -375,6 +384,14 @@ def main() -> int:
                 "--expect especially: an expectation written after the result is a\n"
                 "description, not a prediction, and this is the only moment it can\n"
                 "honestly be recorded."
+            )
+            return 1
+        if args.level not in VALID_LEVELS:
+            print(
+                f"FAIL --level {args.level!r} is not one of {sorted(VALID_LEVELS)}; "
+                "a level state_map.py's gate 9 does not recognise silently counts "
+                "as autonomy above L3 in the derived state (this is exactly how "
+                "R-0029 was mis-recorded)."
             )
             return 1
         opened = append(
