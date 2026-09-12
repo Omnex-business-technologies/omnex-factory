@@ -1804,3 +1804,96 @@ inserted between two of them), and the structural fix plus its own test in
 `test_ci_contract.py`. `git revert` removes the SBOM step and the fixture
 together; the exclusion fix in `test_ci_contract.py` can be reverted
 independently since nothing else depends on it yet.
+
+---
+
+## D-026: liveness and readiness, scoped to what this sandbox can actually verify
+
+**context.** Sovereign Execution Standard, Phase 4 (PRODUCTION-PARITY
+STAGING), names a staging environment, database migrations, health checks,
+readiness checks, rollback, smoke and integration tests. Before building
+anything, `docker info` was tried in this session: Docker is **not
+available** in this sandbox, unlike the GitHub-hosted runner `docker.yml`'s
+own comment says has one. That rules out directly building or running
+`deploy/local/compose.yaml` or the root `compose.yaml` here — anything
+built against them could only be verified by careful reading, the way
+`release.yml` itself can only be rehearsed in real CI. Scoped this round to
+the one Phase 4 piece that is fully buildable AND fully verifiable inside
+this sandbox with no Docker: health and readiness checks for the root
+Next.js app, which `npm`/`vitest`/a local dev server can all exercise for
+real.
+
+**the gap, measured.** `grep` across `app/` and `lib/` for `healthz`,
+`/health`, `readyz` found nothing — no endpoint existed for a platform, an
+uptime monitor, or a human to ask "is this process alive" or "does it have
+what it needs." `deploy/env.json` + `engine/scripts/env_check.py` already
+answer the second question thoroughly, but only at CI time, against the
+code — `env_check.py`'s own docstring names a `--runtime` mode as "the
+operator's, on the host about to serve," which means a person must SSH in
+and run a CLI command. Nothing exposed the same answer over HTTP, which is
+what a deployment platform's own health check, or an uptime monitor, or a
+human with only a browser, can actually reach.
+
+**what was built, and the one design decision in it.** `/api/healthz` is
+liveness ONLY — always 200, checks nothing — kept structurally separate
+from `/api/readyz`, which reads the exact same `deploy/env.json` manifest
+`env_check.py` already reads and checks it against live `process.env`. The
+separation is deliberate, not incidental: a platform's restart policy acts
+on liveness, and conflating "the process can run" with "Stripe is
+configured" would turn a missing environment variable into a crash-loop
+instead of the visible, fixable 503 it already is with the checks apart.
+`lib/core/health/manifest.ts`'s `checkReadiness()` is a pure function
+(manifest, env) → result, tested directly with a synthetic manifest so the
+suite does not depend on which real secrets happen to be set when it runs;
+a second pair of tests then exercises the real route handlers against the
+actual `deploy/env.json`. **Names only, never values**, in the 503 body —
+the identical rule `env_check.py` already enforces at CI time, now
+enforced at request time by the same logic, not a second copy of it
+(`checkReadiness` is the one function both the manifest-shape tests and the
+real-route tests call).
+
+**verified against a running process, not just a function call.** Vitest
+calling `GET()` directly proves the handler's logic; it does not prove
+Next.js actually serves it at the named path. `next dev` was started for
+real in this sandbox and both routes hit with `curl`: `/api/healthz`
+returned `200 {"ok":true}` immediately; `/api/readyz`, with only the two
+placeholder Supabase variables CLAUDE.md's own build command sets, answered
+`503` naming exactly the five still-missing required variables
+(`SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`CRON_SECRET`, `OMNEX_OWNER_KEY`) and the unsatisfied `"an image model"`
+group — with the two variables actually set correctly absent from the
+missing list, proving the check reads real `process.env`, not a stub.
+
+**wired in, not bolted on.** A new `_health_endpoints()` fact in
+`state_map.py` feeds gate `5_production`'s evidence, worded carefully to
+not overclaim: "the app now has the pieces a deployment platform would
+check... which narrows what a first deploy still needs, **not whether one
+exists**." Gate 5 stays `UNKNOWN` — nothing is deployed, and two new routes
+existing does not change that — but the evidence is richer than it was.
+
+**what was NOT built, and why that is the honest boundary here rather than
+an omission.** A staging environment, database migration rehearsal,
+rollback path, and smoke/integration tests against a real running stack all
+need something this sandbox does not have: a container runtime. Building
+YAML for any of them without the ability to run it here would repeat
+exactly the mistake D-024 and D-025 both caught mid-task — a config that
+parses and does not work — with no way to catch it before it reached CI.
+Phase 4's remaining pieces are left for a session (or a CI rehearsal, the
+`workflow_dispatch` pattern `release.yml` already established) that
+actually has Docker.
+
+**what else was considered.** A single `/api/health?mode=ready` endpoint
+switching behaviour on a query parameter — rejected: two separate routes
+make the liveness/readiness distinction structural (a caller cannot
+accidentally point a liveness probe at logic that can 503 on a
+misconfigured secret) rather than a convention a query string can be
+typo'd past. Reading `deploy/env.json` through a shared Node module that
+also re-implements `env_check.py`'s CI-time drift check in TypeScript —
+rejected as scope creep: the drift check already exists, runs in CI, and
+duplicating it in a second language is the exact "twin splitters" risk this
+repository already named and paid for once.
+
+**reversible how.** Three new files under `app/api/` and `lib/core/health/`,
+one new test file, and additive changes to `state_map.py` (a new gate-5
+fact) and `CLAUDE.md`. `git revert` removes the two routes cleanly; nothing
+in the existing app calls either one, so nothing else changes behaviour.

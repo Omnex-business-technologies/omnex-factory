@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "302d7b2172dd3b0c4c1e1095a2bbd1db1e1d4bc8",
+  "source_commit": "919b054dcbcf21d6618a1b2e5e9780f8090fa5cb",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -69,10 +69,10 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 47,
+    "runs": 49,
     "chain_intact": true,
     "by_level": {
-      "L3_REPOSITORY": 46,
+      "L3_REPOSITORY": 48,
       "L4_EXTERNAL": 1
     },
     "above_l3": 1,
@@ -97,6 +97,10 @@
       "E4_INTEGRATED": 8
     },
     "at_least_integrated": 8
+  },
+  "health_endpoints": {
+    "healthz_route": true,
+    "readyz_route": true
   },
   "gates": {
     "0_integrity": {
@@ -142,8 +146,11 @@
     },
     "5_production": {
       "status": "UNKNOWN",
-      "why": "nothing is deployed; DOCKER.md and compose.yaml exist and no workflow builds them, and a configuration is not a deployment",
-      "evidence": []
+      "why": "nothing is deployed; DOCKER.md and compose.yaml exist and no workflow builds them, and a configuration is not a deployment. The app now has the pieces a deployment platform would check (liveness route: True, readiness route: True), which narrows what a first deploy still needs, not whether one exists",
+      "evidence": [
+        "healthz_route: True",
+        "readyz_route: True"
+      ]
     },
     "6_security": {
       "status": "UNKNOWN",
@@ -170,11 +177,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 47 hash-chained run(s) (chain intact: True) at levels ['L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 1 run(s) are recorded above L3 and 0 of those recorded a successful outcome",
+      "why": "the run ledger holds 49 hash-chained run(s) (chain intact: True) at levels ['L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 1 run(s) are recorded above L3 and 0 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 47",
+        "runs recorded: 49",
         "chain intact: True",
-        "runs by autonomy level: {'L3_REPOSITORY': 46, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3_REPOSITORY': 48, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {

@@ -297,6 +297,20 @@ def denied_existing_files(text: str) -> list[str]:
     ]
 
 
+def _health_endpoints() -> dict[str, Any]:
+    """Whether the app exposes liveness and readiness over HTTP.
+
+    Gate 5 says nothing is deployed, which stays true regardless of this —
+    these two facts answer a narrower question (does the app have the pieces
+    a deployment would need to be checked) rather than the one gate 5 asks
+    (is anything actually running).
+    """
+    return {
+        "healthz_route": (REPO / "app" / "api" / "healthz" / "route.ts").exists(),
+        "readyz_route": (REPO / "app" / "api" / "readyz" / "route.ts").exists(),
+    }
+
+
 def _capabilities() -> dict[str, Any]:
     """The capability registry's shape, recomputed from `capability_map.py`.
 
@@ -341,6 +355,7 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     release = facts["release_tooling"]
     supply = facts["supply_chain"]
     capabilities = facts["capabilities"]
+    health = facts["health_endpoints"]
     unsettled = sum(
         count
         for status, count in registry["by_status"].items()
@@ -416,7 +431,11 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "5_production": _gate(
             UNKNOWN,
             "nothing is deployed; DOCKER.md and compose.yaml exist and no workflow "
-            "builds them, and a configuration is not a deployment",
+            "builds them, and a configuration is not a deployment. The app now has "
+            f"the pieces a deployment platform would check (liveness route: "
+            f"{health['healthz_route']}, readiness route: {health['readyz_route']}), "
+            "which narrows what a first deploy still needs, not whether one exists",
+            [f"{key}: {value}" for key, value in health.items()],
         ),
         "6_security": _gate(
             UNKNOWN,
@@ -514,6 +533,7 @@ def derive() -> dict[str, Any]:
         "release_tooling": _release_tooling(),
         "supply_chain": _supply_chain(),
         "capabilities": _capabilities(),
+        "health_endpoints": _health_endpoints(),
     }
     facts["gates"] = gates(facts)
     facts["blocked"] = [

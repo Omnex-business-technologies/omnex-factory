@@ -268,6 +268,10 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
     assert "capability registry" in implementation
     assert "E4_INTEGRATED" in implementation or "E3_TESTED" in implementation
 
+    production = " ".join(str(e) for e in gates["5_production"]["evidence"])
+    assert "healthz_route: True" in production
+    assert "readyz_route: True" in production
+
 
 def test_gate_3_never_claims_more_capabilities_than_the_registry_holds() -> None:
     """Gate 3 used to say 'no capability registry' as a literal. Once one

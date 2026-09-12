@@ -51,10 +51,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,286 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,286 engine tests · 77 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 68 TypeScript tests now run in CI; until recently, seven of them did.
+All 77 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -381,6 +381,16 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   **No value is ever printed** — a preflight that prints a key to a build log has
   copied the secret, not checked it. The n8n side is *derived* from
   `n8n_bindings.json` and deliberately not listed here.
+- `app/api/healthz/` + `app/api/readyz/` + `lib/core/health/manifest.ts` —
+  **`env_check.py --runtime`'s question, asked over HTTP** (Sovereign
+  Execution Standard, Phase 4: health and readiness checks). `/api/healthz`
+  is liveness only — 200 the instant the process can answer at all, no
+  dependency checked — kept separate from `/api/readyz` so a missing Stripe
+  key produces a visible 503 rather than a restart-policy crash loop.
+  `/api/readyz` reads the same `deploy/env.json` manifest and reports which
+  required variables are unset and which `any_of` group has no member set —
+  **names only, never values**, the same rule `env_check.py` already
+  enforces at CI time, now enforced at request time too.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential
@@ -741,3 +751,13 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   git remote as unverified until checked in the same breath as the command
   that depends on it, not assumed stable from an earlier check in the
   conversation.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
