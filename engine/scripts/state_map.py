@@ -228,11 +228,15 @@ def _supply_chain() -> dict[str, Any]:
     release exists yet" while `npm audit --audit-level=moderate` ran in
     `ci.yml` and `.github/dependabot.yml` sat beside it.
 
-    The boundary is stated rather than guessed: CodeQL default setup and secret
-    scanning are GitHub *settings*, not files, so a repository scan cannot see
-    either and this reports neither present nor absent. A control this process
-    cannot observe is unobserved, which is not the same as missing — the
-    distinction the whole file exists to keep.
+    CodeQL has two shapes: "default setup", a GitHub *setting* with no file,
+    which a repository scan genuinely cannot see and this reports neither
+    present nor absent for exactly that reason; and "advanced setup", a
+    workflow file naming `github/codeql-action`, which is observable the same
+    way every other Phase 2 control here is. `codeql_workflow_present` checks
+    only for the file — it cannot see whether a scan has ever run or whether
+    its results are triaged, the same boundary `sbom_generated` already keeps
+    between a control existing and a control mattering. Secret scanning has no
+    advanced-setup file at all, so it stays genuinely unobservable from here.
     """
     import actions_pin_check
     import release_check
@@ -252,6 +256,7 @@ def _supply_chain() -> dict[str, Any]:
         "dependabot_config": (REPO / ".github" / "dependabot.yml").exists(),
         "build_provenance_attested": "attest-build-provenance" in text,
         "sbom_generated": any(k in text for k in ("cyclonedx", "spdx", "syft", "sbom")),
+        "codeql_workflow_present": "codeql-action" in text,
         "actions_pinned_to_sha": pins["pinned_to_sha"],
         "actions_total": pins["total_uses"],
     }
@@ -445,13 +450,14 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
             f"Dependabot config: {supply['dependabot_config']}, build provenance "
             f"attested in the release workflow: {supply['build_provenance_attested']}, "
             f"an SBOM generated and read back against the package it describes in "
-            f"the release workflow: {supply['sbom_generated']}, every GitHub Action "
-            f"pinned to a commit SHA: {supply['actions_pinned_to_sha']}/"
-            f"{supply['actions_total']}); what is absent is any signed PUBLISHED "
-            "artifact, since no release exists — none of this has run for real. "
-            "CodeQL default setup and secret scanning are GitHub settings rather "
-            "than files, so a repository scan cannot see them and this claims "
-            "neither way",
+            f"the release workflow: {supply['sbom_generated']}, static analysis "
+            f"via a CodeQL workflow: {supply['codeql_workflow_present']}, every "
+            f"GitHub Action pinned to a commit SHA: "
+            f"{supply['actions_pinned_to_sha']}/{supply['actions_total']}); what "
+            "is absent is any signed PUBLISHED artifact, since no release exists "
+            "— none of this has run for real. Secret scanning is a GitHub "
+            "setting rather than a file, so a repository scan cannot see it and "
+            "this claims neither way",
             [f"{key}: {value}" for key, value in supply.items()],
         ),
         "7_observability": _gate(

@@ -2210,3 +2210,83 @@ addition — every new field defaults to the fully-open behaviour that already
 existed (`None` timeout, `dangerous=False`, no rate limiter unless
 requested). `git revert` removes the capability with no change to any
 existing tool's registration.
+
+## D-030: CodeQL as a file, so gate 6 can see the one static-analysis control that was invisible on purpose
+
+**context.** `execution_state.json`'s gate 6 has said, since it was written,
+that "CodeQL default setup and secret scanning are GitHub settings rather than
+files, so a repository scan cannot see them and this claims neither way." That
+sentence is honest about a genuine boundary — GitHub's "default setup" for
+CodeQL is a toggle in repository Settings with no corresponding file, so a
+process that only reads the checked-out tree cannot observe it either way.
+Re-reading it during this round's truth pass raised the obvious question: is
+that the *only* way to run CodeQL, or is it the way that happens to be
+invisible to this exact checker?
+
+**what was found.** It is not the only way. CodeQL also ships as an "advanced
+setup" — an ordinary GitHub Actions workflow using `github/codeql-action`'s
+`init` and `analyze` actions — which is a committed file, observable the same
+way `dependabot.yml`, the SBOM step, and every pinned action already are. No
+such workflow existed in `.github/workflows/`. Gate 6 was not reporting a
+control that cannot be seen; it was reporting a control that, for this half of
+the pair, could have been seen and simply was not there.
+
+**what was built.** `.github/workflows/codeql.yml`: a matrix over
+`javascript-typescript` (the root Next.js app) and `python` (`engine/` and
+`oss/citegate/`), triggered on push and pull request to `master`/`main`, a
+weekly cron (Monday 03:17 UTC, off the hour so it does not compete with every
+other repository's `0 0 * * *`), and `workflow_dispatch`. Both
+`github/codeql-action` steps (`init`, `analyze`) are pinned to a full commit
+SHA, resolved the same way Phase 2 already resolved every other action: cloned
+`github/codeql-action` through the git proxy's public-repository read lane,
+confirmed `v4.38.0` is an annotated tag (`git cat-file -t` said `tag`, not
+`commit` — the exact shape that already bit `attest-build-provenance` and
+`setup-uv` in Phase 2), and dereferenced with `^{commit}` rather than trusting
+`git rev-parse` on the bare tag.
+
+`state_map.py`'s `_supply_chain()` gained `codeql_workflow_present`, checking
+only whether a workflow file names `codeql-action` — not whether a scan has
+ever run, found anything, or had a finding triaged, the same boundary
+`sbom_generated` already keeps between a control existing in the repository and
+a control doing something in production. Gate 6's prose now separates the two
+controls it used to bundle: CodeQL moves from "cannot see it" to "here, or
+not"; secret scanning, which genuinely has no advanced-setup file, keeps the
+original unobservable claim, now stated about one control instead of two.
+
+**what was verified.** `actions_pin_check.py` — 23 of 23 actions pinned
+(20 pre-existing + 3 new: `checkout`, `codeql-action/init`,
+`codeql-action/analyze`). `test_the_repaired_gates_derive_their_evidence_
+rather_than_stating_it` extended with `codeql_workflow_present: True`.
+`execution_state.json` regenerated and re-checked in both directions. Full
+engine gate green: ruff/format/mypy, all invariants, `env_check.py`,
+`extras_check.py`, `release_check.py --target engine`, claims/runs/spine,
+`readme_check.py --check` (no test-count change — this round adds workflow and
+script lines, not tests), `capability_map.py --check`, `state_map.py --check`,
+`apply_decisions.py --dry-run`, full `pytest tests/` (1,299 tests, unchanged),
+`mutate.py` (29/29). `npx tsc --noEmit` clean (no TypeScript touched).
+`release_check.py --target citegate` failed on the same pre-existing,
+previously-documented git-remote reversion as D-029 — reproduced independent
+of this change, unrelated to it, and not something this session can fix from
+inside the sandbox.
+
+**what else was considered.** Enabling CodeQL's "default setup" via a
+repository-settings API call instead of a workflow file — rejected: it would
+have solved the actual security question (does static analysis run) while
+leaving gate 6 exactly as blind as before, since a setting has no artifact for
+`state_map.py` to read. The whole point of this round was closing the gap
+between "a control exists" and "a control is visible to the mechanism whose
+job is to say so," and a settings-only fix would have closed neither. Running
+CodeQL only on `python` (matching the SBOM and release path's engine-only
+focus) — rejected: the root Next.js app is the commercial surface handling
+real payment flow (`lib/core/agents/budget.ts`, the Stripe routes), and
+`javascript-typescript` static analysis is exactly the tooling `ci.yml`'s
+`npm audit` does not cover (a dependency's known CVE versus a vulnerability in
+this repository's own code are different questions). A `security-events:
+write` permission narrower than the whole job — not available: `codeql-
+action/analyze` needs it to upload SARIF results to the Security tab, and
+GitHub does not offer a finer-grained scope for that specific write.
+
+**reversible how.** One new workflow file and one additive fact in
+`state_map.py`. `git revert` removes the workflow and the fact; gate 6's prose
+would need a matching revert to stop citing a fact that no longer exists,
+otherwise `state_map.py --check` would immediately say so.

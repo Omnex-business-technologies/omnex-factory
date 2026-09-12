@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "56504d03b06b2a7e65592a6e90dbbfe754cc5dae",
+  "source_commit": "4e2aef2ce40531b5161baa9ba84ea45b965b3a89",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -69,11 +69,11 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 55,
+    "runs": 57,
     "chain_intact": true,
     "by_level": {
       "L3": 2,
-      "L3_REPOSITORY": 52,
+      "L3_REPOSITORY": 54,
       "L4_EXTERNAL": 1
     },
     "above_l3": 3,
@@ -89,8 +89,9 @@
     "dependabot_config": true,
     "build_provenance_attested": true,
     "sbom_generated": true,
-    "actions_pinned_to_sha": 20,
-    "actions_total": 20
+    "codeql_workflow_present": true,
+    "actions_pinned_to_sha": 23,
+    "actions_total": 23
   },
   "capabilities": {
     "total": 8,
@@ -155,15 +156,16 @@
     },
     "6_security": {
       "status": "UNKNOWN",
-      "why": "controls that ARE in the repository run on every pull request or release (dependency audit in CI: True, dependency review on PR diffs: True, Dependabot config: True, build provenance attested in the release workflow: True, an SBOM generated and read back against the package it describes in the release workflow: True, every GitHub Action pinned to a commit SHA: 20/20); what is absent is any signed PUBLISHED artifact, since no release exists — none of this has run for real. CodeQL default setup and secret scanning are GitHub settings rather than files, so a repository scan cannot see them and this claims neither way",
+      "why": "controls that ARE in the repository run on every pull request or release (dependency audit in CI: True, dependency review on PR diffs: True, Dependabot config: True, build provenance attested in the release workflow: True, an SBOM generated and read back against the package it describes in the release workflow: True, static analysis via a CodeQL workflow: True, every GitHub Action pinned to a commit SHA: 23/23); what is absent is any signed PUBLISHED artifact, since no release exists — none of this has run for real. Secret scanning is a GitHub setting rather than a file, so a repository scan cannot see it and this claims neither way",
       "evidence": [
         "dependency_audit_in_ci: True",
         "dependency_review_in_ci: True",
         "dependabot_config: True",
         "build_provenance_attested: True",
         "sbom_generated: True",
-        "actions_pinned_to_sha: 20",
-        "actions_total: 20"
+        "codeql_workflow_present: True",
+        "actions_pinned_to_sha: 23",
+        "actions_total: 23"
       ]
     },
     "7_observability": {
@@ -178,11 +180,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 55 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
+      "why": "the run ledger holds 57 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 55",
+        "runs recorded: 57",
         "chain intact: True",
-        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 52, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 54, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {
