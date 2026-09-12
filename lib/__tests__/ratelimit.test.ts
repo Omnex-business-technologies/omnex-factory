@@ -135,4 +135,15 @@ describe('checkRateLimit', () => {
     }
     expect(checkRateLimit(request(`10.6.${n}.over`), 'stripe_portal', user).allowed).toBe(false)
   })
+
+  it('leads has its own limit, keyed by IP since the route has no identity to pass', () => {
+    const leadsMax = 5 // see RATE_LIMITS['leads']
+    const ip = `10.7.${n}.0`
+    for (let i = 0; i < leadsMax; i++) {
+      expect(checkRateLimit(request(ip), 'leads').allowed).toBe(true)
+    }
+    expect(checkRateLimit(request(ip), 'leads').allowed).toBe(false)
+    // An unrelated IP is a separate window entirely.
+    expect(checkRateLimit(request(`10.7.${n}.1`), 'leads').allowed).toBe(true)
+  })
 })

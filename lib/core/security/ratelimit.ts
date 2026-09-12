@@ -39,12 +39,14 @@
  * optional `identity` parameter is that user id: when passed, it is the key,
  * full stop, and the header is never consulted — an attacker who cannot
  * forge a verified session cannot rotate their way around their own limit
- * by rewriting a header on every request. `getClientId()` remains the
- * fallback for the two configured routes (`email_send`, `auth`) nothing in
- * this repository calls yet, and inherits whatever trust the deployment
- * platform actually provides for it — a claim this file makes about itself,
- * not about Vercel's or any other host's edge, which this environment
- * cannot verify from here.
+ * by rewriting a header on every request. `getClientId()` is the correct,
+ * only option for `leads` — genuinely anonymous, no session to derive an
+ * identity from — and remains the fallback for two configured-but-unwired
+ * routes (`email_send`, `auth`) nothing else in this repository calls yet.
+ * Either way it inherits whatever trust the deployment platform actually
+ * provides for it — a claim this file makes about itself, not about
+ * Vercel's or any other host's edge, which this environment cannot verify
+ * from here.
  */
 import { NextRequest } from 'next/server'
 
@@ -75,6 +77,13 @@ export const RATE_LIMITS = {
   // on how many runs may be STARTED — a generous per-message cap would let one
   // user hold every worker slot with long-running streams nobody is reading.
   'copilot_stream':  { windowMs: 60_000, maxReqs: 12, keyPrefix: 'cp'  },
+  // The one genuinely anonymous route in this list: no session, no identity to
+  // key on, and its insert runs through the service-role client (bypasses RLS
+  // by design, since there is no session to lean on — see the route's own
+  // docstring). A legitimate visitor submits this form once; five per minute
+  // per IP leaves room for a mistaken resubmit without leaving the insert path
+  // open to unlimited anonymous writes.
+  'leads':           { windowMs: 60_000, maxReqs: 5,  keyPrefix: 'ld'  },
 } satisfies Record<string, RateLimitConfig>
 
 export type RateLimitRoute = keyof typeof RATE_LIMITS

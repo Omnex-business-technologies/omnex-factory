@@ -3593,3 +3593,101 @@ site added inside `POST`, one new test file. `git revert` restores the
 pre-fix behavior exactly — the same trust-the-label defect this closes,
 not a break, since nothing downstream depends on `matchesSignature`
 existing.
+
+## D-044: the one anonymous public route had no rate limit at all
+
+**context.** Six rounds of truth-passing the money path had by now checked
+every route already wired to `checkRateLimit` — pricing (D-038), the
+webhook (D-039), the limiter twice (D-040, D-041), the copilot's guard
+(D-042), the upload route's content check (D-043) — and each round asked
+whether an existing protection actually covered the threat it looked like
+it covered. This round widened the pass one step further: which routes
+are NOT wired to `checkRateLimit` at all, and is that absence justified or
+an oversight? `app/api/studio/generate/route.ts` was also read in full
+this round on the strength of `app/api/studio/upload/route.ts`'s own
+docstring claim that it enforces an SSRF boundary on the uploaded image
+URL (`imageUrl` must start with this deployment's own Supabase public
+storage prefix) — confirmed correct: the check is anchored with
+`startsWith` against a server-controlled prefix, applied before the URL
+ever reaches a provider, and the one provider (`local`/ComfyUI) that
+itself fetches that URL only runs after the route's own check has already
+passed. No defect found there; the pass continued to routes not yet read.
+
+**what was found.** `app/api/leads/route.ts` is the only public POST route
+in the entire app with no call to `checkRateLimit` anywhere in it, and
+`RATE_LIMITS` (`lib/core/security/ratelimit.ts`) had no entry for it
+either. Every other route this repository wires to the limiter —
+`studio_generate`, `studio_upload`, `copilot_stream`, `stripe_checkout`,
+`stripe_portal` — authenticates the caller with Supabase first and passes
+`user.id` as the identity. `leads` cannot do that: it is anonymous by
+design (a brand submits a brief with no account), and its own docstring
+already states the insert runs through the service-role client because
+there is no session to enforce anything with. That combination — no rate
+limit, service-role writes, zero authentication — meant an unauthenticated
+caller could flood the `leads` table with unlimited service-role inserts
+at whatever rate a script could send them, held back by nothing but a
+honeypot field (`website`) that only catches a bot filling every field it
+finds, not a targeted flood sending only the required fields. Confirmed
+via `grep` that this route had zero test coverage of any kind before this
+round.
+
+**what was built.** A new `RATE_LIMITS['leads']` entry (5 requests per 60
+seconds, `keyPrefix: 'ld'`) and a `checkRateLimit(request, 'leads')` call
+at the top of `POST`, before the body is even parsed, returning 429 with
+`rateLimitHeaders` on refusal. No `identity` argument is passed — this is
+the one legitimate use of `checkRateLimit`'s `getClientId()` fallback,
+which `ratelimit.ts`'s own module docstring already carved out for "the
+two configured routes (`email_send`, `auth`) nothing in this repository
+calls yet"; that sentence is now corrected to name `leads` as the actual,
+current example of the anonymous case the fallback exists for, rather than
+a hypothetical future one. `lib/__tests__/leads.test.ts` is this route's
+first test file: the rate limit itself (five allowed from one IP, the
+sixth refused, a different IP holding its own untouched window), the
+honeypot path, both validation refusals (bad email, short brief), a
+successful insert with the row shape asserted, and the `.error` read on a
+failed insert.
+
+**what was verified.** All 7 new route tests plus a new `ratelimit.test.ts`
+config-level test (`leads` behaves like the existing `stripe_portal`
+pattern: N allowed, N+1 refused, a different IP untouched) pass — 15 tests
+total across the two files touched. **Sabotage-verified**: temporarily
+removed the `checkRateLimit` call from `POST`, reran the suite, confirmed
+the rate-limit test failed with exactly the expected wrong result (a sixth
+request from the same IP answered 200 instead of 429, with `insert()`
+having actually been called a sixth time), then restored the fix and
+reconfirmed all 15 tests green. Root gate green: `npm audit` (0
+vulnerabilities), `tsc --noEmit` (clean), `vitest run` (116 tests across 12
+files, +8), `next build` (13 routes, clean). Full Python engine gate green
+with only the two known, previously-documented, non-blocking failures
+(citegate's `[project.urls]` drift; the intermittent rate-limiter flake was
+not encountered this round); `mutate.py` 29/29, `spine_check.py` 14/14
+EXECUTABLE, `business_map.py --check` and `state_map.py --check` both agree
+with the repository.
+
+**what else was considered.** Passing the request's own header-derived id
+as an explicit `identity` argument instead of relying on the implicit
+fallback — rejected as strictly worse: `identity` exists specifically to
+outrank a spoofable header with a verified one, and passing the same
+spoofable value through the parameter that is supposed to mean "trust
+this" would misstate what the code is actually keying on to the next
+reader of the call site; leaving `identity` unset and letting
+`getClientId()` run is the honest way to say "this route has no better
+signal than the header." A stricter limit (e.g. 1/min) — rejected: this is
+a real business-development channel and a legitimate visitor plausibly
+resubmits once after a validation error or a typo; 5/min leaves room for
+that while still bounding a flood to a small multiple of genuine traffic
+instead of an unbounded one. Requiring a CAPTCHA or similar challenge
+instead of / in addition to a rate limit — out of scope for this round: it
+is a real complementary control but a materially larger, product-facing
+change (a third-party dependency, a UI change, a decision about which
+provider) than the structural gap this fix closes, and the honeypot this
+route already has plus a rate limit closes the concrete, measured issue
+(unbounded anonymous service-role writes) without widening the PR into a
+product decision nobody has made yet.
+
+**reversible how.** One new `RATE_LIMITS` entry, one call added at the top
+of `POST` in the existing route file, one new test file, one new test in
+an existing file, one docstring correction. `git revert` restores the
+pre-fix behavior exactly — the same unbounded-anonymous-write gap this
+closes, not a break, since nothing downstream depends on the `leads`
+limiter existing.

@@ -58,7 +58,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 108 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 116 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 100 TypeScript tests now run in CI; until recently, seven of them did.
@@ -548,6 +548,21 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   a bypass with no legitimate caller and a real leak scenario is pure
   liability. `stripe_portal` also gained the rate limit `stripe_checkout`
   already had; nothing had documented why the sibling route lacked one.
+- `app/api/leads/route.ts` — **the one public route with no session, and the
+  one that had no rate limit at all.** Every other route wired to
+  `checkRateLimit` authenticates first and passes `user.id`; this one is
+  anonymous by design (a brand submits a brief with no account) and its
+  insert runs through the service-role client, bypassing RLS entirely
+  because there is no session to lean on. Nothing stood between an
+  unauthenticated caller and unlimited service-role database writes except
+  a honeypot field a scripted flood simply never fills. New `RATE_LIMITS['leads']`
+  entry (5/min) and a `checkRateLimit(request, 'leads')` call with no
+  identity — the one legitimate use of `getClientId()`'s IP fallback the
+  module docstring already carved out for exactly this shape of route.
+  This route had zero test coverage before `lib/__tests__/leads.test.ts`.
+  Proven by sabotage: removing the rate-limit call was confirmed to let
+  a sixth request from the same IP through with 200 and a real `insert()`
+  call, before the check was restored and reconfirmed to refuse it with 429.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential
