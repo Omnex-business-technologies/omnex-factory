@@ -54,7 +54,7 @@ jobs:
           # but it makes the check decoration. Full history makes it real.
           fetch-depth: 0
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: engine/pyproject.toml
@@ -113,7 +113,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
 
       - name: Build sdist and wheel
         working-directory: oss/citegate
@@ -209,7 +209,7 @@ jobs:
         with:
           name: citegate-dist
           path: dist
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
 
       - name: Refuse by name without the credential
         env:
