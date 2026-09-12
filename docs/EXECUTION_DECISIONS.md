@@ -2336,3 +2336,70 @@ gate re-run green end to end (ruff/format/mypy, all invariants, `env_check.py`,
 --check`, `apply_decisions.py --dry-run`, full `pytest tests/`, `mutate.py`
 29/29); `release_check.py --target citegate` still failing on the same
 pre-existing, unrelated git-remote reversion.
+
+## D-031: the n8n binding checker had no test and did not run in CI
+
+**context.** This round's truth pass, after PR #43's CodeQL correction, looked
+for the same class of gap the last several rounds have each found once: a real
+checker that exists, catches a real defect class, and is invisible to
+`test_ci_runs_every_gate_script_the_document_names` because nobody named it in
+CLAUDE.md's gate block. `readme_check.py` was that gap two rounds ago;
+`actions_pin_check.py`, `capability_map.py` and `sbom_check.py` before it.
+
+**what was found.** `engine/scripts/n8n_bindings_check.py` exists, has a
+docstring naming a real defect it was built to catch (`unresolved_commands()`
+was added after the catalogue once named `python -m omnex.pipeline.
+verify_webhook` and `...seen_before`, neither of which was a real module, and
+every schema-level check passed both), and exits non-zero on exactly that
+class of problem. It had **zero tests** and did not appear in CLAUDE.md's gate
+block or `engine.yml` — the resolution logic that caught the original defect
+had, for the entire time since, no test holding it in place and no CI run
+exercising it on every push or pull request. It is not `n8n_bindings.json`
+that was undertested (`bindings.load()` has its own coverage through
+`test_factory_compile.py`); it is this checker's own two functions,
+`unresolved_commands()` and `required_env()`, that had none.
+
+**what was built.** `engine/tests/test_n8n_bindings_check.py`: nine tests
+against synthetic catalogues built via `bindings.load()` on a `tmp_path` file
+(no second parser — the same `Catalogue`/`load()` the checker itself uses) —
+a module with no `__main__`, a real module with a real subcommand, a real
+module with a bad subcommand, a binding naming no command at all, a
+`proposal`-sourced binding that must never be resolved (only `source: this
+repository` entries claim to be checkable), the environment-variable
+derivation reading both interpolated and declared names, `main()` failing on
+a catalogue that will not load and on an unresolved command, and — the test
+that is the actual point — the real, committed `n8n_bindings.json` still
+resolving cleanly today. Added `scripts/n8n_bindings_check.py` to CLAUDE.md's
+gate block (between `actions_pin_check.py` and `readme_check.py`, preserving
+the order the document already runs things in) and a matching step in
+`engine.yml`, in the same position.
+
+**what was verified.** `test_ci_contract.py`'s
+`test_ci_runs_every_gate_script_the_document_names` passes with the new
+script named in both places. `n8n_bindings_check.py` itself still exits 0
+against the real catalogue (7 bindings, 0 confirmed — unchanged; this round
+adds coverage, not new bindings). Full engine gate green: ruff/format/mypy,
+all invariants, `env_check.py`, `extras_check.py`, `release_check.py --target
+engine`, claims/runs/spine, `actions_pin_check.py` (20/20), the new
+`n8n_bindings_check.py` step, `readme_check.py --check` (1,308, up from 1,299
+— nine new tests), `capability_map.py --check`, `state_map.py --check`,
+`apply_decisions.py --dry-run`, full `pytest tests/`, `mutate.py` (29/29).
+`release_check.py --target citegate` still failing on the same pre-existing,
+previously-documented git-remote reversion, unrelated to this change.
+
+**what else was considered.** Making `n8n_bindings_check.py` exit non-zero on
+an unconfirmed binding, to force the CI gate to reflect that 0 of 7 bindings
+are confirmed — rejected, and the module's own docstring already gives the
+reason: "a permanently red build is one people learn to ignore," and
+unconfirmed is every entry's honest starting state, not a defect. Writing a
+second, independent command-resolution implementation for the test file
+rather than reusing `bindings.load()` — rejected as exactly the
+`one_symbol_resolver`/`twin_splitters_agree` mistake this repository already
+paid for once; the test file uses the same `Catalogue` the checker consumes,
+so a change to the schema shows up as a test failure here too rather than two
+readers silently disagreeing.
+
+**reversible how.** One new test file and two-line additions to CLAUDE.md and
+`engine.yml`. `git revert` removes CI coverage and the test file; the checker
+itself is untouched either way, since this round added test and CI wiring,
+not new logic.
