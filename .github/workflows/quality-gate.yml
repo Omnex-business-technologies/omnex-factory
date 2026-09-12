@@ -43,9 +43,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: engine/pyproject.toml
@@ -79,7 +79,7 @@ jobs:
         # what changed. Deleting it because the build went red is how a team
         # loses the ability to answer "when did this start".
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: eval-run-${{ github.run_number }}
           path: engine/.omnex/runs/

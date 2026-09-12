@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "1a109e1141d60f23b4f6f0501853130144f65f63",
+  "source_commit": "64134535c8362612e209deb08ca15eafe5747fa9",
   "branch": "claude/vitest5-typescript7-migration",
   "tree_clean": false,
   "corpus": {

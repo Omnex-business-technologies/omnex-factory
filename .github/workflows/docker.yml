@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Shallow (depth 1) is the default and is insufficient here: the
           # image bakes in engine/scripts/business_map.py, which counts days

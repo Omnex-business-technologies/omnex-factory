@@ -916,6 +916,142 @@ way, since that one needs no config file to begin with.
 
 ---
 
+## D-017 · The citegate tag push was refused, and nothing public exists
+
+**date:** 2026-09-12 · **status:** ACCEPTED, blocked on the operator ·
+**reversible:** n/a (a finding; no tag exists anywhere but this sandbox)
+
+**context.** The operator gave explicit, specific authorization — after
+being shown exactly what it creates (a real, public, irreversible-once-
+pushed GitHub Release) — to cut `citegate-v0.1.0`. `release_check.py
+--target citegate --release` was run first and found only the documented
+session-local `[project.urls]` artifact; the dirty-tree, tag-not-taken,
+HEAD-on-remote-branch, license, version, floor and dependency checks all
+passed clean. `git tag citegate-v0.1.0` created the tag locally at `1a109e1`.
+
+**what happened.** `git push origin citegate-v0.1.0` was refused with a
+clean `HTTP 403 Forbidden` at the git-receive-pack layer itself — confirmed
+with `GIT_CURL_VERBOSE`: TLS handshake to `github.com` succeeded normally,
+the `POST /RaveZona/omnex-factory/git-receive-pack` request went through,
+and GitHub's own response was the 403, not this sandbox's proxy
+(`recentRelayFailures` was empty at the time). Retried once per the
+network-error protocol; same result.
+
+**ruled out, in order:**
+1. **A proxy problem.** `curl -sS "$HTTPS_PROXY/__agentproxy/status"`
+   showed zero recent relay failures, and the TLS/HTTP exchange completed
+   normally up to GitHub's own 403 response.
+2. **A general access regression.** An ordinary branch push to
+   `claude/production-ai-projects-bzz82l` on the same remote, in the same
+   minute, succeeded normally — ruling out "this session cannot reach
+   `RaveZona/omnex-factory` right now" as the explanation.
+3. **The already-known cross-owner limitation.** Pushing the same tag
+   directly to `Omnex-business-technologies/omnex-factory` was blocked
+   too, but with a *different*, already-documented failure: this session's
+   own proxy refuses it outright ("is not in this session's authorized
+   repository set"), the same `add_repo` cross-tier restriction `D-013`
+   already named. That is a different failure mode from the clean 403 on
+   the old path, which rules out "the new owner is simply unreachable"
+   as the explanation for the tag-specific refusal there.
+
+**what is left, honestly.** The refusal is specific to *creating this tag
+ref* — not the repository, not this branch, not this session's network
+path in general. The most consistent unconfirmed explanation is a tag
+protection rule or ruleset on the repository or organization restricting
+who may create a tag matching this pattern, distinct from the branch-
+protection ruleset `docs/TRANSFER.md`'s own step 6 already tracks as open.
+This session has no tool that reads GitHub rulesets or tag-protection
+settings (checked: the GitHub MCP toolset here has `get_tag`, `list_tags`,
+`get_release_by_tag` and the Actions tools, nothing that reads a
+repository's rule configuration) — so this cannot be confirmed from here,
+only reported.
+
+**not routed around.** No force, no alternate credential, no third push
+path attempted beyond the two legitimate diagnostic pushes above. The
+local tag object exists only in this sandbox's git store and was never
+accepted by GitHub — confirmed with `get_tag`, which returns `404`.
+Nothing public was created; `C-013` stays `UNKNOWN`, not `CONTRADICTED` —
+being unable to push is not evidence the workflow itself would fail, the
+same `UNKNOWN`-is-not-`FALSE` distinction `execution_state.json` already
+holds elsewhere.
+
+**what the operator can check, since this session cannot.** GitHub
+Settings → Rules → Rulesets (and the older Settings → Tags → "Tag
+protection rules") on `Omnex-business-technologies/omnex-factory`, for
+any rule matching `citegate-v*` or `*`. If one exists and is intended to
+block automated pushes, the tag needs pushing from a person's own
+machine, or the rule needs a bypass naming this integration. If no such
+rule exists, this is worth a second attempt from here — the failure was
+clean enough to retry once resolved, but not something to keep retrying
+blind.
+
+**reversible how.** Nothing to reverse — no tag, no release, no artifact
+exists anywhere outside this sandbox's local git store. `R-0016` records
+the attempt and this finding.
+
+**update, same day: repo-level Rulesets ruled out.** The operator checked
+`Omnex-business-technologies/omnex-factory`'s Settings → Rules → Rulesets
+directly — empty, "You haven't created any rulesets." A second push
+attempt (`GIT_CURL_VERBOSE`, same method as the first) produced the
+identical clean `HTTP 403` at the git-receive-pack layer, confirming the
+refusal does not come from a repository-level ruleset. What is left,
+untested from here: an **organization-level** ruleset (a separate setting
+from the per-repository page just checked — `Omnex-business-
+technologies`'s org settings, not the repo's), the older, separate
+**Settings → Tags → "Tag protection rules"** page (distinct UI from
+Rulesets, never checked), and the possibility that whatever GitHub App
+this session's git access runs through simply was never granted a
+permission scope covering tag-ref creation specifically — plausible
+because some integrations gate "create tag" as a higher-risk action
+separately from ordinary branch pushes, checkable only from
+`https://github.com/settings/installations` (or the org's installed
+GitHub Apps page) → the app → Permissions, which is the operator's page,
+not this session's.
+
+**resolved, same day: root cause found, and it is none of the above.**
+The operator checked all three remaining candidates (org-level Rulesets,
+the legacy Tag protection rules page, and the App's own Permissions page)
+and none applied. `GIT_TRACE_CURL=1 git push origin citegate-v0.1.0`
+finally surfaced the response body git's own error handling had been
+swallowing (`unpack error` / `unexpected disconnect while reading
+sideband packet` was the *symptom*, not the cause — git cannot parse a
+plain-text error into a sideband packet and gives up before printing it):
+
+```
+ERR push contains a ref outside refs/heads/*; only branch updates are permitted.
+```
+
+This is GitHub's own git-receive-pack response, and it names the actual
+mechanism: **the credential this session's git access uses is scoped to
+`refs/heads/*` only**. Not a repository setting, not an org setting, not
+a ruleset of any kind — a property of the token itself, enforced by
+GitHub before any repository-level policy is even consulted. Every
+candidate in the update above (repo Rulesets, org Rulesets, Tag
+protection rules, App permissions as *read via the GitHub UI*) was a
+reasonable place to look and every one came back clean because none of
+them is where this restriction lives.
+
+**what this means, plainly.** No setting on `github.com` that either the
+operator or this session can reach will change this — the token
+Claude Code Remote's git integration uses for this session is, by
+design or by the platform's own default, branch-only. This reads as the
+same shape `policy.py`'s own `ALWAYS_ASKS` set encodes one layer up in
+this repository (`PUBLISH`, `DEPLOY`, `CREDENTIAL`, `FINANCIAL`,
+`DESTRUCTIVE` — "cleared by no level alone") — except enforced here by
+GitHub itself, on the actual credential, rather than by a document this
+repository writes about itself. A tag is exactly the kind of ref a
+platform would reasonably keep out of an agent's write scope: it is
+what turns a rehearsal into a release.
+
+**resolution.** `citegate-v0.1.0` needs pushing from the operator's own
+machine, with their own git credentials — not from this session, and not
+by any further diagnosis or retry here. `git tag citegate-v0.1.0
+<commit>` at `1a109e1` (or wherever `master` is by the time this is
+done) then `git push origin citegate-v0.1.0` from a real developer
+checkout completes what this session correctly could not.
+
+---
+
 ## D-018 · vitest 5 and TypeScript 7, verified rather than merged blind
 
 **date:** 2026-09-12 · **status:** ACCEPTED · **reversible:** yes, a version bump
