@@ -234,6 +234,7 @@ def _supply_chain() -> dict[str, Any]:
     cannot observe is unobserved, which is not the same as missing — the
     distinction the whole file exists to keep.
     """
+    import actions_pin_check
     import release_check
 
     # One comment-stripping reader, imported rather than copied. A second copy
@@ -244,11 +245,15 @@ def _supply_chain() -> dict[str, Any]:
         for path in sorted((REPO / ".github" / "workflows").glob("*.yml"))
         for line in path.read_text(encoding="utf-8").splitlines()
     ).lower()
+    pins = actions_pin_check.summarise(release_check._workflow_text())
     return {
         "dependency_audit_in_ci": "npm audit" in text,
+        "dependency_review_in_ci": "dependency-review-action" in text,
         "dependabot_config": (REPO / ".github" / "dependabot.yml").exists(),
         "build_provenance_attested": "attest-build-provenance" in text,
         "sbom_generated": any(k in text for k in ("cyclonedx", "spdx", "syft", "sbom")),
+        "actions_pinned_to_sha": pins["pinned_to_sha"],
+        "actions_total": pins["total_uses"],
     }
 
 
@@ -417,8 +422,11 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
             UNKNOWN,
             "controls that ARE in the repository run on every pull request "
             f"(dependency audit in CI: {supply['dependency_audit_in_ci']}, "
+            f"dependency review on PR diffs: {supply['dependency_review_in_ci']}, "
             f"Dependabot config: {supply['dependabot_config']}, build provenance "
-            f"attested in the release workflow: {supply['build_provenance_attested']}); "
+            f"attested in the release workflow: {supply['build_provenance_attested']}, "
+            f"every GitHub Action pinned to a commit SHA: "
+            f"{supply['actions_pinned_to_sha']}/{supply['actions_total']}); "
             f"what is absent is an SBOM ({supply['sbom_generated']}) and any signed "
             "PUBLISHED artifact, since no release exists. CodeQL default setup and "
             "secret scanning are GitHub settings rather than files, so a repository "

@@ -249,6 +249,12 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
     security = " ".join(str(e) for e in gates["6_security"]["evidence"])
     assert "dependency_audit_in_ci: True" in security, "npm audit runs in ci.yml"
     assert "sbom_generated: False" in security, "genuinely absent, and must say so"
+    assert "dependency_review_in_ci: True" in security, "dependency-review-action runs on PRs"
+
+    supply = state_map.derive()["supply_chain"]
+    assert supply["actions_pinned_to_sha"] == supply["actions_total"] > 0, (
+        "every GitHub Action this repository runs must be pinned to a commit SHA"
+    )
 
     autonomy = " ".join(str(e) for e in gates["9_autonomy"]["evidence"])
     assert "chain intact: True" in autonomy

@@ -70,9 +70,9 @@ jobs:
         python: ["3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
           enable-cache: true
           cache-dependency-glob: engine/pyproject.toml
@@ -149,6 +149,13 @@ jobs:
         # point: a gate that can only print a passing chain is decorative.
         run: uv run python scripts/spine_check.py
 
+      - name: GitHub Actions pinned to a commit
+        # Sovereign Execution Standard, Phase 2: "pinned or controlled GitHub
+        # Actions". A version tag (@v7) is the action's maintainer's to move;
+        # a commit SHA is not. Fails if any `uses:` in any workflow resolves
+        # to anything but a full 40-character SHA.
+        run: uv run python scripts/actions_pin_check.py
+
       - name: Capability registry
         # The canonical capability registry (Sovereign Execution Standard,
         # Phase 1): evidence level per capability derived from symbol
@@ -219,9 +226,9 @@ jobs:
         python: ["3.11", "3.13"]
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
           enable-cache: true
           cache-dependency-glob: oss/citegate/pyproject.toml
