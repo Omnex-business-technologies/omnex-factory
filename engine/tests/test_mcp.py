@@ -326,6 +326,84 @@ def test_arguments_that_are_not_an_object_are_a_params_error() -> None:
     assert message.error.code is ErrorCode.INVALID_PARAMS
 
 
+def _scoped_server() -> McpServer:
+    """One open tool, one tool that needs `admin`."""
+    server = McpServer("fx", "1.0")
+
+    @server.tool("convert", "convert between currencies")
+    def convert(args: dict[str, object]) -> str:
+        return f"{args.get('amount')} {args.get('frm')} = 42 {args.get('to')}"
+
+    @server.tool("delete_all", "delete everything", required_permission="admin")
+    def delete_all(args: dict[str, object]) -> str:
+        return "deleted"
+
+    return server
+
+
+def test_an_unscoped_caller_sees_and_calls_everything() -> None:
+    """`granted=None` (the default) is unrestricted — no caller loses a tool it
+    already had just because scoping exists elsewhere in the server."""
+    server = _scoped_server()
+    server.handle(encode(Request(id="0", method="initialize")))
+    listed = decode(server.handle(encode(Request(id="1", method="tools/list"))) or "")
+    assert isinstance(listed, Response)
+    assert listed.result is not None
+    names = {t["name"] for t in listed.result["tools"]}
+    assert names == {"convert", "delete_all"}
+
+    called = decode(
+        server.handle(encode(Request(id="2", method="tools/call", params={"name": "delete_all"})))
+        or ""
+    )
+    assert isinstance(called, Response)
+    assert called.error is None
+
+
+def test_a_scoped_tool_is_invisible_to_a_caller_without_the_permission() -> None:
+    server = _scoped_server()
+    server.handle(encode(Request(id="0", method="initialize")), granted=frozenset({"user"}))
+    listed = decode(
+        server.handle(encode(Request(id="1", method="tools/list")), granted=frozenset({"user"}))
+        or ""
+    )
+    assert isinstance(listed, Response)
+    assert listed.result is not None
+    names = {t["name"] for t in listed.result["tools"]}
+    assert names == {"convert"}, "the admin-only tool leaked into an unprivileged listing"
+
+
+def test_calling_a_scoped_tool_without_permission_reads_exactly_like_no_such_tool() -> None:
+    """Not 'permission denied' — that would confirm the tool exists to a caller
+    who is not supposed to know. Same error, same shape, as an unknown name."""
+    server = _scoped_server()
+    server.handle(encode(Request(id="0", method="initialize")), granted=frozenset({"user"}))
+    reply = server.handle(
+        encode(Request(id="1", method="tools/call", params={"name": "delete_all"})),
+        granted=frozenset({"user"}),
+    )
+    assert reply is not None
+    message = decode(reply)
+    assert isinstance(message, Response)
+    assert message.error is not None
+    assert message.error.code is ErrorCode.INVALID_PARAMS
+    assert "no tool named" in message.error.message
+    assert message.error.data["available"] == ["convert"], "must not list the scoped tool either"
+
+
+def test_a_caller_with_the_right_permission_gets_the_scoped_tool_back() -> None:
+    server = _scoped_server()
+    server.handle(encode(Request(id="0", method="initialize")), granted=frozenset({"admin"}))
+    reply = server.handle(
+        encode(Request(id="1", method="tools/call", params={"name": "delete_all"})),
+        granted=frozenset({"admin"}),
+    )
+    assert reply is not None
+    message = decode(reply)
+    assert isinstance(message, Response)
+    assert message.error is None
+
+
 def test_serve_runs_the_real_loop_and_honours_its_bound() -> None:
     server = _server()
     theirs, ours = MemoryTransport.pair()
