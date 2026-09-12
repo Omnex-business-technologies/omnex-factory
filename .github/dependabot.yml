@@ -1,0 +1,66 @@
+# The structural fix C-008 exposed a gap for: a pinned GitHub Action can go
+# stale with no CVE behind it, and nothing here caught that automatically.
+# `actions/attest-build-provenance@v2` sat two majors behind (last released
+# 2025-06-11, v4.2.2 current) until a manual `git clone` of the action's own
+# public repository found it during the citegate release rehearsal — the
+# open web being blocked at this environment's proxy made even reading
+# `docs.github.com` impossible, so the only way to check was cloning the
+# action's repository through the git lane and reading its tags by hand.
+# Dependabot's *security* alerts are automatic for supported ecosystems with
+# no config file at all — that is how the 13 npm advisories behind D-014
+# were found — but that channel only fires on a known vulnerability. A pin
+# that is merely outdated, with no CVE attached, is invisible to it. Only
+# Dependabot's *version-update* channel watches for that, and it is opt-in:
+# nothing here was opted in until this file existed.
+#
+# Four ecosystems, matching every package manifest actually in this
+# repository, so the same class of "nobody is watching this" gap does not
+# reopen somewhere else the next time a dependency ages quietly:
+#   - github-actions: every `uses:` pin across every workflow in this repo
+#     (release.yml's attestation action among them) — GitHub always resolves
+#     this against the repository root regardless of where the workflow
+#     files live.
+#   - npm: the root `package.json` — the manifest D-014 patched by hand
+#     after `npm audit` measured 8 vulnerabilities `npm audit fix` could not
+#     resolve itself. Version-update PRs here catch routine drift before it
+#     becomes another manual investigation.
+#   - pip: `engine/` and `oss/citegate/` separately, mirroring how
+#     `release_check.py --target` treats them as two packages, never one.
+#
+# Grouped into one PR per ecosystem per week for minor/patch bumps, so this
+# does not trade "nobody is watching" for "thirty PRs nobody reads" — a
+# major bump still opens its own PR, since that is where a breaking change
+# is most likely to hide.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "pip"
+    directory: "/engine"
+    schedule:
+      interval: "weekly"
+    groups:
+      engine-pip-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "pip"
+    directory: "/oss/citegate"
+    schedule:
+      interval: "weekly"
+    groups:
+      citegate-pip-minor-patch:
+        update-types: ["minor", "patch"]
