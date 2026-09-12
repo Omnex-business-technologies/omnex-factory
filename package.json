@@ -32,7 +32,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/mocker": "^4.1.11",
+    "@vitest/mocker": "^5.0.0",
     "autoprefixer": "^10.4.20",
     "pg": "^8.22.0",
     "tailwindcss": "^4.3.0",
