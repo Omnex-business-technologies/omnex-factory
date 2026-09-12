@@ -742,3 +742,83 @@ than CI in either direction.
 moment `stripe`, `postcss` or `@testcontainers/postgresql` themselves bump
 past the vulnerable range and carry a fixed transitive version on their own
 — worth revisiting then, not before.
+
+---
+
+## D-015 · Two claims that are fixed and will never say so
+
+**date:** 2026-09-12 · **status:** ACCEPTED, action needed from a person ·
+**reversible:** n/a (a finding, plus two comment-only edits)
+
+**context.** With PR #12 merged, `next_action.py` was run to find the next
+real item rather than assume one. It ranked `C-001` and `C-008` at the top —
+both `CONTRADICTED`, both flagged "no machine may close it." Re-measuring
+found both **already fixed**, by commits that predate this session's summary,
+with nobody having gone back to tell the ledger.
+
+**C-001** ("citegate imports on Python 3.10"). `oss/citegate/pyproject.toml`
+declared `>=3.10` when `E-001` measured the contradiction (`grounding.py`
+imports `enum.StrEnum`, 3.11+ only). Commit `0c0d426` — the same commit that
+built `release_check.py` and found this as one of its four bugs — already
+raised the floor to `>=3.11`. Re-measured just now, on the actual
+interpreters: `/usr/bin/python3.10 -c "import citegate"` still raises
+`ImportError: cannot import name 'StrEnum'` (expected — 3.10 was never going
+to be supported), and `/usr/bin/python3.11` imports clean. The floor is
+honest now. But the claim as worded — "imports on Python 3.10" — did not get
+fixed into truth; it got fixed into **irrelevance**, because the promise it
+was checking no longer exists in the file. No amount of further code change
+makes `C-001` `SUPPORTED`; the fix was raising the floor, not lowering the
+requirement.
+
+**C-008** ("`actions/attest-build-provenance@v2` is a current major
+version"). `E-011` measured `@v2` two majors stale on 2026-09-08. The pin
+was already moved to `@v4` as part of that same investigation
+(`.github/workflows/release.yml:146`). Same shape as C-001: the file no
+longer makes the claim being checked, so the claim can never mechanically
+become true again — it can only be superseded.
+
+**why no evidence was added, and why no claim was closed.** Adding another
+`contradicts` entry for either would be noise — the file already agrees with
+itself that both are false, twice now. What is missing is not evidence, it
+is a person's judgement that the *problem* the claim was tracking is closed,
+which is a `reject`, not a `support`. `next_action.py`'s own text is
+explicit: *"Either change the repository so it becomes true, or reject the
+claim with a person's name and a date. No machine may close it."* Both floors
+already changed; neither claim can ever become true as worded; therefore both
+need the second option, and `apply_decisions.py`'s refusal of
+machine-shaped reviewers for `nodes.json` applies here by the same logic
+even though `claims.jsonl` has no script enforcing it yet — this repository
+does not get to selectively apply its own rule to the file that has a
+checker and skip it for the file that does not.
+
+**what a person needs to do, precisely.** Add `rejected_by` (a real name) and
+`rejected_on` (today's date) to the `C-001` and `C-008` rows in
+`state/claims.jsonl`, with a `note` along the lines of "fixed by raising the
+requires-python floor / bumping the action pin, not by making the original
+claim true — see D-015." That is a two-field edit per row; I am not making it
+myself.
+
+**docker.yml, fixed directly (comment-only, not a claim question).**
+`docker.yml`'s header still read "This has never run" and its size-check step
+still asked "against the Dockerfile's own claim of '~120 MB'" — both false:
+`C-014` is `SUPPORTED` (`E-014`, run `34277853648`, merged as part of
+`588514c`), and the Dockerfile stopped repeating a size number during that
+same fix, on purpose, because the honest comparison was never measured
+against a full-repo build context. This one needed no reject and no person —
+it was a comment describing a past that already changed, the same class of
+drift `release.yml`'s pre-rehearsal comments were before the dispatch, fixed
+the same way: rewritten to say what happened, cited by run id and evidence
+id rather than re-asserted from memory.
+
+**what else was considered.** Silently updating `claims.jsonl` myself and
+letting `claims.py --check` wave it through — rejected outright; that is
+exactly the "machine decides two things mean the same thing" move
+`CONSTITUTION.md` and `node_map.py`'s own docstring refuse for ontology
+nodes, and there is no principled reason a claim without a dedicated checker
+gets less discipline than one with one.
+
+**reversible how.** The `docker.yml` comment edit is a comment; `git revert`
+undoes it with no behavioral change either direction. The `claims.jsonl`
+edit this entry asks for is additive (two fields on an existing row) and
+`claims.py`'s own rule — a rejection keeps what it overturned — means even a
+mistaken reject is legible and correctable later, never a silent overwrite.
