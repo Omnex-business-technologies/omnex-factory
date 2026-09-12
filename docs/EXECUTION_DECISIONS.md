@@ -1049,3 +1049,82 @@ by any further diagnosis or retry here. `git tag citegate-v0.1.0
 <commit>` at `1a109e1` (or wherever `master` is by the time this is
 done) then `git push origin citegate-v0.1.0` from a real developer
 checkout completes what this session correctly could not.
+
+---
+
+## D-018 · vitest 5 and TypeScript 7, verified rather than merged blind
+
+**date:** 2026-09-12 · **status:** ACCEPTED · **reversible:** yes, a version bump
+
+**context.** Dependabot's own `.github/dependabot.yml` (`D-016`) opened
+`#26` (`vitest` 4.1.11 → 5.0.0), `#24` (`@vitest/mocker` 4.1.11 → 5.0.0)
+and `#27` (`typescript` 5.9.3 → 7.0.2) within minutes of being merged.
+`#26` failed CI outright: `npm ci` refused with `ERESOLVE` because
+`vitest@5.0.0` peer-requires `@types/node@"^22.0.0 || >=24.0.0"` while
+`package.json` still pinned `^20`. `#24` and `#27` both showed green CI in
+isolation, which is not the same claim — `#24` alone would pair
+`@vitest/mocker@5.0.0` with `vitest@4.1.11`, a combination nobody tests
+together, and `#27` moves to `typescript-go`, a from-scratch Go
+reimplementation of the compiler, not a version bump of the same code.
+
+**what was actually checked, not assumed.** vitest 5's own release notes
+list real breaking changes — mocks cleared by default before each test,
+removed entry points, `sequential` replaced by `concurrent`, changed
+`test.for/each` title formatting. Each was checked against this
+repository specifically before touching a version number:
+
+- Only one test file (`lib/__tests__/metering.test.ts`) uses any `vi.*`
+  mocking, and it is a single `vi.fn()` created fresh inside one test with
+  no `vi.mock()`, no shared module-level mock, no `beforeEach`/`afterEach`
+  reset logic — the new default-clear-mocks behavior has nothing to act on
+  here.
+- No file uses `sequential`, `test.each`, or `test.for`.
+- Every import is `from 'vitest'` or `from 'vitest/config'`, both kept
+  entry points — none of the ones vitest 5 removed.
+- `@vitest/mocker` is never imported directly; it is purely a transitive
+  dependency `vitest` itself resolves.
+
+**measured, not read from a changelog.** `@types/node` raised `^20` →
+`^22` (the floor vitest 5 actually requires), `@vitest/mocker` and
+`vitest` both to `^5.0.0`, `typescript` to `^7.0.2` — one `npm install`,
+one dependency tree, tested together rather than three separate merges
+each assumed harmless alone. Full gate, twice (once with `typescript@^5`
+still pinned to isolate the vitest-only change, once with both bumped
+together): `npm audit` 0 vulnerabilities, `tsc --noEmit` clean, `vitest
+run` 68/68, `next build` 11/11 routes — no source file touched, the
+version bumps alone are sufficient. `engine/tests/test_ci_contract.py`
+re-run and unaffected, as expected for a root-level dependency change.
+
+**what surprised, honestly.** Nothing broke. `tsc`'s own reported time
+inside `next build` dropped from ~5.2s to ~0.8–1.2s under TypeScript 7 —
+the Go rewrite's own performance claim, measured here rather than quoted.
+That speed is not evidence of correctness, only of the compiler doing
+less work per file or doing it faster; the type-check still reports zero
+errors on the same source tree either way, which is the claim that
+actually matters.
+
+**what was not done, on purpose.** TypeScript 7 is a full reimplementation
+of the compiler, not the same code with a version bump — a clean `tsc
+--noEmit` and a clean `next build` prove this codebase's specific surface
+compiles the same, not that every edge case of the type system behaves
+identically. That residual uncertainty is stated rather than absorbed
+into "verified": if a type-checking discrepancy surfaces later that this
+local gate could not have caught, `typescript@^7` is the first place to
+look, and reverting it alone (independent of the vitest/`@types/node`
+pair) is a one-line change.
+
+**why one PR, not three.** `#24`, `#26` and `#27` each looked
+independently safe or independently broken; only running all three
+together, then the whole gate, shows whether the combination is what
+Dependabot's own grouping already argued for (major bumps get their own
+PR because that is where a breaking change hides) but could not itself
+verify, since it never runs three separate PRs' dependency trees merged
+together. `#24` and `#26` are superseded by this branch directly; `#27`'s
+version is the same target, verified alongside the pair it actually ships
+next to rather than merged in isolation on the strength of its own green
+CI.
+
+**reversible how.** `git revert` on the four-line `package.json` diff
+returns to `vitest@4.1.11`, `@vitest/mocker@4.1.11`, `@types/node@^20`,
+`typescript@^5` exactly; `package-lock.json` regenerates identically from
+a clean `npm install` either direction.

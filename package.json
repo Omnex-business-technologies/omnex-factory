@@ -29,15 +29,15 @@
     "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/typography": "^0.5.20",
     "@testcontainers/postgresql": "^12.1.0",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/mocker": "^4.1.11",
+    "@vitest/mocker": "^5.0.0",
     "autoprefixer": "^10.5.5",
     "pg": "^8.23.0",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5",
-    "vitest": "^4.1.11"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "overrides": {
     "qs": "^6.16.0",
