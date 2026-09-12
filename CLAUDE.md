@@ -57,7 +57,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,317 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,320 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -296,9 +296,15 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   itself and the validator would have to learn to ignore a field — it is keyed on
   `source_commit` instead. Today: **1 gate PASS, 12 UNKNOWN, 0 FAIL**, and every
   UNKNOWN names the evidence it waits for, because `UNKNOWN` is a state and
-  `false` is a claim. **Gates 0, 1 and 2 derive their evidence; the rest state
-  why they cannot.** That distinction was itself a defect for weeks: gates 1 and
-  2 carried the hard-coded strings "node_dossier.py does not exist" and
+  `false` is a claim. **Gates 0, 1, 2, 3, 5, 6, 9, 10, 11 and 12 derive their
+  evidence from a real source; only 4, 7 and 8 state why they cannot — no
+  integration, observability or evaluation evidence exists yet to read.**
+  Gates 11 and 12 joined that list latest, and deliberately incompletely: a
+  live listing or a revenue log now moves their evidence and prose, but never
+  their `PASS`/`FAIL` verdict, which stays a person's call under §21 of the
+  Sovereign Execution Standard. The undifferentiated version of that
+  distinction was itself a defect for weeks: gates 1 and 2 carried the
+  hard-coded strings "node_dossier.py does not exist" and
   "state/claims.jsonl does not exist", both scripts were then written and entered
   CI, and `--check` passed the whole time because it compared the committed file
   against those same literals — a constant validated against itself, in the file

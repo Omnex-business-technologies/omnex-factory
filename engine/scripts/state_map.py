@@ -396,6 +396,31 @@ def _mutation_clause(mutation: dict[str, Any]) -> str:
     return clause
 
 
+def _business() -> dict[str, Any]:
+    """What `business_map.py`'s own functions say right now.
+
+    Gates 11 and 12 carried "no external user has obtained the software; 0
+    listings live" and "no revenue log exists — 0 recorded is not 0 earned"
+    as literal strings — true the day they were typed, and structurally
+    incapable of noticing a listing going live or a revenue log appearing,
+    the exact shape gates 1, 2 and 3 already carried once each. Imported
+    rather than re-derived, for the same reason `_capabilities()` imports
+    `capability_map` instead of re-reading `ontology/capabilities.json`: two
+    readers of one source are how the source and its second copy disagree.
+    """
+    import business_map
+
+    rows, promised, passed = business_map.goods()
+    money = business_map.revenue()
+    return {
+        "listings_live": len([r for r in rows if r["live"]]),
+        "modules_live": len(business_map.live_modules()),
+        "goods_passed": passed,
+        "goods_promised": promised,
+        "revenue_recorded": money["recorded"],
+    }
+
+
 def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"status": status, "why": why, "evidence": evidence or []}
 
@@ -427,6 +452,7 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     capabilities = facts["capabilities"]
     mutation = facts["mutation_probe"]
     health = facts["health_endpoints"]
+    business = facts["business"]
     unsettled = sum(
         count
         for status, count in registry["by_status"].items()
@@ -571,12 +597,27 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
             ],
         ),
         "11_commercial": _gate(
-            UNKNOWN, "no external user has obtained the software; 0 listings live"
+            UNKNOWN,
+            "no external user has obtained the software; 0 listings live"
+            if business["listings_live"] == 0
+            else f"{business['listings_live']} listing(s) are now live — a machine "
+            "may report the count but may not decide this gate passes; a person "
+            "must re-argue it against what a live listing actually proves",
+            [
+                f"listings_live: {business['listings_live']}",
+                f"modules_live: {business['modules_live']}",
+                f"goods: {business['goods_passed']}/{business['goods_promised']}",
+            ],
         ),
         "12_economic": _gate(
             UNKNOWN,
             "no revenue log exists — 0 recorded is not 0 earned, and BUSINESS.md "
-            "refuses to render it as a measurement",
+            "refuses to render it as a measurement"
+            if not business["revenue_recorded"]
+            else "a revenue log now exists — a machine may report that it is "
+            "present but may not grade what it records; a person must re-argue "
+            "this gate against the actual figures",
+            [f"revenue_recorded: {business['revenue_recorded']}"],
         ),
     }
 
@@ -609,6 +650,7 @@ def derive() -> dict[str, Any]:
         "capabilities": _capabilities(),
         "mutation_probe": _mutation_probe(),
         "health_endpoints": _health_endpoints(),
+        "business": _business(),
     }
     facts["gates"] = gates(facts)
     facts["blocked"] = [
