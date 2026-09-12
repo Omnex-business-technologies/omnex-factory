@@ -24,6 +24,41 @@ That question shaped nearly every design decision below.
 
 ---
 
+## More than one codebase
+
+Everything above is the commercial surface — a Next.js app. It sells access to
+something bigger that also lives in this repository:
+
+**`engine/`** is a separate, zero-dependency Python AI platform: eighteen
+production systems — LLM routing, RAG with page- and figure-anchored citations,
+a hybrid vector store, injection/PII guardrails, multi-agent consensus with a
+hash-chained audit trail, human-in-the-loop approval, OpenTelemetry
+observability, and a compiler that turns one agent spec into a runnable graph,
+an MCP server, or an n8n workflow. It has [its own README](engine/README.md),
+1,231 tests, zero required dependencies, and is why GitHub lists this repo's
+primary language as Python — not because the commercial app is secondary, but
+because the engine is larger.
+
+The rest of the top level supports one side or the other, or the process that
+builds them:
+
+| Path | What it is |
+|---|---|
+| `oss/citegate/` | A standalone, dependency-free citation checker extracted from the engine's RAG grounder — its own package, its own [README](oss/citegate/README.md), its own tests. |
+| `skills/` | Five packaged Claude Skills (`cost-router`, `eval-gate`, `finground`, `grounded-answers`, `injection-corpus`), each shipping a measured number rather than a claim. [README](skills/README.md) |
+| `packs/` | Image-generation job packs for a separate digital-goods line (Etsy / Lemon Squeezy) — QC gates, listing checks, deterministic pack assembly. |
+| `intel/` | Committed market-research snapshots: competitive intel, a revenue matrix, a roadmap — the evidence behind product decisions, not the decisions themselves. |
+| `corpus/` | A 509-figure reference corpus (~1.7 MB, from *AI Engineering* by Pachaar & Chawla) that ranks what the engine should build next by how many figures name a capability it doesn't have yet. |
+| `state/` | An append-only, hash-chained ledger of claims, evidence, and execution runs — the mechanism that keeps this file, and every other doc in the repo, a measurement rather than a hope. |
+| `docs/` | Why things were built the way they were, in the order they happened, with the evidence that forced each call. |
+| `deploy/` | A local-first Docker stack — the same router, guardrails, and eval gate as production, priced at zero. |
+
+`CLAUDE.md`, `CONSTITUTION.md` and `EXECUTION_CONTRACT.md` are the operating
+rules for whoever works on this repository next, human or agent — not
+application code, worth reading before changing anything load-bearing.
+
+---
+
 ## Architecture
 
 ```mermaid
