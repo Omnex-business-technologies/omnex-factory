@@ -322,3 +322,79 @@ def test_gate_3_flags_a_stale_probe_against_a_grown_catalogue(monkeypatch) -> No
     clause = state_map._mutation_clause(probe)
     assert "stale" in clause
     assert "re-run mutate.py" in clause
+
+
+def test_business_facts_agree_with_business_map_itself() -> None:
+    """No second resolver: `_business()` must read the exact same functions
+    `BUSINESS.md` is rendered from, not a re-derivation that could disagree."""
+    import business_map
+
+    rows, promised, passed = business_map.goods()
+    facts = state_map._business()
+    assert facts["listings_live"] == len([r for r in rows if r["live"]])
+    assert facts["modules_live"] == len(business_map.live_modules())
+    assert facts["goods_passed"] == passed
+    assert facts["goods_promised"] == promised
+    assert facts["revenue_recorded"] == business_map.revenue()["recorded"]
+
+
+def test_gate_11_moves_when_a_listing_goes_live(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """The defect this closes: gate 11 said "no external user has obtained the
+    software; 0 listings live" as a literal string, the exact shape gate 3's
+    mutation sentence carried before it read a committed file instead of
+    asserting a sentence that happened to be true on the day it was typed.
+    Proven by sabotage, the same way `test_gate_3_...` above is: fake a live
+    listing and require the gate's own prose to change, not just a number
+    sitting unread in an evidence list beside unchanged text."""
+    import business_map
+
+    monkeypatch.setattr(
+        business_map,
+        "goods",
+        lambda: (
+            [
+                {
+                    "pack": "x",
+                    "listing": "x",
+                    "price_eur": 1,
+                    "promised": 1,
+                    "passed": 1,
+                    "live": True,
+                }
+            ],
+            1,
+            1,
+        ),
+    )
+    facts = state_map.derive()
+    facts["business"] = state_map._business()
+    assert facts["business"]["listings_live"] == 1
+
+    gate = state_map.gates(facts)["11_commercial"]
+    assert gate["status"] == state_map.UNKNOWN, "a count is not a person's decision"
+    assert "0 listings live" not in gate["why"]
+    assert "1 listing(s) are now live" in gate["why"]
+    assert "must re-argue" in gate["why"]
+    assert "listings_live: 1" in " ".join(gate["evidence"])
+
+
+def test_gate_12_moves_when_a_revenue_log_appears(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """Gate 12's half of the same defect: "no revenue log exists" was a
+    literal that could not notice `REVENUE_LOG.json` being written."""
+    import business_map
+
+    monkeypatch.setattr(
+        business_map, "revenue", lambda: {"recorded": True, "asks": 1, "paid": 1, "eur": 1.0}
+    )
+    facts = state_map.derive()
+    facts["business"] = state_map._business()
+    assert facts["business"]["revenue_recorded"] is True
+
+    gate = state_map.gates(facts)["12_economic"]
+    assert gate["status"] == state_map.UNKNOWN, (
+        "a machine may report the log exists, never grade it"
+    )
+    assert "no revenue log exists" not in gate["why"]
+    assert "a revenue log now exists" in gate["why"]
+    assert "must re-argue" in gate["why"]
+    assert "revenue_recorded: True" in " ".join(gate["evidence"])

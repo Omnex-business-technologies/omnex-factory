@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "c912b24e98d0abe60cd23193eeb461bc9b601fd1",
+  "source_commit": "a67fc975ad5ec739861a4e425ff334e0e5e02de0",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -69,11 +69,11 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 71,
+    "runs": 73,
     "chain_intact": true,
     "by_level": {
       "L3": 2,
-      "L3_REPOSITORY": 68,
+      "L3_REPOSITORY": 70,
       "L4_EXTERNAL": 1
     },
     "above_l3": 3,
@@ -109,6 +109,13 @@
   "health_endpoints": {
     "healthz_route": true,
     "readyz_route": true
+  },
+  "business": {
+    "listings_live": 0,
+    "modules_live": 1,
+    "goods_passed": 80,
+    "goods_promised": 170,
+    "revenue_recorded": false
   },
   "gates": {
     "0_integrity": {
@@ -185,11 +192,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 71 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
+      "why": "the run ledger holds 73 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 71",
+        "runs recorded: 73",
         "chain intact: True",
-        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 68, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 70, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {
@@ -203,12 +210,18 @@
     "11_commercial": {
       "status": "UNKNOWN",
       "why": "no external user has obtained the software; 0 listings live",
-      "evidence": []
+      "evidence": [
+        "listings_live: 0",
+        "modules_live: 1",
+        "goods: 80/170"
+      ]
     },
     "12_economic": {
       "status": "UNKNOWN",
       "why": "no revenue log exists — 0 recorded is not 0 earned, and BUSINESS.md refuses to render it as a measurement",
-      "evidence": []
+      "evidence": [
+        "revenue_recorded: False"
+      ]
     }
   },
   "blocked": [
