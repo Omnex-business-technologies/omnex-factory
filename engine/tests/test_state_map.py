@@ -15,7 +15,6 @@ bytes, which is why there is no timestamp in it.
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -173,23 +172,69 @@ def test_no_gate_claims_a_file_is_absent_while_it_sits_in_the_repository() -> No
     So this asserts the property rather than the two known cases: any path a
     gate names as missing must actually be missing. Keyed on paths, because a
     list of the two that already bit would stop covering whatever is added next.
-    """
-    absent_pattern = re.compile(r"([\w./-]+\.(?:py|json|jsonl|md|yml|yaml))\s+does not exist")
 
+    The first version of this keyed on one phrasing — `<file> does not exist` —
+    and three more gates drifted past it in phrasings it could not see:
+    `10_distribution` said "release_check.py and release.yml **do** not exist"
+    (plural, and with the first filename two words further back than the regex
+    reached) while both were in CI, and `6_security` and `9_autonomy` asserted
+    absence with no filename at all. So the scan is now per clause: any clause
+    that denies existence is checked against every filename in that clause.
+    """
     offenders: list[str] = []
     for name, gate in state_map.derive()["gates"].items():
         for text in [str(gate["why"]), *(str(e) for e in gate["evidence"])]:
-            for named in absent_pattern.findall(text):
-                candidates = [REPO / named, ENGINE / named, ENGINE / "scripts" / named]
-                if any(path.exists() for path in candidates):
-                    offenders.append(f"{name}: says {named!r} does not exist, and it does")
+            offenders += [
+                f"{name}: says {named!r} does not exist, and it does"
+                for named in state_map.denied_existing_files(text)
+            ]
 
     assert offenders == [], "; ".join(offenders)
 
 
-def test_the_two_repaired_gates_derive_their_evidence_rather_than_stating_it() -> None:
-    """The fix, held in place. Both gates must move when the repository moves,
-    so their evidence has to contain a measured quantity — not a sentence that
+def test_the_absence_checker_catches_the_phrasings_that_already_slipped_past_it() -> None:
+    """A checker nobody has seen fail is a checker nobody has tested.
+
+    These three strings are verbatim what gates 10, 6 and 9 actually carried
+    while every file they named was in the repository and in CI. The first
+    version of the scan above found nothing in any of them.
+    """
+    drifted = "release_check.py and release.yml do not exist; no artifact has been built"
+    assert set(state_map.denied_existing_files(drifted)) == {
+        "release_check.py",
+        "release.yml",
+    }, "the plural phrasing and the 'A and B' construction must both be seen"
+
+    # Both original bites, including the one the first scan could never have
+    # caught: `json` ordered before `jsonl` truncated this to a path that
+    # resolves to nothing, so gate 2 read as clean no matter what it said.
+    assert state_map.denied_existing_files("node_dossier.py does not exist") == ["node_dossier.py"]
+    assert state_map.denied_existing_files("state/claims.jsonl does not exist") == [
+        "state/claims.jsonl"
+    ]
+
+    # A denial naming no file cannot be path-checked; it is recognised as a
+    # denial all the same, which is why gates 6 and 9 now derive instead.
+    assert state_map._DENIED_INSIDE.search("no run ledger exists, so nothing follows")
+    assert state_map._DENIED_INSIDE.search("no secret scanning or SBOM exists yet")
+
+    # A file named positively is not an offence.
+    assert state_map.denied_existing_files("release.yml exists and runs in CI") == []
+
+    # And the denial must be ABOUT the file: this one denies a revenue log, and
+    # the BUSINESS.md in the same sentence is not what is being called absent.
+    assert (
+        state_map.denied_existing_files(
+            "no revenue log exists — 0 recorded is not 0 earned, and BUSINESS.md "
+            "refuses to render it as a measurement"
+        )
+        == []
+    )
+
+
+def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> None:
+    """The fix, held in place. Each gate must move when the repository moves,
+    so its evidence has to contain a measured quantity — not a sentence that
     happened to be true on the day somebody typed it."""
     gates = state_map.derive()["gates"]
 
@@ -200,3 +245,15 @@ def test_the_two_repaired_gates_derive_their_evidence_rather_than_stating_it() -
     evidence = " ".join(str(e) for e in gates["2_evidence"]["evidence"])
     assert "claims registry present: True" in evidence
     assert "SUPPORTED" in evidence, "the derived status counts, recomputed not stored"
+
+    security = " ".join(str(e) for e in gates["6_security"]["evidence"])
+    assert "dependency_audit_in_ci: True" in security, "npm audit runs in ci.yml"
+    assert "sbom_generated: False" in security, "genuinely absent, and must say so"
+
+    autonomy = " ".join(str(e) for e in gates["9_autonomy"]["evidence"])
+    assert "chain intact: True" in autonomy
+    assert "runs recorded: 0" not in autonomy, "the ledger is not empty"
+
+    distribution = " ".join(str(e) for e in gates["10_distribution"]["evidence"])
+    assert "release_check.py present: True" in distribution
+    assert "release.yml present: True" in distribution

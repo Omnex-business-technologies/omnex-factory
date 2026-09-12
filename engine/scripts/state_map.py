@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import tomllib
@@ -170,6 +171,127 @@ def _registry() -> dict[str, Any]:
     }
 
 
+def _run_ledger() -> dict[str, Any]:
+    """The run ledger's shape, recomputed rather than asserted.
+
+    Gate 9 carried "no run ledger exists" as a literal while `state/runs.jsonl`
+    held a hash-chained ledger that `runs.py --check` verifies on every CI run.
+    The same defect as gates 1 and 2, in a gate nobody had re-read since.
+    """
+    import runs as ledger
+
+    if not ledger.LEDGER.exists():
+        return {"present": False, "runs": 0, "chain_intact": False, "by_level": {}}
+
+    entries = ledger.load()
+    by_level: dict[str, int] = {}
+    for run in entries:
+        level = run.autonomy_level or "unrecorded"
+        by_level[level] = by_level.get(level, 0) + 1
+
+    # Counted separately because "a run was recorded above L3" and "a run above
+    # L3 succeeded" are different statements, and the first written as the
+    # second is how a refused attempt turns into a demonstrated capability.
+    above = [r for r in entries if r.autonomy_level not in ("", "L3_REPOSITORY")]
+    return {
+        "present": True,
+        "runs": len(entries),
+        # Verified through the ledger's own checker rather than a second copy
+        # of the hashing rule, which is what `one_symbol_resolver` is about.
+        "chain_intact": not ledger.broken_links(entries),
+        "by_level": dict(sorted(by_level.items())),
+        "above_l3": len(above),
+        "above_l3_succeeded": sum(1 for r in above if r.result == "ok"),
+    }
+
+
+def _release_tooling() -> dict[str, Any]:
+    """Whether the release path exists here — never whether it has run.
+
+    Gate 10 carried "release_check.py and release.yml do not exist" while both
+    sat in the repository and in CI. Whether an artifact was actually published
+    is deliberately NOT derived: a GitHub Release and a PyPI upload are facts
+    about other systems, and `state/claims.jsonl` already tracks them as C-005,
+    C-011 and C-013. Reading `git tag` instead would disagree between a full
+    clone and CI's shallow checkout — a validator that fails on where it ran.
+    """
+    return {
+        "release_check": (ENGINE / "scripts" / "release_check.py").exists(),
+        "release_workflow": (REPO / ".github" / "workflows" / "release.yml").exists(),
+    }
+
+
+def _supply_chain() -> dict[str, Any]:
+    """Which supply-chain controls are visible in the repository.
+
+    Gate 6 carried "no secret scanning, dependency audit, SBOM or signed
+    release exists yet" while `npm audit --audit-level=moderate` ran in
+    `ci.yml` and `.github/dependabot.yml` sat beside it.
+
+    The boundary is stated rather than guessed: CodeQL default setup and secret
+    scanning are GitHub *settings*, not files, so a repository scan cannot see
+    either and this reports neither present nor absent. A control this process
+    cannot observe is unobserved, which is not the same as missing — the
+    distinction the whole file exists to keep.
+    """
+    import release_check
+
+    # One comment-stripping reader, imported rather than copied. A second copy
+    # is how `twin_splitters_agree` got its name, and a reader that takes prose
+    # for configuration has already flipped a gate in this repository once.
+    text = "\n".join(
+        release_check._uncommented(line)
+        for path in sorted((REPO / ".github" / "workflows").glob("*.yml"))
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ).lower()
+    return {
+        "dependency_audit_in_ci": "npm audit" in text,
+        "dependabot_config": (REPO / ".github" / "dependabot.yml").exists(),
+        "build_provenance_attested": "attest-build-provenance" in text,
+        "sbom_generated": any(k in text for k in ("cyclonedx", "spdx", "syft", "sbom")),
+    }
+
+
+#: A filename, and the ways a sentence denies that one exists. Kept here as one
+#: implementation rather than copied into the test that exercises it: a second
+#: copy of a rule is what `twin_splitters_agree` is named after.
+#: Longest extension first, and anchored at a word boundary. `json` before
+#: `jsonl` truncates `state/claims.jsonl` to `state/claims.json`, which then
+#: resolves to nothing and reads as clean — so the original scan could never
+#: have caught gate 2, one of the two cases it was written for.
+_FILENAME = re.compile(r"[\w./-]+\.(?:jsonl|json|yaml|yml|py|md)\b")
+#: "A.py and B.yml do not exist" — the subject sits BEFORE the phrase, and may
+#: be several filenames joined by "and". Bounded so it cannot reach back across
+#: a whole sentence and collect a file the denial was never about.
+_DENIED_BEFORE = re.compile(r"([^;]{0,80}?)\s+(?:do(?:es)? not exist|(?:is|are) not in the repo)")
+#: "no X exists" — the subject sits INSIDE the phrase. Commas allowed, because
+#: `6_security` listed four things this way; an em dash ends it, because
+#: `12_economic` continues past one into a sentence about a file that does.
+_DENIED_INSIDE = re.compile(r"\bno\s+([^;—]{0,80}?)\s+exists?\b")
+#: Where a gate's filename may actually live. `.github/workflows` is here
+#: because leaving it out is why `release.yml do not exist` stayed invisible
+#: even once the phrasing was understood: the path simply never resolved.
+_BASES = ("", "engine", "engine/scripts", ".github/workflows")
+
+
+def denied_existing_files(text: str) -> list[str]:
+    """Filenames `text` says are absent that are in fact in the repository.
+
+    The denial must be ABOUT the file. Scanning a whole clause for any filename
+    was the first attempt and it fired on `12_economic` — "no revenue log
+    exists ... and BUSINESS.md refuses to render it" denies the revenue log,
+    not the file sitting in the same sentence.
+    """
+    subjects = [m.group(1) for m in _DENIED_BEFORE.finditer(text)]
+    subjects += [m.group(1) for m in _DENIED_INSIDE.finditer(text)]
+    return [
+        named
+        for subject in subjects
+        for named in _FILENAME.findall(subject)
+        if any((REPO / base / named).exists() for base in _BASES)
+    ]
+
+
 def _gate(status: str, why: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"status": status, "why": why, "evidence": evidence or []}
 
@@ -195,6 +317,9 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
     extras = facts["extras"]
     dossiers = facts["dossiers"]
     registry = facts["registry"]
+    ledger = facts["run_ledger"]
+    release = facts["release_tooling"]
+    supply = facts["supply_chain"]
     unsettled = sum(
         count
         for status, count in registry["by_status"].items()
@@ -266,7 +391,15 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "6_security": _gate(
             UNKNOWN,
-            "no secret scanning, dependency audit, SBOM or signed release exists yet",
+            "controls that ARE in the repository run on every pull request "
+            f"(dependency audit in CI: {supply['dependency_audit_in_ci']}, "
+            f"Dependabot config: {supply['dependabot_config']}, build provenance "
+            f"attested in the release workflow: {supply['build_provenance_attested']}); "
+            f"what is absent is an SBOM ({supply['sbom_generated']}) and any signed "
+            "PUBLISHED artifact, since no release exists. CodeQL default setup and "
+            "secret scanning are GitHub settings rather than files, so a repository "
+            "scan cannot see them and this claims neither way",
+            [f"{key}: {value}" for key, value in supply.items()],
         ),
         "7_observability": _gate(
             UNKNOWN,
@@ -280,13 +413,35 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "9_autonomy": _gate(
             UNKNOWN,
-            "no run ledger exists, so no autonomous action can be shown to have "
-            "been policy-bounded",
+            f"the run ledger holds {ledger['runs']} hash-chained run(s) (chain "
+            f"intact: {ledger['chain_intact']}) at levels {sorted(ledger['by_level'])}, "
+            "so actions taken here are bounded and auditable — what this gate asks "
+            "for and still has no evidence of is an autonomous run against a "
+            f"deployment: {ledger['above_l3']} run(s) are recorded above L3 and "
+            f"{ledger['above_l3_succeeded']} of those recorded a successful outcome"
+            if ledger["present"]
+            else "no run ledger exists, so no autonomous action can be shown to "
+            "have been policy-bounded",
+            [
+                f"runs recorded: {ledger['runs']}",
+                f"chain intact: {ledger['chain_intact']}",
+                f"runs by autonomy level: {ledger['by_level']}",
+            ],
         ),
         "10_distribution": _gate(
             UNKNOWN,
-            "release_check.py and release.yml do not exist; no artifact has been "
-            "built, signed or published",
+            "the release path is in the repository and in the gate block "
+            f"(release_check.py: {release['release_check']}, release.yml: "
+            f"{release['release_workflow']}); whether an artifact was actually "
+            "published is not a fact about this tree, and C-005, C-011 and C-013 "
+            "in state/claims.jsonl are where that is tracked"
+            if release["release_check"] and release["release_workflow"]
+            else "the release path is not in the repository, so no artifact can "
+            "have been built, signed or published from it",
+            [
+                f"release_check.py present: {release['release_check']}",
+                f"release.yml present: {release['release_workflow']}",
+            ],
         ),
         "11_commercial": _gate(
             UNKNOWN, "no external user has obtained the software; 0 listings live"
@@ -321,6 +476,9 @@ def derive() -> dict[str, Any]:
         "promise_integrity": {"licences": _licences()},
         "dossiers": _dossiers(),
         "registry": _registry(),
+        "run_ledger": _run_ledger(),
+        "release_tooling": _release_tooling(),
+        "supply_chain": _supply_chain(),
     }
     facts["gates"] = gates(facts)
     facts["blocked"] = [

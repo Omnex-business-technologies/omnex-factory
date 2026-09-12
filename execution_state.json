@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "6702ec53d33707af0a775e6b0071b4c5419a01c0",
+  "source_commit": "44f21f4889be33a43cf08e12e22dcdaa62891a7f",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -67,6 +67,27 @@
       "UNKNOWN": 4
     }
   },
+  "run_ledger": {
+    "present": true,
+    "runs": 41,
+    "chain_intact": true,
+    "by_level": {
+      "L3_REPOSITORY": 40,
+      "L4_EXTERNAL": 1
+    },
+    "above_l3": 1,
+    "above_l3_succeeded": 0
+  },
+  "release_tooling": {
+    "release_check": true,
+    "release_workflow": true
+  },
+  "supply_chain": {
+    "dependency_audit_in_ci": true,
+    "dependabot_config": true,
+    "build_provenance_attested": true,
+    "sbom_generated": false
+  },
   "gates": {
     "0_integrity": {
       "status": "PASS",
@@ -115,8 +136,13 @@
     },
     "6_security": {
       "status": "UNKNOWN",
-      "why": "no secret scanning, dependency audit, SBOM or signed release exists yet",
-      "evidence": []
+      "why": "controls that ARE in the repository run on every pull request (dependency audit in CI: True, Dependabot config: True, build provenance attested in the release workflow: True); what is absent is an SBOM (False) and any signed PUBLISHED artifact, since no release exists. CodeQL default setup and secret scanning are GitHub settings rather than files, so a repository scan cannot see them and this claims neither way",
+      "evidence": [
+        "dependency_audit_in_ci: True",
+        "dependabot_config: True",
+        "build_provenance_attested: True",
+        "sbom_generated: False"
+      ]
     },
     "7_observability": {
       "status": "UNKNOWN",
@@ -130,13 +156,20 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "no run ledger exists, so no autonomous action can be shown to have been policy-bounded",
-      "evidence": []
+      "why": "the run ledger holds 41 hash-chained run(s) (chain intact: True) at levels ['L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 1 run(s) are recorded above L3 and 0 of those recorded a successful outcome",
+      "evidence": [
+        "runs recorded: 41",
+        "chain intact: True",
+        "runs by autonomy level: {'L3_REPOSITORY': 40, 'L4_EXTERNAL': 1}"
+      ]
     },
     "10_distribution": {
       "status": "UNKNOWN",
-      "why": "release_check.py and release.yml do not exist; no artifact has been built, signed or published",
-      "evidence": []
+      "why": "the release path is in the repository and in the gate block (release_check.py: True, release.yml: True); whether an artifact was actually published is not a fact about this tree, and C-005, C-011 and C-013 in state/claims.jsonl are where that is tracked",
+      "evidence": [
+        "release_check.py present: True",
+        "release.yml present: True"
+      ]
     },
     "11_commercial": {
       "status": "UNKNOWN",
