@@ -27,6 +27,7 @@ from ..core.clock import Clock, SystemClock
 from ..core.errors import ConfigurationError, PermanentError, ProviderError, RateLimited
 from .base import CallOptions, compute_cost
 from .catalog import ModelSpec
+from .reasoning import split_reasoning
 from .types import Completion, FinishReason, Message, Usage
 
 __all__ = ["LiteLlmModel"]
@@ -105,6 +106,12 @@ class LiteLlmModel:
     def _to_completion(self, response: Any, latency: float) -> Completion:
         choice = response.choices[0]
         text = getattr(choice.message, "content", "") or ""
+        # LiteLLM normalises a separate `reasoning_content` for the providers
+        # that report one (DeepSeek R1 and others served through it); only
+        # fall back to tag-splitting for a provider that inlines the block.
+        reasoning = getattr(choice.message, "reasoning_content", "") or ""
+        if not reasoning:
+            text, reasoning = split_reasoning(text)
         finish = _FINISH_REASONS.get(
             str(getattr(choice, "finish_reason", "stop")), FinishReason.STOP
         )
@@ -135,6 +142,7 @@ class LiteLlmModel:
             finish_reason=finish,
             latency_seconds=latency,
             provider=self._spec.provider,
+            reasoning=reasoning,
             metadata={"litellm_model": self.litellm_model},
         )
 

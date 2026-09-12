@@ -465,6 +465,93 @@ def test_a_reply_to_a_request_this_client_never_sent_is_refused() -> None:
         client.initialize()
 
 
+def _dual_server() -> McpServer:
+    """Two tools, so a batch actually has more than one thing to correlate."""
+    server = McpServer("fx", "1.0")
+
+    @server.tool("convert", "convert between currencies")
+    def convert(args: dict[str, object]) -> str:
+        if args.get("to") == "EURO":
+            raise ValueError("use EUR, not EURO")
+        return f"{args.get('amount')} {args.get('frm')} = 42 {args.get('to')}"
+
+    @server.tool("square", "square a number")
+    def square(args: dict[str, object]) -> str:
+        n = args.get("n", 0)
+        assert isinstance(n, int)
+        return str(n * n)
+
+    return server
+
+
+def _dual_client(**kwargs: object) -> McpClient:
+    params: dict[str, object] = {"prices": {"convert": PENNY, "square": PENNY}}
+    params.update(kwargs)
+    client = McpClient(_dual_server().loopback(), **params)  # type: ignore[arg-type]
+    client.initialize()
+    return client
+
+
+def test_call_tools_with_no_calls_returns_no_results() -> None:
+    assert _client().call_tools([]) == []
+
+
+def test_call_tools_returns_results_in_call_order_not_reply_order() -> None:
+    client = _dual_client()
+    results = client.call_tools(
+        [
+            ("square", {"n": 4}),
+            ("convert", {"amount": 10, "frm": "USD", "to": "EUR"}),
+            ("square", {"n": 5}),
+        ]
+    )
+    assert [r.tool for r in results] == ["square", "convert", "square"]
+    assert results[0].text == "16"
+    assert "42 EUR" in results[1].text
+    assert results[2].text == "25"
+
+
+def test_call_tools_bills_every_call_including_a_tool_level_failure() -> None:
+    """A tool-level failure inside a batch is a normal, billed result -- not an
+    exception that swallows the batch, exactly as a single `call_tool` treats it."""
+    client = _dual_client()
+    results = client.call_tools([("square", {"n": 3}), ("convert", {"to": "EURO"})])
+    assert not results[0].is_error
+    assert results[1].is_error
+    assert client.spent == results[0].cost + results[1].cost
+    assert client.spent > Money.zero()
+
+
+def test_call_tools_refuses_an_unpriced_tool_before_sending_anything() -> None:
+    ours, theirs = MemoryTransport.pair()
+    client = McpClient(ours, prices={"square": PENNY})
+    with pytest.raises(ConfigurationError, match="billing it at zero"):
+        client.call_tools([("square", {"n": 1}), ("convert", {})])
+    assert theirs.pending == 0, "a refused batch must not have sent a single request"
+
+
+def test_call_tools_refuses_over_budget_before_sending_anything() -> None:
+    ours, theirs = MemoryTransport.pair()
+    client = McpClient(
+        ours, prices={"square": PENNY, "convert": PENNY}, budget=Money.from_usd("0.00005")
+    )
+    with pytest.raises(BudgetExceeded):
+        client.call_tools([("square", {"n": 1}), ("convert", {})])
+    assert theirs.pending == 0, "a refused batch must not have sent a single request"
+    assert client.spent == Money.zero()
+
+
+def test_call_tools_refuses_a_reply_this_batch_never_sent() -> None:
+    """The single-call desynchronisation guard, extended to a set of outstanding ids."""
+    ours, theirs = MemoryTransport.pair()
+    client = McpClient(ours, prices={"square": PENNY, "convert": PENNY})
+    theirs.send(encode(Response(id="somebody-else-9", result={})))
+    with pytest.raises(ValidationFailed, match="desynchronised"):
+        client.call_tools(
+            [("square", {"n": 1}), ("convert", {"amount": 1, "frm": "USD", "to": "EUR"})]
+        )
+
+
 def test_a_notification_arriving_mid_call_is_kept_not_discarded() -> None:
     server = _server()
     client = McpClient(

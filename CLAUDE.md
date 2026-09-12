@@ -49,7 +49,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,235 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,256 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.

@@ -31,6 +31,7 @@ from ..core.errors import ProviderError
 from ..core.money import Money
 from .base import CallOptions
 from .catalog import ModelSpec, Tier
+from .reasoning import split_reasoning
 from .types import Completion, FinishReason, Message, Usage
 
 __all__ = ["OllamaModel", "local_spec"]
@@ -110,7 +111,13 @@ class OllamaModel:
             ) from exc
         latency = self.clock.monotonic() - started
 
-        text = str(body.get("message", {}).get("content", ""))
+        message = body.get("message", {})
+        text = str(message.get("content", ""))
+        # Newer Ollama versions separate a reasoning model's thinking into its
+        # own field already; only fall back to tag-splitting when they have not.
+        reasoning = str(message.get("thinking", "") or "")
+        if not reasoning:
+            text, reasoning = split_reasoning(text)
         input_tokens = int(body.get("prompt_eval_count", 0) or 0)
         output_tokens = int(body.get("eval_count", 0) or 0)
         # Ollama reports `done_reason: "length"` when it hit num_predict. Same
@@ -131,6 +138,7 @@ class OllamaModel:
             finish_reason=finish,
             latency_seconds=latency,
             provider="ollama",
+            reasoning=reasoning,
             metadata={"ollama_model": self.ollama_model},
         )
 

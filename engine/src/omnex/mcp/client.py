@@ -28,6 +28,7 @@ and the symptom lands on the wrong side of the connection.
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -157,6 +158,116 @@ class McpClient:
         outcome = ToolResult.from_wire(name, result, cost)
         self._settle(name, outcome)
         return outcome
+
+    def call_tools(self, calls: Sequence[tuple[str, dict[str, Any] | None]]) -> list[ToolResult]:
+        """Call several independent tools without waiting for each reply in turn.
+
+        `call_tool` sends one request and blocks on that request's own reply
+        before another can be issued — correct for one call, and a needless
+        round trip per call when an LLM turn returns several independent tool
+        calls at once (the standard `parallel_tool_calls` shape). This sends
+        every request first and then drains replies as they arrive, so a
+        server that can work on them concurrently — a real subprocess, a real
+        socket — is not serialised by this client on top of whatever latency
+        it already has. `MemoryTransport` still delivers everything in send
+        order, so it exercises the correlation logic without asserting a
+        wall-clock speedup that this transport cannot demonstrate; a real
+        transport is where the time is actually saved.
+
+        Results come back in the order `calls` was given, whatever order the
+        replies actually arrived in — reusing `_exchange`'s own id-correlation
+        invariant (an id this client never sent is refused, loudly, rather
+        than accepted as the next thing off the wire) extended to a set of
+        outstanding ids instead of one. A tool-level failure (`isError`) is
+        still a normal, billed result, exactly as `call_tool` treats it; a
+        protocol-level error aborts the whole batch, exactly as `_exchange`
+        aborts a single call — the calls that already settled before the
+        abort keep their entries in the ledger, because the work they did was
+        real regardless of what a sibling call in the same batch did.
+        """
+        if not calls:
+            return []
+        for name, _ in calls:
+            if name not in self.prices:
+                raise ConfigurationError(
+                    f"tool {name!r} has no price; billing it at zero would report a "
+                    "wrong number rather than a missing one",
+                    tool=name,
+                    priced=sorted(self.prices),
+                )
+        floor = Money.zero()
+        for name, _ in calls:
+            floor = floor + self.prices[name].per_call
+        if self.budget is not None and self._spent + floor > self.budget:
+            raise BudgetExceeded(
+                "the session budget cannot cover this batch of calls",
+                tools=[name for name, _ in calls],
+                spent=str(self._spent),
+                budget=str(self.budget),
+            )
+
+        pending: dict[str, int] = {}
+        for index, (name, arguments) in enumerate(calls):
+            request = Request(
+                id=self._next_id(),
+                method="tools/call",
+                params={"name": name, "arguments": arguments or {}},
+            )
+            self.transport.send(encode(request))
+            pending[request.id] = index
+
+        results: dict[int, ToolResult] = {}
+        deadline = self.clock.monotonic() + self.timeout
+        while pending:
+            remaining = deadline - self.clock.monotonic()
+            if remaining <= 0:
+                raise TimeoutExceeded(
+                    f"no reply to {len(pending)} of {len(calls)} tools/call "
+                    f"request(s) within {self.timeout}s",
+                    method="tools/call",
+                )
+            raw = self.transport.receive(remaining)
+            if raw is None:
+                raise TimeoutExceeded(
+                    "the transport closed while waiting for a batch of tools/call replies",
+                    method="tools/call",
+                )
+            message = decode(raw)
+            if isinstance(message, Notification):
+                self._notifications.append(message)
+                continue
+            if isinstance(message, Request):
+                self.transport.send(
+                    encode(
+                        Response(
+                            id=message.id,
+                            error=RpcError(
+                                ErrorCode.METHOD_NOT_FOUND,
+                                f"{CLIENT_NAME} serves no requests",
+                            ),
+                        )
+                    )
+                )
+                continue
+            if message.id not in pending:
+                raise ValidationFailed(
+                    "the stream is desynchronised: a reply arrived for a request "
+                    "this client did not send as part of this batch, and accepting "
+                    "it would answer the wrong question confidently",
+                    wanted=sorted(pending),
+                    got=message.id,
+                )
+            index = pending.pop(message.id)
+            name = calls[index][0]
+            if message.error is not None:
+                raise _as_error("tools/call", message.error)
+            result = message.result or {}
+            cost = self.prices[name].of(len(json.dumps(result, ensure_ascii=False).encode("utf-8")))
+            outcome = ToolResult.from_wire(name, result, cost)
+            self._settle(name, outcome)
+            results[index] = outcome
+
+        return [results[i] for i in range(len(calls))]
 
     def _settle(self, name: str, outcome: ToolResult) -> None:
         """Bill on completion — success, failure, both.

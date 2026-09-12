@@ -14,6 +14,13 @@ is not an error and does not raise, so it is the single easiest failure to ship:
 the answer looks fine, is silently truncated, and any downstream parser sees
 malformed JSON with no explanation. Making it a distinct enum member means
 callers must think about it, and the eval harness (P4) can count it.
+
+`Completion.text` is never allowed to carry a reasoning model's inlined chain
+of thought. `Tier.REASONING` is the router's top escalation tier, so this is
+not a hypothetical: a `<think>...</think>` block left in `text` silently
+contaminates RAG grounding, eval metrics and any structured-output parser
+downstream, none of which raise — see `reasoning.split_reasoning`, which every
+adapter runs its raw text through before this dataclass is built.
 """
 
 from __future__ import annotations
@@ -91,11 +98,20 @@ class Completion:
     finish_reason: FinishReason = FinishReason.STOP
     latency_seconds: float = 0.0
     provider: str = ""
+    #: A reasoning model's chain of thought, separated out of `text` by the
+    #: adapter that produced this completion. Empty when the model gave none
+    #: or is not a reasoning model — never a signal to treat `text` as unsafe
+    #: on its own, since a clean split leaves nothing behind to find.
+    reasoning: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def truncated(self) -> bool:
         return self.finish_reason is FinishReason.LENGTH
+
+    @property
+    def reasoned(self) -> bool:
+        return bool(self.reasoning)
 
     @property
     def saved(self) -> Money:

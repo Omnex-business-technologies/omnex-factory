@@ -47,13 +47,13 @@ IMPLEMENTED      a person agreed
 | state | nodes |
 |---|--:|
 | DISCOVERED | 345 |
-| EVIDENCE-BACKED | 116 |
-| PROPOSED | 46 |
+| EVIDENCE-BACKED | 115 |
+| PROPOSED | 47 |
 
 0 node(s) are settled and may not be changed here.
 
 **Evidence and lifecycle are different axes.** 134 nodes have a direct
-figure, and only 116 of them
+figure, and only 115 of them
 read `EVIDENCE-BACKED` — the rest already carry a proposal, so they sit in
 `PROPOSED`. MCP has 62 direct figures *and* an alias. Two numbers that look
 contradictory are measuring different things, which is the reason the states
@@ -74,7 +74,7 @@ are not collapsed into one.
 | XII | HTTP | EVIDENCE-BACKED | 11 | 16 | fig_0061 fig_0139 fig_0213 fig_0253 | `—` | read-the-branch | LOW | | | |
 | VI | Retrieval Evaluation | EVIDENCE-BACKED | 11 | 15 | fig_0141 fig_0180 fig_0184 fig_0190 | `—` | read-the-branch | LOW | | | |
 | IV | System Prompts | EVIDENCE-BACKED | 11 | 13 | fig_0081 fig_0087 fig_0124 fig_0136 | `—` | read-the-branch | LOW | | | |
-| III | Reasoning | EVIDENCE-BACKED | 10 | 48 | fig_0012 fig_0015 fig_0017 fig_0020 | `—` | read-the-branch | LOW | | | |
+| III | Reasoning | PROPOSED | 10 | 48 | fig_0012 fig_0015 fig_0017 fig_0020 | `omnex.llm.split_reasoning` | confirm-or-reject | MEDIUM | | | |
 | VII | Research Agent | EVIDENCE-BACKED | 9 | 63 | fig_0212 fig_0213 fig_0222 fig_0223 | `—` | read-the-branch | LOW | | | |
 | XIV | Search | PROPOSED | 9 | 21 | fig_0136 fig_0211 fig_0212 fig_0234 | `omnex.vectors.SearchHit` | confirm-or-reject | MEDIUM | | | |
 | XIX | GPU | EVIDENCE-BACKED | 8 | 19 | fig_0090 fig_0133 fig_0414 fig_0416 | `—` | read-the-branch | LOW | | | |
