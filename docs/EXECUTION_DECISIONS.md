@@ -1991,3 +1991,87 @@ route through `credits.db.test.ts`'s real container instead.
 **reversible how.** One new test file, purely additive; nothing in
 `app/api/copilot/stream/route.ts` or any module it imports was changed.
 `git revert` removes the test with no effect on any other suite.
+
+---
+
+## D-028: a claim purge that found the repo's marketing clean and its own README stale
+
+**context.** Sovereign Execution Standard §14 (CLAIM PURGE) names a
+systematic search for unsupported claims — "production-ready," "fully
+autonomous," "enterprise-grade," "revenue generating," "battle-tested," and
+similar — across README, docs, code comments, and UI, with a rule to
+downgrade or remove anything found without an evidence level behind it.
+
+**what the search actually found: very little, and it says something.**
+`grep` for the standard's own named phrases plus a dozen more common
+superlatives ("best-in-class," "world-class," "cutting-edge," "industry-
+leading," "state-of-the-art"...) across every `.md`/`.ts`/`.tsx`/`.py` file
+found exactly one set of hits, all inside `corpus/universal-ai-os/
+export.md` — a committed export of the *source book*'s own captions
+("The most advanced pattern..."), already documented in CLAUDE.md as
+quoted third-party material whose own n/10 scores are "deliberately not
+imported" because "its author scored its own nodes." Purging a book's own
+words would be a category error, not a claim purge. `GIG.md`'s Etsy/Fiverr
+listing copy — the one place in this repository actually writing sales
+copy — was read in full rather than grepped past: it already carries its
+own "Honest note" disclaiming the AI-generation limitation before a
+customer orders, which is the standard's own §14 discipline already
+self-applied without anyone naming it that. Zero chapters needed purging —
+this is the same shape D-021's handbook audit reported (some rounds find
+nothing to fix, and that is a real result, not a failed search) rather
+than a manufactured finding to justify the round.
+
+**what the search DID find: README.md's own numbers had drifted.** It
+quotes engine's test count in one sentence — "1,231 tests, zero required
+dependencies" — and that number had not moved since before this session's
+Phase 1 work, while the real count reached 1,286 across five phases of
+this same session. CLAUDE.md's own "Lab notes" section already records
+this exact drift class happening to *itself* four times; it had never
+been checked in README.md, a different file with no structural protection
+at all — this session's own practice of re-verifying CLAUDE.md's figure
+after every phase does not extend to README.md, and nothing else did
+either.
+
+**what was built.** `scripts/readme_check.py` derives the real count via
+`pytest --collect-only -q` — the same command a person runs, not a second
+counting implementation that could disagree with it — and either rewrites
+README.md's one narrowly-matched sentence or, under `--check`, refuses if
+it disagrees. The regex is deliberately narrow (`[\d,]+ tests, zero
+required dependencies`) so it can only ever touch the one sentence it was
+written for, never a different number elsewhere in the file. Wired into
+CLAUDE.md's gate block and `engine.yml`, immediately after
+`actions_pin_check.py`.
+
+**a self-referential correction, held in place rather than described
+once.** Adding `readme_check.py` and its own tests moved the real count
+again — first to 1,286, checked, then to 1,292 once `test_readme_check.py`
+itself existed — and the number was re-synced each time rather than
+quoted once and left to become the next stale figure this same mechanism
+would need to catch.
+
+**what was verified.** `readme_check.py --check` caught the real,
+pre-existing 1,231-vs-1,286 drift (confirmed failing before any fix);
+running it without `--check` corrected it; 6 new tests, including one
+asserting the currently-committed README agrees with the repository right
+now (the same shape as `state_map.py`'s and `capability_map.py`'s own
+"committed artifact agrees with reality" tests); full engine gate green
+(ruff/mypy, all invariants, `actions_pin_check.py` 20/20, `capability_map.
+py --check`, `state_map.py --check`, both release targets, claims/runs/
+spine, full `pytest` — 1,292 tests — `mutate.py` 29/29).
+
+**what else was considered.** Extending the same mechanism to check
+CLAUDE.md's own quoted figures too, replacing the manual re-verification
+this session has been doing by hand every phase — deferred, not rejected:
+CLAUDE.md quotes several independent numbers in one sentence (engine
+tests, TypeScript tests, citegate tests, mutations, spine transitions),
+and a single script maintaining all five correctly is a larger, separate
+piece of work than the one-sentence fix this round scoped to. A GitHub
+Action or pre-commit hook enforcing this on every PR rather than only in
+the gate script — rejected as redundant: `engine.yml` already runs
+`readme_check.py --check` on every push and pull request, which is the
+same enforcement point every other check in this repository uses.
+
+**reversible how.** One new script, one new test file, and two-line
+additions to `CLAUDE.md` and `engine.yml`. `git revert` removes the check
+and leaves README.md at whatever count it last held — the file itself is
+untouched by the revert since the fix already landed as ordinary prose.

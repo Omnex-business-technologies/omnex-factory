@@ -23,6 +23,7 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/python scripts/runs.py --check \
   && .venv/bin/python scripts/spine_check.py \
   && .venv/bin/python scripts/actions_pin_check.py \
+  && .venv/bin/python scripts/readme_check.py --check \
   && .venv/bin/python scripts/capability_map.py --check \
   && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/apply_decisions.py --dry-run \
