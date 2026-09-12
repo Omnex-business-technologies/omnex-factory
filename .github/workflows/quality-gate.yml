@@ -79,7 +79,7 @@ jobs:
         # what changed. Deleting it because the build went red is how a team
         # loses the ability to answer "when did this start".
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: eval-run-${{ github.run_number }}
           path: engine/.omnex/runs/
