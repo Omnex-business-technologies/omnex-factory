@@ -228,11 +228,20 @@ def _supply_chain() -> dict[str, Any]:
     release exists yet" while `npm audit --audit-level=moderate` ran in
     `ci.yml` and `.github/dependabot.yml` sat beside it.
 
-    The boundary is stated rather than guessed: CodeQL default setup and secret
-    scanning are GitHub *settings*, not files, so a repository scan cannot see
-    either and this reports neither present nor absent. A control this process
-    cannot observe is unobserved, which is not the same as missing — the
-    distinction the whole file exists to keep.
+    CodeQL and secret scanning are GitHub *settings*, not files, so a
+    repository scan genuinely cannot see either from the tree alone — with one
+    exception that is not a repository-scan fact and does not belong in this
+    function's return value: pushing an "advanced setup" CodeQL workflow
+    (`github/codeql-action`) here failed with "CodeQL analyses from advanced
+    configurations cannot be processed when the default setup is enabled",
+    which is GitHub's own confirmation that default setup is ON for this
+    repository. That is a live, one-time observation of a GitHub-side
+    setting — the same shape as C-005's and C-008's `ci_run`/`network_probe`
+    evidence, never a fact this function can rederive from a checkout — so it
+    lives as **C-015** in `state/claims.jsonl`, not as a fact here. The
+    advanced-setup workflow itself was reverted: GitHub refuses to run both,
+    so shipping it would leave a permanently red, non-fixable check for no
+    analysis gained over what default setup already runs.
     """
     import actions_pin_check
     import release_check
@@ -445,13 +454,16 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
             f"Dependabot config: {supply['dependabot_config']}, build provenance "
             f"attested in the release workflow: {supply['build_provenance_attested']}, "
             f"an SBOM generated and read back against the package it describes in "
-            f"the release workflow: {supply['sbom_generated']}, every GitHub Action "
-            f"pinned to a commit SHA: {supply['actions_pinned_to_sha']}/"
+            f"the release workflow: {supply['sbom_generated']}, every GitHub "
+            f"Action pinned to a commit SHA: {supply['actions_pinned_to_sha']}/"
             f"{supply['actions_total']}); what is absent is any signed PUBLISHED "
             "artifact, since no release exists — none of this has run for real. "
-            "CodeQL default setup and secret scanning are GitHub settings rather "
-            "than files, so a repository scan cannot see them and this claims "
-            "neither way",
+            "CodeQL and secret scanning are GitHub settings rather than files, so "
+            "a repository scan cannot see either from the tree alone; C-015 in "
+            "state/claims.jsonl carries the one live exception — attempting an "
+            "advanced-setup CodeQL workflow confirmed default setup is already "
+            "enabled, evidence a repository scan cannot rederive and this "
+            "function does not claim",
             [f"{key}: {value}" for key, value in supply.items()],
         ),
         "7_observability": _gate(

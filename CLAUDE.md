@@ -213,6 +213,18 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   the tag object, not the commit it points to — pinning to that would have
   shipped a `uses:` line that parses and does not resolve. **20 of 20**
   currently pinned, each with a `# vX.Y.Z` comment for the next version bump.
+- **CodeQL default setup is confirmed enabled** (`state/claims.jsonl` C-015,
+  `SUPPORTED`) — not by reading the repository, which cannot see a GitHub
+  *setting*, but by GitHub's own service refusing an advanced-setup workflow
+  this session pushed and reverted: "CodeQL analyses from advanced
+  configurations cannot be processed when the default setup is enabled." That
+  refusal is the evidence — a live, one-time `network_probe` observation of a
+  GitHub-side setting, the same shape as C-005's and C-008's `ci_run` findings,
+  never a fact `state_map.py` can rederive from a checkout. The workflow itself
+  was not kept: GitHub refuses to run both, so an advanced-setup file here
+  could only ever be permanently red for zero analysis gained over what
+  default setup already runs. Secret scanning has no such exception and stays
+  the one genuinely unobservable control in gate 6.
 - `oss/citegate/`'s release path + `engine/scripts/sbom_check.py` — **an SBOM
   generated in a CLEAN venv containing only the package, never the venv
   running the SBOM tool itself** (which would report the tool's own ~30
