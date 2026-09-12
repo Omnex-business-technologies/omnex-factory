@@ -4,9 +4,18 @@
  * Anonymous by design: a brand should be able to send an enquiry without an
  * account. The service-role client is used for the insert, so this route must do
  * its own validation — the key bypasses RLS and there is no session to lean on.
+ *
+ * That same anonymity is why this is the one public route in the app that had
+ * no rate limit at all: every other route calling `checkRateLimit` had a
+ * verified user id to key on before this one existed. There is no session
+ * here, so nothing distinguishes a flood of anonymous inserts through the
+ * service-role client from ordinary traffic except the caller's IP — the
+ * `getClientId()` fallback `checkRateLimit` already falls back to when no
+ * identity is passed, exactly the case this route is.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/core/supabase/admin'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/core/security/ratelimit'
 
 interface Body {
   name?: string
@@ -24,6 +33,14 @@ const clean = (v: unknown, max: number): string =>
   typeof v === 'string' ? v.trim().slice(0, max) : ''
 
 export async function POST(request: NextRequest) {
+  const limit = checkRateLimit(request, 'leads')
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many submissions. Please try again shortly.' },
+      { status: 429, headers: rateLimitHeaders(limit, 'leads') },
+    )
+  }
+
   const body = (await request.json().catch(() => ({}))) as Body
 
   // Bots fill every field they find. Answer 200 so the bot believes it succeeded
