@@ -3499,3 +3499,97 @@ test corrected to the behavior this fix establishes (not deleted — its
 sabotage-verification value is now the opposite assertion). `git revert`
 restores the block — a regression in kind (the exact defect this closes),
 not a break, since nothing downstream depends on `redactSecrets` existing.
+
+## D-043: the upload route trusted the client's own label for what kind of file it was
+
+**context.** The money-path truth pass had by now covered pricing (D-038),
+the webhook (D-039), the rate limiter twice (D-040, D-041) and the
+copilot's input guard (D-042) — every round finding a check that looked
+like it defended something but didn't, on the same handful of routes. This
+round widened the pass to a route none of the previous five had touched:
+`app/api/studio/upload/route.ts`, the only place in the product that writes
+attacker-influenced bytes to public storage.
+
+**what was found.** The route accepted a multipart upload, read `file.type`
+— the `Content-Type` the *sender* set on that multipart part, not anything
+the server measured — and used it for two separate jobs: picking the
+stored extension, and deciding whether the upload was an allowed image at
+all. Both uses trusted the same client-supplied label. A multipart
+`Content-Type` is not enforced by anything on the wire; a raw `fetch` or
+`curl` sets it to whatever the caller wants, no browser file picker
+involved. So a request claiming `image/jpeg` while attaching arbitrary
+bytes — an HTML document, an SVG carrying a `<script>` tag, anything —
+passed both checks, was written to the `products` bucket (which this
+route's own docstring already documented as public), and the route handed
+back a public URL on this product's own domain that would serve that
+content back with the claimed content-type. This is OWASP's own named
+class, Unrestricted File Upload. Confirmed via `grep` that no byte-level
+signature check existed anywhere in the codebase, and that this route had
+**zero** test coverage of any kind before this round — the same "E3
+evidence: none" shape found repeatedly this session in previously-unread
+routes (the webhook, the rate limiter, the guardrails misuse).
+
+**what was built.** A new exported `matchesSignature(mimeType, bytes):
+boolean` in the same route file, checking the real magic-byte signature for
+each of the three allowed types against the bytes actually uploaded — JPEG
+(`FF D8 FF`), PNG (the 8-byte PNG signature), WebP (`RIFF….WEBP` framing).
+Wired into `POST` immediately after the bytes are read from the request and
+before the storage path is constructed: a mismatch now returns 415 and
+never reaches `admin.storage.from('products').upload(...)`. `file.type`
+still selects which signature to check and still names the stored file
+extension — narrowing what the client's label is trusted *for*, not
+removing it, since the label is still a legitimate hint about intent — but
+it no longer stands in, alone, for a fact about the content. The module
+docstring gained a section naming the vulnerability class directly, and the
+function is exported specifically so a test can assert both directions
+rather than only the accept path.
+
+**what was verified.** `lib/__tests__/upload.test.ts`, the first test file
+this route has ever had: five unit tests directly against
+`matchesSignature` (accepts each real signature; rejects HTML content
+falsely labelled as each of the three types; rejects one real format
+mislabelled as another; rejects a buffer too short to carry any real
+signature; rejects an unknown mime type outright) and three route-level
+integration tests (an HTML payload labelled `image/jpeg` is refused with
+415 and `upload()` is never called; a genuinely real JPEG is accepted and
+stored under `<user id>/<timestamp>.jpg`; an unauthenticated request is
+refused with 401 before storage is touched at all). **Sabotage-verified**:
+temporarily removed the `matchesSignature` call and its surrounding refusal
+from `POST`, re-ran the suite, and confirmed the disguised-HTML test failed
+exactly as it should — `expected 200 to be 415`, with `upload` having
+actually been called — proving the test genuinely exercises the fix rather
+than passing regardless of it. Restored the fix and reconfirmed all eight
+tests green. Full root gate green: `npm audit` (0 vulnerabilities),
+`tsc --noEmit` (clean), `vitest run` (108 tests across 11 files, +8),
+`next build` (13 routes, clean). Full Python engine gate green with only
+the two known, previously-documented, non-blocking failures (citegate's
+`[project.urls]` pointing at the org's post-transfer path while this
+session is sourced from `ravezona/omnex-factory`, and — not encountered
+this round — the intermittent rate-limiter flake); `mutate.py` still 29/29,
+`spine_check.py` still 14/14 EXECUTABLE, `state_map.py --check` and
+`business_map.py --check` both agree with the repository.
+
+**what else was considered.** Rejecting the upload outright whenever
+`file.type` and the detected signature disagree in the mime string as well
+as the bytes (e.g. refusing a real PNG uploaded with `file.type:
+'image/jpeg'`, distinct from refusing non-image content) — already covered:
+`matchesSignature(file.type, bytes)` checks the bytes against the *claimed*
+type specifically, so a real PNG labelled as JPEG already fails (proven by
+the "rejects one real format mislabelled as another" test) without needing
+a second, separate check. Using a general-purpose file-type sniffing
+library instead of hand-written magic-byte checks — rejected for now: the
+zero-dependency posture that governs `engine/` is a Python-side rule, not
+one this repository states for the Next.js app, but three fixed-width
+signature checks for three explicitly allowed types is a smaller and more
+auditable surface than a dependency that sniffs arbitrary formats this
+route will never accept anyway; revisiting this is cheap if the allowed set
+grows. Validating the file extension in the original filename — rejected:
+the route already discards the client's filename entirely and derives its
+own from `user.id` and a timestamp, so the original filename carries no
+security-relevant information to check.
+
+**reversible how.** One new function in the existing route file, one call
+site added inside `POST`, one new test file. `git revert` restores the
+pre-fix behavior exactly — the same trust-the-label defect this closes,
+not a break, since nothing downstream depends on `matchesSignature`
+existing.
