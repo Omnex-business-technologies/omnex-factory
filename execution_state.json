@@ -1,7 +1,7 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "32acbb3225ed28aa864c78247fa3b4a9a370caae",
+  "source_commit": "191905ec0452f9e7de9bc999a373228bf2a978f6",
   "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
@@ -69,11 +69,11 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 67,
+    "runs": 69,
     "chain_intact": true,
     "by_level": {
       "L3": 2,
-      "L3_REPOSITORY": 64,
+      "L3_REPOSITORY": 66,
       "L4_EXTERNAL": 1
     },
     "above_l3": 3,
@@ -98,6 +98,14 @@
       "E4_INTEGRATED": 8
     },
     "at_least_integrated": 8
+  },
+  "mutation_probe": {
+    "present": true,
+    "source_commit": "191905ec0452f9e7de9bc999a373228bf2a978f6",
+    "total": 29,
+    "killed": 29,
+    "survivors": [],
+    "catalogue_size_matches": true
   },
   "health_endpoints": {
     "healthz_route": true,
@@ -133,9 +141,9 @@
     },
     "3_implementation": {
       "status": "UNKNOWN",
-      "why": "the suite is green and the mutation probe kills every mutation, and the capability registry now measures coverage per capability: 8 capabilities at {'E4_INTEGRATED': 8}. What is still missing is scale — 8 is a first, deliberately small cut, not the platform's full surface, and E5-E7 are unreachable from a repository scan for every one of them",
+      "why": "the suite is green, and the mutation probe's committed result says 29/29 mutations killed as of 191905ec0452. The capability registry measures coverage per capability: 8 capabilities at {'E4_INTEGRATED': 8}. What is still missing is scale — 8 is a first, deliberately small cut, not the platform's full surface, and E5-E7 are unreachable from a repository scan for every one of them",
       "evidence": [
-        "mutate.py exists and is in CI",
+        "mutation_probe: {'present': True, 'source_commit': '191905ec0452f9e7de9bc999a373228bf2a978f6', 'total': 29, 'killed': 29, 'survivors': [], 'catalogue_size_matches': True}",
         "capability registry: 8 capabilities",
         "by evidence level: {'E4_INTEGRATED': 8}"
       ]
@@ -178,11 +186,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 67 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
+      "why": "the run ledger holds 69 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 67",
+        "runs recorded: 69",
         "chain intact: True",
-        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 64, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 66, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {

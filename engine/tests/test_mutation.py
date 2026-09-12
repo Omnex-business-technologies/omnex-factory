@@ -24,10 +24,11 @@ the summary internally inconsistent, and nothing red.
 
 from __future__ import annotations
 
+import json
 import tempfile
 from pathlib import Path
 
-from mutate import CATALOGUE, apply_and_run, verify_catalogue
+from mutate import CATALOGUE, Mutation, Result, apply_and_run, verify_catalogue, write_result
 
 
 def test_every_mutation_still_applies_to_the_tree() -> None:
@@ -95,3 +96,43 @@ def test_the_probe_never_touches_the_working_tree() -> None:
     with tempfile.TemporaryDirectory(prefix="omnex-mutate-safety-") as raw:
         apply_and_run(mutation, Path(raw))
     assert source.read_text(encoding="utf-8") == before
+
+
+def _fake_mutation(ident: str) -> Mutation:
+    return Mutation(ident=ident, path="x.py", find="a", replace="b", caught_by=(), rule="r")
+
+
+def test_write_result_records_survivors_rather_than_hiding_them(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """Not a full 29-mutation run (see this file's own docstring on cost) --
+    just the persistence `state_map.py`'s gate 3 now depends on, against a
+    handful of synthetic results. A hole on file is the point: `main()` writes
+    this even when `survivors` is non-empty, the same way `Trend` in
+    `eval_gate.py` keeps a failed run rather than discarding it."""
+    results = [
+        Result(mutation=_fake_mutation("a"), killed=True, detail=""),
+        Result(mutation=_fake_mutation("b"), killed=False, detail="nothing failed"),
+        Result(mutation=_fake_mutation("c"), killed=True, detail=""),
+    ]
+    path = tmp_path / "mutation_probe.json"
+    payload = write_result(results, path)
+
+    assert payload["total"] == 3
+    assert payload["killed"] == 2
+    assert payload["survivors"] == ["b"]
+    assert payload["source_commit"], "a probe result with no commit binding cannot be aged"
+
+    on_disk = json.loads(path.read_text(encoding="utf-8"))
+    assert on_disk == payload
+
+
+def test_the_committed_result_matches_the_live_catalogue_size() -> None:
+    """The half `state_map.py`'s `catalogue_size_matches` exists to catch: a
+    mutation added to `CATALOGUE` with nobody re-running the probe since would
+    otherwise sit invisible behind a `total` that quietly stopped meaning
+    'every mutation this repository has'."""
+    from mutate import RESULT
+
+    payload = json.loads(RESULT.read_text(encoding="utf-8"))
+    assert payload["total"] == len(CATALOGUE), (
+        "ontology/mutation_probe.json is stale -- run `python scripts/mutate.py`"
+    )

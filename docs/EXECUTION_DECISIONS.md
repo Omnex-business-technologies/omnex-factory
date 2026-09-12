@@ -2630,3 +2630,120 @@ round needed.
 pair, additive only. `git revert` restores the old pin; the claim and
 evidence rows stay on file either way, since evidence is never deleted, only
 superseded.
+
+## D-035: gate 3's own hard-coded claim — the third occurrence of a defect this repository has already named twice
+
+**context.** The operator shared the full text of the Sovereign Execution
+Standard verbatim for the first time this session (earlier rounds worked from
+a from-memory summary). Re-reading §0 ("NO EVIDENCE = NO CLAIM"), §7 (the
+UNKNOWN/NO-EVIDENCE discipline) and §23 (STATE CONSISTENCY — "if a mismatch
+exists, the capability must not be automatically marked verified") against
+`state_map.py`'s own source, rather than against its rendered output, is what
+this round's truth pass changed: previous rounds read `execution_state.json`
+and asked whether it agreed with the repository; this one read the *script
+that writes it* and asked whether every sentence in it was still earning its
+truth on every run.
+
+**what was found.** `state_map.py`'s own module docstring warns, twice, about
+exactly one failure shape: a gate whose evidence is a literal cannot notice
+when it comes true or stops being true. Gates 1 and 2 already carried this
+defect once each — "node_dossier.py does not exist" and "state/claims.jsonl
+does not exist," both hard-coded, both surviving for weeks after the named
+scripts existed, both caught only by `test_no_gate_claims_a_file_is_absent_
+while_it_sits_in_the_repository`. Gate 3 carried a third, unnoticed instance
+of the identical shape: `"the suite is green and the mutation probe kills
+every mutation"`, typed directly into this file's source rather than derived
+from anything. That sentence was true the day it was written and would have
+stayed exactly as true in the rendered `execution_state.json` if a mutation
+had started surviving the next day, if `mutate.py` had been deleted, or if it
+had never been run at all in a given session — none of those states could
+change the string, because nothing read anything to produce it.
+
+**what was built.** `mutate.py`'s `main()` now calls `write_result()`
+(extracted as its own function so a test can exercise the persistence against
+synthetic `Result`s rather than paying for a full 29-mutation run twice),
+writing `ontology/mutation_probe.json` — committed, not `.omnex/`-ignored,
+because `state_map.py`'s `derive()` must produce the same
+`execution_state.json` from a fresh checkout that it does locally, and a
+gitignored sidecar would make CI and a local run disagree about whether the
+fact exists at all. Written on every run, survivors included: a probe result
+with a hole in it is the one worth keeping on file, the same argument
+`eval_gate.py`'s `Trend` already makes for a failed suite run.
+
+`state_map.py` gained `_mutation_probe()` (reads the file, or reports
+`{"present": False}` — the state a hard-coded string could never represent)
+and `_mutation_clause()` (gate 3's sentence, built from what was actually
+read). A second check rides along: `catalogue_size_matches` compares the
+file's `total` against the live `len(mutate.CATALOGUE)`, so a mutation added
+to the catalogue with nobody re-running the probe reads as **stale**, not as
+a silently undercounted total. `git diff --exit-code ontology/mutation_
+probe.json` guards freshness the same way `node_dossier.py`'s output already
+is — added as its own step, gated to the same `matrix.python == '3.12'`
+condition as `mutate.py` itself, immediately after it in `engine.yml`, since
+the file is only ever regenerated on that interpreter.
+
+CLAUDE.md's gate block reordered so `mutate.py` and its diff check now run
+*before* `capability_map.py --check` and `state_map.py --check`: not because
+CI's own step order matters (analysed and confirmed it does not — every check
+in a CI job reads the same static checked-out commit regardless of which
+script runs first, since none of them overwrite a file another one reads
+mid-job on the interpreters where mutation doesn't run), but because a
+contributor pasting the whole documented one-liner and running it fresh needs
+`ontology/mutation_probe.json` to exist and be current *before* `state_map.py
+--check` can meaningfully compare against it, and the written order should
+say so rather than rely on it happening to work by accident of file
+persistence.
+
+**what was verified.** The full, reordered CLAUDE.md one-liner run start to
+finish, for real, in the new order — not assumed from the individual scripts
+passing in isolation. Two new tests in `test_mutation.py`
+(`test_write_result_records_survivors_rather_than_hiding_them`, against
+synthetic `Result`s, and `test_the_committed_result_matches_the_live_
+catalogue_size`, against the real committed file) and three in
+`test_state_map.py` (`_mutation_probe()`'s presence now appears in gate 3's
+evidence; a monkeypatched absent file produces the honest `{"present": False}`
+this shape could never produce before; a synthetic stale-catalogue case
+reaches the "re-run mutate.py" clause). `test_ci_contract.py`'s full suite
+still passes with the reordered document and workflow. Full engine gate
+green end to end in the new documented order: ruff/format/mypy, all
+invariants, `env_check.py`, `extras_check.py`, `release_check.py --target
+engine`, claims/runs/spine, `actions_pin_check.py` (20/20), `n8n_bindings_
+check.py`, `readme_check.py --check` (1,317, up from 1,313 — 4 new tests),
+`node_dossier.py` + diff, `apply_decisions.py --dry-run`, full `pytest
+tests/`, `mutate.py` (29/29 killed) + its new diff check, `capability_map.py
+--check`, `state_map.py --check`, `eval_gate.py`. `release_check.py --target
+citegate` still fails on the same pre-existing, previously-documented
+git-remote reversion, unrelated. While in this file, corrected `mutate.py`'s
+own stale figure in CLAUDE.md's "Where things live" section (quoted "27 of
+27," measured 29 of 29) — the exact drift class its own Lab Notes section
+already warns about, found by re-measuring rather than restating while this
+bullet was already open for the persistence note.
+
+**what else was considered.** Writing the probe result into `.omnex/`
+alongside `eval_gate.py`'s `Trend` runs, matching that convention exactly —
+rejected once the gitignore was checked: `.omnex/` is *entirely* ignored,
+which is fine for `eval_gate.py`'s own trend history (a local/CI-ephemeral
+run log `quality-gate.yml` uploads as a build artifact rather than commits)
+but wrong for a fact `execution_state.json` must reproduce identically from
+a fresh checkout. Requiring `mutation_probe.json`'s `source_commit` to equal
+the exact current `HEAD` in `state_map.py --check`'s strict comparison —
+rejected: every derived file already committed here (`execution_state.json`
+itself, via its own `source_commit` field) is structurally one commit behind
+itself at the moment it is committed, and `test_the_committed_state_agrees_
+with_the_repository` already excludes `source_commit` from its equality check
+for exactly this reason; holding a *different* derived file to a stricter
+standard than the one it feeds would be arbitrary. Reordering `engine.yml`'s
+steps to match CLAUDE.md's new order exactly — not done, since the two files
+have never matched step-for-step (`env_check.py` runs fifth in CLAUDE.md's
+block and near the end in `engine.yml`, unchanged by any prior round) and
+`test_ci_contract.py` only requires the *set* of gate scripts to match, never
+their sequence; reordering `engine.yml` for cosmetic symmetry would be a
+larger, riskier diff for a property nothing checks or needs.
+
+**reversible how.** Two new fields on the derived-state graph
+(`mutation_probe`, feeding gate 3's evidence and prose), one new committed
+file, one new CI step, and a block reorder in CLAUDE.md with no scripts added
+or removed from the set `test_ci_runs_every_gate_script_the_document_names`
+and its mirror already check. `git revert` restores the literal sentence gate
+3 carried before — a regression in kind, not a break, since nothing downstream
+depends on `mutation_probe.json` existing.
