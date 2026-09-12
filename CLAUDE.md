@@ -58,7 +58,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 100 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 108 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 100 TypeScript tests now run in CI; until recently, seven of them did.
@@ -482,6 +482,23 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   Proven by sabotage: `copilot-stream.integration.test.ts`'s new test
   confirmed to fail with the old `guardInbound`-based block, then pass with
   the fix.
+- `app/api/studio/upload/route.ts` — **`file.type` is a label the client
+  wrote on its own multipart request, not a fact about the bytes that
+  follow it.** Trivial to set to `image/jpeg` on arbitrary content with a
+  raw `fetch`/`curl`, no browser file picker involved — and it was the sole
+  gate on both extension selection and image-type validation before writing
+  to the `products` bucket, which this route's own docstring already calls
+  public, and handing back a public URL on this product's own domain.
+  OWASP's own name for this class is Unrestricted File Upload. New exported
+  `matchesSignature(mimeType, bytes)` checks the real JPEG/PNG/WebP magic
+  bytes against what was actually uploaded and refuses with 415 before
+  anything reaches storage; `file.type` still selects which signature to
+  check and the stored extension, but no longer stands in for the content
+  it claims to describe. This route had zero test coverage before
+  `lib/__tests__/upload.test.ts`. Proven by sabotage: removing the
+  `matchesSignature` call was confirmed to let an HTML payload labelled
+  `image/jpeg` through with a 200 and a real `upload()` call, before the
+  check was restored and reconfirmed to refuse it with 415.
 - `app/api/stripe/webhook/route.ts` + `supabase/migrations/003_webhook_retry.
   sql` — **idempotency that survives a failed first attempt.** Migration 001's
   gate inserted the event id and treated any primary-key conflict as "already
