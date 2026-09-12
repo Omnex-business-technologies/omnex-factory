@@ -2290,3 +2290,49 @@ GitHub does not offer a finer-grained scope for that specific write.
 `state_map.py`. `git revert` removes the workflow and the fact; gate 6's prose
 would need a matching revert to stop citing a fact that no longer exists,
 otherwise `state_map.py --check` would immediately say so.
+
+**addendum, same PR, before merge: the workflow could not run, and the
+finding got stronger because of it.** CI on PR #43 failed both `codeql.yml`
+jobs with GitHub's own error: "CodeQL analyses from advanced configurations
+cannot be processed when the default setup is enabled." That is GitHub
+refusing to accept an advanced-setup SARIF upload while the repository's
+CodeQL *default setup* — the very setting gate 6's prose named as
+unobservable — is already turned on. The two configurations are mutually
+exclusive on GitHub's side; there is no combination of workflow permissions
+or `category` naming that reconciles them, only disabling default setup
+(a repository Settings change, `CREDENTIAL`/`DESTRUCTIVE`-adjacent under
+`policy.py` and not something this session takes on its own initiative) or
+not running the advanced workflow at all.
+
+Reverted `.github/workflows/codeql.yml` and `codeql_workflow_present` rather
+than leave a check that can only ever be red for zero analysis gained — this
+repository already runs CodeQL, via the setting the workflow would have
+duplicated. The refusal message itself is then the more valuable artifact:
+a live, one-time confirmation that default setup is genuinely active,
+recorded as **C-015** (`SUPPORTED` via `E-015`, method `network_probe`) in
+`state/claims.jsonl` rather than as a fact in `state_map.py`, because it is
+not rederivable from a checkout the way every other Phase 2 fact here is —
+the same reason C-005's and C-008's confirmations live in the claim registry
+and not in `execution_state.json`. Gate 6's prose now cites C-015 by id
+instead of claiming "neither way" for CodeQL specifically; secret scanning,
+which has no advanced-setup file to attempt this trick with, keeps the
+original unobservable claim as the one remaining control in that sentence.
+
+This is the structural pattern this repository already runs on, held to
+its own PR: a checker's own CI run produced evidence the checker's source
+tree could never contain, and that evidence went into the ledger built for
+exactly this (`state/claims.jsonl` + `state/evidence.jsonl`), not into a
+"pass" bent to fit it. `actions_pin_check.py` accordingly reports 20/20
+again, not 23/23; `README.md`'s test count is unchanged at 1,299 (no test
+was added or removed by the revert, since the CI failure was caught before
+merge, not after).
+
+**what was verified, second pass.** `state_map.py --check` after both the
+revert and the regeneration; `claims.py --check` shows C-015 `SUPPORTED` (1
+live evidence) and the registry still well-formed at 15 claims; full engine
+gate re-run green end to end (ruff/format/mypy, all invariants, `env_check.py`,
+`extras_check.py`, `release_check.py --target engine`, claims/runs/spine,
+`readme_check.py --check`, `capability_map.py --check`, `state_map.py
+--check`, `apply_decisions.py --dry-run`, full `pytest tests/`, `mutate.py`
+29/29); `release_check.py --target citegate` still failing on the same
+pre-existing, unrelated git-remote reversion.

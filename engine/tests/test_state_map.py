@@ -250,7 +250,6 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
     assert "dependency_audit_in_ci: True" in security, "npm audit runs in ci.yml"
     assert "sbom_generated: True" in security, "release.yml now generates and reads back an SBOM"
     assert "dependency_review_in_ci: True" in security, "dependency-review-action runs on PRs"
-    assert "codeql_workflow_present: True" in security, "codeql.yml runs github/codeql-action"
 
     supply = state_map.derive()["supply_chain"]
     assert supply["actions_pinned_to_sha"] == supply["actions_total"] > 0, (

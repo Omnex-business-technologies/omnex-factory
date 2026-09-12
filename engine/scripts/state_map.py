@@ -228,15 +228,20 @@ def _supply_chain() -> dict[str, Any]:
     release exists yet" while `npm audit --audit-level=moderate` ran in
     `ci.yml` and `.github/dependabot.yml` sat beside it.
 
-    CodeQL has two shapes: "default setup", a GitHub *setting* with no file,
-    which a repository scan genuinely cannot see and this reports neither
-    present nor absent for exactly that reason; and "advanced setup", a
-    workflow file naming `github/codeql-action`, which is observable the same
-    way every other Phase 2 control here is. `codeql_workflow_present` checks
-    only for the file — it cannot see whether a scan has ever run or whether
-    its results are triaged, the same boundary `sbom_generated` already keeps
-    between a control existing and a control mattering. Secret scanning has no
-    advanced-setup file at all, so it stays genuinely unobservable from here.
+    CodeQL and secret scanning are GitHub *settings*, not files, so a
+    repository scan genuinely cannot see either from the tree alone — with one
+    exception that is not a repository-scan fact and does not belong in this
+    function's return value: pushing an "advanced setup" CodeQL workflow
+    (`github/codeql-action`) here failed with "CodeQL analyses from advanced
+    configurations cannot be processed when the default setup is enabled",
+    which is GitHub's own confirmation that default setup is ON for this
+    repository. That is a live, one-time observation of a GitHub-side
+    setting — the same shape as C-005's and C-008's `ci_run`/`network_probe`
+    evidence, never a fact this function can rederive from a checkout — so it
+    lives as **C-015** in `state/claims.jsonl`, not as a fact here. The
+    advanced-setup workflow itself was reverted: GitHub refuses to run both,
+    so shipping it would leave a permanently red, non-fixable check for no
+    analysis gained over what default setup already runs.
     """
     import actions_pin_check
     import release_check
@@ -256,7 +261,6 @@ def _supply_chain() -> dict[str, Any]:
         "dependabot_config": (REPO / ".github" / "dependabot.yml").exists(),
         "build_provenance_attested": "attest-build-provenance" in text,
         "sbom_generated": any(k in text for k in ("cyclonedx", "spdx", "syft", "sbom")),
-        "codeql_workflow_present": "codeql-action" in text,
         "actions_pinned_to_sha": pins["pinned_to_sha"],
         "actions_total": pins["total_uses"],
     }
@@ -450,14 +454,16 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
             f"Dependabot config: {supply['dependabot_config']}, build provenance "
             f"attested in the release workflow: {supply['build_provenance_attested']}, "
             f"an SBOM generated and read back against the package it describes in "
-            f"the release workflow: {supply['sbom_generated']}, static analysis "
-            f"via a CodeQL workflow: {supply['codeql_workflow_present']}, every "
-            f"GitHub Action pinned to a commit SHA: "
-            f"{supply['actions_pinned_to_sha']}/{supply['actions_total']}); what "
-            "is absent is any signed PUBLISHED artifact, since no release exists "
-            "— none of this has run for real. Secret scanning is a GitHub "
-            "setting rather than a file, so a repository scan cannot see it and "
-            "this claims neither way",
+            f"the release workflow: {supply['sbom_generated']}, every GitHub "
+            f"Action pinned to a commit SHA: {supply['actions_pinned_to_sha']}/"
+            f"{supply['actions_total']}); what is absent is any signed PUBLISHED "
+            "artifact, since no release exists — none of this has run for real. "
+            "CodeQL and secret scanning are GitHub settings rather than files, so "
+            "a repository scan cannot see either from the tree alone; C-015 in "
+            "state/claims.jsonl carries the one live exception — attempting an "
+            "advanced-setup CodeQL workflow confirmed default setup is already "
+            "enabled, evidence a repository scan cannot rederive and this "
+            "function does not claim",
             [f"{key}: {value}" for key, value in supply.items()],
         ),
         "7_observability": _gate(

@@ -211,21 +211,20 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   SHA is not. Resolving each tag found `actions/attest-build-provenance` and
   `astral-sh/setup-uv` use *annotated* tags, where the bare tag's own SHA is
   the tag object, not the commit it points to — pinning to that would have
-  shipped a `uses:` line that parses and does not resolve. **23 of 23**
+  shipped a `uses:` line that parses and does not resolve. **20 of 20**
   currently pinned, each with a `# vX.Y.Z` comment for the next version bump.
-- `.github/workflows/codeql.yml` — **static analysis for both languages this
-  repository ships**, on push, PR, a weekly schedule and manual dispatch.
-  CodeQL's "default setup" is a GitHub *setting* with no file, which
-  `execution_state.json`'s gate 6 has said plainly since it was written a
-  repository scan cannot see; "advanced setup" is a workflow naming
-  `github/codeql-action`, which is a file like every other Phase 2 control
-  here. `state_map.py`'s `codeql_workflow_present` fact reads only whether
-  that file exists — it cannot see whether a run ever found anything or
-  whether a finding was triaged, the same boundary `sbom_generated` already
-  keeps between a control existing and a control mattering. Secret scanning
-  has no advanced-setup file at all and stays genuinely unobservable from
-  here; gate 6's prose now says so for that one control alone rather than
-  bundling it with CodeQL.
+- **CodeQL default setup is confirmed enabled** (`state/claims.jsonl` C-015,
+  `SUPPORTED`) — not by reading the repository, which cannot see a GitHub
+  *setting*, but by GitHub's own service refusing an advanced-setup workflow
+  this session pushed and reverted: "CodeQL analyses from advanced
+  configurations cannot be processed when the default setup is enabled." That
+  refusal is the evidence — a live, one-time `network_probe` observation of a
+  GitHub-side setting, the same shape as C-005's and C-008's `ci_run` findings,
+  never a fact `state_map.py` can rederive from a checkout. The workflow itself
+  was not kept: GitHub refuses to run both, so an advanced-setup file here
+  could only ever be permanently red for zero analysis gained over what
+  default setup already runs. Secret scanning has no such exception and stays
+  the one genuinely unobservable control in gate 6.
 - `oss/citegate/`'s release path + `engine/scripts/sbom_check.py` — **an SBOM
   generated in a CLEAN venv containing only the package, never the venv
   running the SBOM tool itself** (which would report the tool's own ~30
