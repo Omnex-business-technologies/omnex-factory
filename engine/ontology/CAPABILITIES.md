@@ -137,9 +137,9 @@ Blocks a deploy on any case that passed and now fails, never on the mean -- beca
 - **contract:** Gate.decide() compares a run to its baseline case-by-case and refuses to compare across a changed suite fingerprint.
 - **dependencies:** CAP-004
 - **security requirements:** none declared
-- **evidence:** E4_INTEGRATED — 3 test file(s) and 4 other production module(s) reference 'Gate'
+- **evidence:** E4_INTEGRATED — 4 test file(s) and 4 other production module(s) reference 'Gate'
 - **operational/production/outcome evidence:** E5_UNKNOWN_NOT_OBSERVABLE — requires evidence from a running deployment (traces, an operator, a payment); this repository has none, matching state_map.py's gate 5_production, which is UNKNOWN for the same reason
-- **test files (3):** `engine/tests/test_evals.py`, `engine/tests/test_factory.py`, `engine/tests/test_state_map.py`
+- **test files (4):** `engine/tests/test_eval_gate.py`, `engine/tests/test_evals.py`, `engine/tests/test_factory.py`, `engine/tests/test_state_map.py`
 - **integrated by (4):** `engine/src/omnex/evals/__init__.py`, `engine/src/omnex/evals/judge.py`, `engine/src/omnex/factory/__init__.py`, `engine/src/omnex/factory/gates.py`
 - **limitations:** The default metrics are deterministic and in-process; judge_quality() in judge.py is a separate, non-gating metric by design (variance between runs would make a noisy gate teach a team to disable it).
 - **known risks:** Editing an expected answer and re-running looks identical to a real improvement unless the suite fingerprint is checked first -- which is why a fingerprint mismatch raises rather than silently comparing.

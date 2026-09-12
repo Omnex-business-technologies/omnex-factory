@@ -2486,3 +2486,70 @@ test function. `git revert` removes both; the stricter test would then need
 its own revert too, or it would immediately fail on the next CI-only script
 someone adds and forgets to document — which is the property working as
 intended, not a bug in the revert.
+
+## D-033: eval_gate.py's own CLI had no test, one script after the last one
+
+**context.** D-032 added `eval_gate.py` to CLAUDE.md's gate block and CI in
+the same round it wrote the bidirectional `documented == in_ci` test. Adding
+a script to the gate closes the CI-visibility gap; it says nothing about
+whether the script's own logic has a test, which is a different, adjacent
+gap — the exact one D-031 closed for `n8n_bindings_check.py` one round
+earlier. Checking immediately after landing D-032 found the same shape here.
+
+**what was found.** `omnex.evals`'s library code (`Suite`, `Gate.decide()`,
+`EvalRunner`, `Trend`) is well covered by `test_evals.py`. `scripts/eval_
+gate.py`'s own `main()` — argument parsing, the exit code, `--record`,
+whether a fresh run with no baseline behaves correctly, whether a genuine
+regression against a real baseline actually returns 1 — had never been
+exercised directly by anything. `grep -rl "import eval_gate" tests/*.py`
+returned nothing.
+
+**what was built.** `engine/tests/test_eval_gate.py`, four tests run against
+the real, committed `suites/rag_core.json` and its corpus (not a synthetic
+suite — the point is this script's own plumbing, and the real suite is
+small, deterministic and already zero-cost):
+
+- a first run with no baseline passes and writes nothing (only `--record`
+  may write the baseline file);
+- `--record` writes a baseline a later, independently-run instance of the
+  same deterministic pipeline reads back as unchanged;
+- **sabotage-verified**: record a real baseline, then edit ONE result in the
+  saved JSON to claim a case passed that the real run still fails at
+  (score 0.0, one of the suite's known chronic failures) — `main()` must
+  return `1` and print that case's id, proving the CLI's exit code and
+  output actually reflect `Gate.decide()`'s verdict rather than merely that
+  `Gate.decide()` can compute one in isolation;
+- the script's own defaults load and run the real suite and corpus this
+  repository ships, with only `--baseline`/`--out` redirected to `tmp_path`.
+
+**what was verified.** All four tests pass, including the sabotage case
+(confirmed failing before the fix was written — the JSON edit trick, not a
+mocked `Gate`). `engine/ontology/CAPABILITIES.md` regenerated: `Gate`'s
+capability entry gained a fourth referencing test file, confirmed by
+`capability_map.py --check` rather than hand-edited. `README.md`'s test
+count re-synced 1,309→1,313 by `readme_check.py`. Full engine gate green:
+ruff/format/mypy, all invariants, `env_check.py`, `extras_check.py`,
+`release_check.py --target engine`, claims/runs/spine, `actions_pin_check.py`
+(20/20), `n8n_bindings_check.py`, `readme_check.py --check`, `capability_
+map.py --check`, `state_map.py --check`, `node_dossier.py` + diff,
+`apply_decisions.py --dry-run`, full `pytest tests/` (1,313 tests),
+`mutate.py` (29/29 killed), `eval_gate.py` itself. `release_check.py
+--target citegate` still fails on the same pre-existing, previously-
+documented git-remote reversion, unrelated to this change.
+
+**what else was considered.** Writing a small synthetic suite (two or three
+`GoldenCase`s) instead of running the real committed one — rejected: the
+real suite is already deterministic and cheap (`ScriptedModel`, no network,
+regeneration off), so a synthetic one would only add a second fixture to
+keep in sync with `omnex.evals`'s schema for no isolation benefit, the same
+reasoning `test_n8n_bindings_check.py` used to reuse `bindings.load()`
+rather than inventing a parallel catalogue format. Mocking `Gate.decide()`
+to force a `False` verdict rather than genuinely engineering a regression —
+rejected: it would prove the CLI prints whatever the mock returns, not that
+a real regression in a real recorded baseline actually reaches the exit
+code, which is the one property worth holding in place given this script's
+whole reason for existing ("a quality check that exits 0 never blocks
+anything").
+
+**reversible how.** One new test file, no production code changed.
+`git revert` removes it with no effect on `eval_gate.py` or `omnex.evals`.

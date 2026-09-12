@@ -56,7 +56,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,309 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,313 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -462,6 +462,17 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   check.py` now exercises `unresolved_commands()` and `required_env()` against
   synthetic catalogues, plus one test holding the real committed catalogue to
   the same standard.
+- `engine/scripts/eval_gate.py` — the same shape of gap found one script over:
+  added to this gate block and CI in the *previous* round (D-032) with
+  `omnex.evals`'s own logic (`Gate.decide`, `EvalRunner`, `Trend`) already
+  covered by `test_evals.py`, but the CLI script's own `main()` — argument
+  parsing, the exit code, `--record` — had never been exercised directly.
+  `test_eval_gate.py` runs the real committed suite through `main()`: a first
+  run with no baseline passes and writes nothing, `--record` writes one a
+  later deterministic run reads back clean, and a **sabotage-verified**
+  regression test edits one recorded result to claim a case passed that the
+  real run still fails, confirming `main()` returns `1` and names the
+  regressed case — not just that `Gate.decide()` can compute one in isolation.
 - `engine/src/omnex/pipeline/__main__.py` — the CLI an n8n `executeCommand` node
   runs: `verify` (signature, replay window, sender id; body on stdin) and `claim`
   (deliver once). **Exit codes are the interface**: `0` proceed, `1` refused,
