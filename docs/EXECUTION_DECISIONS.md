@@ -1437,3 +1437,95 @@ its own: `evals/judge.py` is a new file nothing else calls yet;
 fall back to it being empty when `split_reasoning` finds nothing, so no
 existing caller's behaviour changes unless the model it talks to actually
 emits a `<think>` block.
+
+---
+
+## D-022: Phase 0 truth lock — three gates were lying, and the guard could not see any of them
+
+**context.** The operator supplied a "Sovereign Execution & Proof
+Architecture" standard. Its §3 and §8 Phase 0 both require a Repository
+Truth Pass *before* any new implementation, so that was done first rather
+than building anything the standard asks for. The pass found that three of
+the thirteen maturity gates in `execution_state.json` asserted the absence
+of things that had since arrived — the exact defect class this repository
+already paid for once with gates 1 and 2, and built a structural fix
+against.
+
+**what was false.** `10_distribution` said "release_check.py and release.yml
+do not exist; no artifact has been built, signed or published" while
+`engine/scripts/release_check.py` is in the CLAUDE.md gate block and in CI,
+and `.github/workflows/release.yml` exists and has actually executed once
+(the `workflow_dispatch` rehearsal). `9_autonomy` said "no run ledger
+exists" while `state/runs.jsonl` held 39 hash-chained runs that
+`runs.py --check` verifies on every CI run. `6_security` said "no secret
+scanning, dependency audit, SBOM or signed release exists yet" while
+`npm audit --audit-level=moderate` runs at `ci.yml:53`,
+`.github/dependabot.yml` sits beside it, and `attest-build-provenance@v4`
+is wired into the release workflow.
+
+**why the guard missed all three — four independent reasons.** This is the
+part worth recording, because the guard
+(`test_no_gate_claims_a_file_is_absent_while_it_sits_in_the_repository`)
+was written precisely to stop this and was itself green throughout.
+(1) Its regex required `<file> does not exist`, singular; gate 10 said
+"**do** not exist", plural, and the construction "A.py and B.yml do not
+exist" also put the first filename further back than the pattern reached.
+(2) Gates 6 and 9 denied existence with no filename at all, so a
+path-keyed scan had nothing to resolve. (3) Its path bases were
+repo/engine/engine-scripts, which do not include `.github/workflows`, so
+even once the phrasing was understood `release.yml` resolved to nothing and
+read as clean. (4) Its extension alternation was `py|json|jsonl|md|yml|yaml`
+— `json` before `jsonl` — so `state/claims.jsonl does not exist` truncated
+to `state/claims.json`, a path that does not exist, meaning **gate 2, one
+of the two cases the guard was written for, could never have been caught by
+it**. A guard nobody has seen fail is a guard nobody has tested; this one
+had four holes and a docstring describing the bug it was not catching.
+
+**what was done.** The three gates now derive, like gates 0/1/2 already
+did, from three new fact helpers: `_run_ledger()` (run count, chain
+integrity via the ledger's own `broken_links`, runs by autonomy level),
+`_release_tooling()` (both files present) and `_supply_chain()` (dependency
+audit in CI, Dependabot config, provenance attestation, SBOM — each read
+from the workflows through `release_check._uncommented`, the repository's
+one comment-stripping reader, rather than a second copy). The scan itself
+moved out of the test and into `state_map.denied_existing_files()`, which
+the test now calls — one implementation, for the same reason
+`one_symbol_resolver` and `twin_splitters_agree` exist — and a new test
+feeds it the three verbatim drifted strings plus both original bites and
+requires it to catch every one.
+
+**two boundaries stated rather than papered over.** CodeQL default setup
+and secret scanning are GitHub *settings*, not files; a repository scan
+cannot see either, so `6_security` reports neither present nor absent and
+says so. A control this process cannot observe is unobserved, which is not
+the same as missing — the distinction the whole file exists to keep, and
+exactly the standard's §7 discipline. Separately, `10_distribution`
+deliberately does not derive whether anything was published: reading
+`git tag` would disagree between a full clone and CI's shallow checkout,
+producing a validator that fails on where it ran, and C-005/C-011/C-013 in
+`state/claims.jsonl` already track publication as claims about other
+systems.
+
+**a finding deliberately NOT acted on.** Deriving `9_autonomy` immediately
+contradicted a sentence in my own first draft of it ("nothing above L3 has
+ever been taken"): the ledger shows one `L4_EXTERNAL` run, R-0005, the
+citegate tag-push attempt — and its `result` is still `UNKNOWN`, never
+closed with `--observe`. The gate now derives "N runs above L3, of which M
+recorded a successful outcome" instead of asserting anything. R-0005 was
+left open rather than closed: D-017 established that *a* tag push was
+refused by a platform ref restriction, but closing R-0005 on the strength
+of a later run's finding would be inferring an outcome rather than
+observing one, which is the standard's §7 and this repository's own rule.
+It is the operator's to close.
+
+**what else was considered.** Widening the guard's regex to also match the
+two new phrasings and leaving the three gates as prose — rejected: that
+keeps three literals that must be re-read by a human to stay true, and the
+whole lesson of gates 1 and 2 is that nobody re-reads them. Deriving the
+gates and leaving the guard alone — rejected for the mirror reason: the
+next gate added will be prose again, and a guard with four holes would not
+catch it either.
+
+**reversible how.** `git revert` restores the three prose gates and the
+narrower guard. Nothing outside `state_map.py`, `test_state_map.py` and the
+regenerated `execution_state.json` changed.
