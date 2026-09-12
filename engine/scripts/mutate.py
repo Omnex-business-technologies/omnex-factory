@@ -62,20 +62,27 @@ REPO = ENGINE.parent
 RESULT = ENGINE / "ontology" / "mutation_probe.json"
 
 
-def _head() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, check=False
-    ).stdout.strip()
-
-
 def write_result(results: list[Result], path: Path = RESULT) -> dict[str, object]:
     """The committed shape. Pulled out of `main()` so a test can exercise the
     persistence itself against a handful of synthetic results, rather than
     the only test being a full 29-mutation run this suite should not pay for
-    on every invocation (see `test_mutation.py`'s own docstring)."""
+    on every invocation (see `test_mutation.py`'s own docstring).
+
+    Deliberately carries no commit binding. A first version wrote `git
+    rev-parse HEAD`, which is stable in a person's own checkout but not in a
+    GitHub Actions `pull_request` run: that event checks out a synthetic
+    merge-preview commit GitHub creates fresh on every run, never a real
+    commit that could ever match what was committed — so `git diff --exit-
+    code` on this file failed the first time it actually ran there, on every
+    single PR, structurally. `DECISIONS.md` and `CAPABILITIES.md` already
+    avoid this by carrying no commit hash at all; `execution_state.json` is
+    the one exception, and only because `state_map.py`'s own `differences()`
+    explicitly drops `source_commit` before comparing. Matching that second,
+    more complicated pattern without also copying its exclusion was the
+    mistake — this file follows the first, simpler one instead.
+    """
     survivors = [r.mutation.ident for r in results if not r.killed]
     payload = {
-        "source_commit": _head(),
         "total": len(results),
         "killed": len(results) - len(survivors),
         "survivors": survivors,

@@ -119,7 +119,12 @@ def test_write_result_records_survivors_rather_than_hiding_them(tmp_path) -> Non
     assert payload["total"] == 3
     assert payload["killed"] == 2
     assert payload["survivors"] == ["b"]
-    assert payload["source_commit"], "a probe result with no commit binding cannot be aged"
+    assert "source_commit" not in payload, (
+        "a commit binding here failed on every pull request in practice: "
+        "GitHub checks out a synthetic merge-preview commit that never "
+        "matches anything actually committed, so a freshness diff against "
+        "it fails structurally. See write_result()'s own docstring."
+    )
 
     on_disk = json.loads(path.read_text(encoding="utf-8"))
     assert on_disk == payload

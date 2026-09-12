@@ -312,8 +312,13 @@ def test_gate_3_flags_a_stale_probe_against_a_grown_catalogue(monkeypatch) -> No
     """A mutation added to `CATALOGUE` with nobody re-running the probe is the
     other honest-absence case: the file is present, but its `total` no longer
     describes 'every mutation this repository has'."""
-    probe = {"present": True, "source_commit": "abc123", "total": 1, "killed": 1, "survivors": []}
-    probe["catalogue_size_matches"] = False
+    probe = {
+        "present": True,
+        "total": 1,
+        "killed": 1,
+        "survivors": [],
+        "catalogue_size_matches": False,
+    }
     clause = state_map._mutation_clause(probe)
     assert "stale" in clause
     assert "re-run mutate.py" in clause

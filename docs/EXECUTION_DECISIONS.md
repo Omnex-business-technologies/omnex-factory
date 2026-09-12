@@ -2747,3 +2747,50 @@ or removed from the set `test_ci_runs_every_gate_script_the_document_names`
 and its mirror already check. `git revert` restores the literal sentence gate
 3 carried before — a regression in kind, not a break, since nothing downstream
 depends on `mutation_probe.json` existing.
+
+**addendum, same PR, before merge: the freshness check itself failed on
+every pull request, structurally.** PR #49's CI went red on exactly the new
+"Mutation probe result committed" step, on its very first real run. The log
+showed `git diff --exit-code` failing on one line:
+`"source_commit"` changing from the commit this session generated the file
+against to `218569dc...` — a SHA that appears nowhere in this repository's
+history. GitHub Actions checks out a synthetic merge-preview commit for a
+`pull_request` event (`refs/pull/N/merge`), fabricated fresh on every run and
+never a real commit anything else could match. `write_result()`'s
+`source_commit` field, bound via `git rev-parse HEAD` at generation time,
+could therefore never equal what a fresh CI run would compute — the check
+was not flaky, it was guaranteed to fail on every single pull request from
+the moment it started running for real.
+
+The same commit-binding pattern exists in `execution_state.json` and does
+not have this problem, for a reason this round initially missed: `state_map.
+py`'s own `differences()` explicitly drops `source_commit` (along with
+`branch` and `tree_clean`) before comparing committed against measured.
+Copying the field without copying the exclusion reproduced the shape of a
+working pattern without the part that makes it work. `DECISIONS.md` and
+`CAPABILITIES.md`, the two other files this repository already diff-checks
+after regeneration, avoid the problem entirely by carrying no commit hash at
+all — the simpler and, in hindsight, obviously correct precedent to follow
+for a file whose freshness is checked with a raw `git diff`, not a
+field-excluding comparator.
+
+Removed `source_commit` from `mutation_probe.json` rather than adding an
+exclusion mechanism: nothing downstream needed the exact commit, only the
+counts, and a file with no volatile field is simpler than a diff check smart
+enough to ignore one. Verified the fix actually holds, not just that it
+compiles: ran `mutate.py` twice in a row and confirmed the two output files
+are byte-for-byte identical — the property `git diff --exit-code` needs to
+be meaningful across independent runs, checked directly rather than inferred
+from removing the field that broke it. Every affected test updated to assert
+`"source_commit" not in payload` rather than checking a value; `execution_
+state.json` and `CLAUDE.md`'s quoted figures regenerated. Full engine gate
+re-run green end to end after the fix, including a fresh `git diff --exit-
+code ontology/mutation_probe.json` against the newly-committed schema.
+
+The lesson generalises past this one field: a value bound to `git rev-parse
+HEAD` inside content a `pull_request`-triggered `git diff --exit-code` step
+compares is never safe to commit, because the checked-out commit on that
+event type is never the one that will exist in history. `execution_state.
+json` gets away with it only because its own comparator was written to
+know that; a new committed-and-diffed artifact should default to carrying no
+commit hash unless it also carries that exclusion.

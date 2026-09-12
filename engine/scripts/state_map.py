@@ -347,12 +347,19 @@ def _mutation_probe() -> dict[str, Any]:
     on every run, survivors included, and this reads it back rather than
     asserting anything about mutation testing on its own.
 
-    `total` is compared against the live `mutate.CATALOGUE` length — not to
-    demand the probe was run at this exact commit (every derived file here is
-    structurally one commit behind itself; `source_commit` is dropped from the
-    strict comparison for exactly that reason), but to catch a mutation added
-    to the catalogue with nobody re-running the probe since, which the file's
-    own `total` field would otherwise hide.
+    `total` is compared against the live `mutate.CATALOGUE` length to catch a
+    mutation added to the catalogue with nobody re-running the probe since,
+    which the file's own `total` field would otherwise hide. No commit is
+    bound to this fact on purpose: an earlier version wrote `git rev-parse
+    HEAD` into the committed file, which a GitHub Actions `pull_request` run
+    checks out as a synthetic merge-preview commit that never matches
+    anything actually committed — `git diff --exit-code` on that field failed
+    on every single pull request, structurally, the first time it ran for
+    real. `DECISIONS.md` and `CAPABILITIES.md` already avoid this by binding
+    to no commit at all; only `execution_state.json` carries one, and only
+    because `differences()` explicitly drops it before comparing (see below).
+    Matching that pattern here without also copying its exclusion is exactly
+    what broke.
     """
     import mutate
 
@@ -361,7 +368,6 @@ def _mutation_probe() -> dict[str, Any]:
     payload = json.loads(mutate.RESULT.read_text(encoding="utf-8"))
     return {
         "present": True,
-        "source_commit": payload.get("source_commit", ""),
         "total": payload.get("total", 0),
         "killed": payload.get("killed", 0),
         "survivors": payload.get("survivors", []),
@@ -378,8 +384,7 @@ def _mutation_clause(mutation: dict[str, Any]) -> str:
         )
     clause = (
         f"the mutation probe's committed result says {mutation['killed']}/"
-        f"{mutation['total']} mutations killed as of "
-        f"{mutation['source_commit'][:12]}"
+        f"{mutation['total']} mutations killed"
     )
     if not mutation["catalogue_size_matches"]:
         import mutate
