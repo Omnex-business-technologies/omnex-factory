@@ -32,6 +32,7 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/python scripts/mutate.py \
   && git diff --exit-code ontology/mutation_probe.json \
   && .venv/bin/python scripts/capability_map.py --check \
+  && .venv/bin/python scripts/business_map.py --check \
   && .venv/bin/python scripts/state_map.py --check \
   && .venv/bin/python scripts/eval_gate.py --baseline suites/baseline.json --out .omnex/runs
 
@@ -57,7 +58,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,320 engine tests · 82 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 82 TypeScript tests now run in CI; until recently, seven of them did.
@@ -526,8 +527,17 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   recorded, which is not 0 earned" — never €0.00.** It reads the repository and
   cannot see Stripe, Supabase, Etsy or Lemon Squeezy, and says so in its own
   last section; printing an unobservable as zero is the mistake `3766976`
-  already paid for. Today: **day 41, 116 commits, 80 of 170 images through QC,
-  0 listings live, 1 module enabled, no revenue log.**
+  already paid for. Today: **day 45, 208 commits, 80 of 170 images through QC,
+  0 listings live, 1 module enabled, no revenue log.** `--check` (D-036, this
+  round) closes the one gap the other four derived-and-committed documents
+  never had: nothing regenerated or diffed it, and it had drifted 11 commits
+  stale with nothing reporting so. A raw `git diff --exit-code` would be
+  permanently red the day after every regeneration — `_elapsed()`'s headline
+  depends on `datetime.now(UTC)`, not just the checked-out commit — so
+  `--check` masks that one line before comparing (the same "drop the
+  volatile field" move `state_map.py`'s `differences()` already makes for
+  `source_commit`) and still fails on a real disagreement in the goods,
+  live, or revenue figures.
 - `packs/build_pack.py` — QC-passed images → a file Etsy can deliver. Four
   ratios **cropped from the centre, never padded**: a background scene with bars
   is not publishable, so losing edge pixels is the correct loss here. The zip is
