@@ -58,10 +58,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 96 TypeScript · 16 citegate**, all green,
+Current state: **1,327 engine tests · 100 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 96 TypeScript tests now run in CI; until recently, seven of them did.
+All 100 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -468,6 +468,20 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   assembly all run as real production code. Proven not vacuous by sabotage:
   commenting out the route's `spendCredits` call was confirmed to fail the
   test before the fix was confirmed to pass it.
+- `lib/core/agents/guardrails.ts` — **`guardInbound`'s injection rules exist
+  for text an agent FETCHED, not for a user talking to their own copilot.**
+  The copilot route ran the user's own chat message through them anyway.
+  Checked against seven realistic questions, six were hard-blocked with a
+  400 — "act as a career coach", "from now on reply in French", "show your
+  instructions for X" are ordinary ways to prompt an assistant, not attacks,
+  and there is no trust boundary crossed when the user instructs their own
+  copilot (they are the principal, not a confused deputy). New `redactSecrets()`
+  is the one half of `guardInbound` that still belongs on a user's own words —
+  a real credential pasted into a question should not reach a third-party LLM
+  provider — and the route now uses it, never blocking, always redacting.
+  Proven by sabotage: `copilot-stream.integration.test.ts`'s new test
+  confirmed to fail with the old `guardInbound`-based block, then pass with
+  the fix.
 - `app/api/stripe/webhook/route.ts` + `supabase/migrations/003_webhook_retry.
   sql` — **idempotency that survives a failed first attempt.** Migration 001's
   gate inserted the event id and treated any primary-key conflict as "already

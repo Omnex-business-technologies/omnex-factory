@@ -37,7 +37,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/core/supabase/server'
 import { checkRateLimit } from '@/lib/core/security/ratelimit'
-import { guardInbound, guardOutbound, summarise } from '@/lib/core/agents/guardrails'
+import { redactSecrets, guardOutbound } from '@/lib/core/agents/guardrails'
 import { complete, hasProvider } from '@/lib/core/llm/provider'
 import { Trace } from '@/lib/core/agents/trace'
 import { RunBudget } from '@/lib/core/agents/budget'
@@ -88,12 +88,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Question is too long (max ${MAX_QUESTION}).` }, { status: 400 })
   }
 
-  // Guarded BEFORE the stream opens. A blocked prompt should be an ordinary 400
-  // the client can render, not a stream that opens and immediately closes.
-  const inbound = guardInbound(question)
-  if (!inbound.ok) {
-    return NextResponse.json({ error: summarise(inbound) }, { status: 400 })
-  }
+  // Never blocked: this is the user instructing their own copilot, not fetched
+  // content an agent placed into a prompt on the user's behalf, so the
+  // injection rules `guardInbound` applies to scraped pages do not apply here
+  // (see guardrails.ts's module docstring — six of seven realistic copilot
+  // questions like "act as a career coach" were being hard-blocked by them
+  // before this fix). Only strips anything shaped like a credential, so a
+  // customer who pastes a real key into their question does not send it to a
+  // third-party LLM provider.
+  const safeQuestion = redactSecrets(question).redacted
 
   const trace = new Trace(MODULE_ID, { userId: user.id.slice(0, 8) })
   const budget = new RunBudget({ maxCostEur: MAX_RUN_COST_EUR, maxPasses: 4 })
@@ -137,12 +140,12 @@ export async function POST(req: NextRequest) {
         const result = await complete(
           [
             { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: question },
+            { role: 'user', content: safeQuestion },
           ],
           { maxTokens: 800, temperature: 0.2, taskProfile: 'fast' },
         )
 
-        const cost = priceCall(result, `${SYSTEM_PROMPT}\n${question}`)
+        const cost = priceCall(result, `${SYSTEM_PROMPT}\n${safeQuestion}`)
         budget.record({ tokens: cost.promptTokens + cost.completionTokens, costEur: cost.costEur })
         spentEur += cost.costEur
         calledProvider = true
