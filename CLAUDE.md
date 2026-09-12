@@ -51,7 +51,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,276 engine tests · 68 TypeScript · 16 citegate**, all green,
+Current state: **1,286 engine tests · 68 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 68 TypeScript tests now run in CI; until recently, seven of them did.
@@ -175,6 +175,33 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   unenforceable with reasons, 2 allowlisted exceptions that each name a working
   injection point. Each bullet in "Non-obvious invariants" above cites its id,
   and a test requires that link in both directions.
+- `engine/ontology/capabilities.json` + `CAPABILITIES.md` +
+  `engine/scripts/capability_map.py` — **the canonical capability registry**
+  (Sovereign Execution Standard, Phase 1). A person states name, symbol,
+  contract, dependencies, security requirements, limitations, known risks;
+  everything the standard calls evidence is derived — E1 (declared, does not
+  resolve) through E4 (integrated: another production module references it,
+  excluding its own defining file). E5-E7 need a running deployment this
+  repository does not have and are reported `E5_UNKNOWN_NOT_OBSERVABLE`
+  rather than guessed. Currently **8 capabilities**, a deliberately small
+  first cut. `state_map.py`'s gate 3 derives from `summarise()`, imported,
+  never a second count.
+- `engine/scripts/actions_pin_check.py` — **every `uses:` in every workflow
+  pinned to a full commit SHA, never a version tag** (Phase 2: "pinned or
+  controlled GitHub Actions"). A tag is the action's maintainer's to move; a
+  SHA is not. Resolving each tag found `actions/attest-build-provenance` and
+  `astral-sh/setup-uv` use *annotated* tags, where the bare tag's own SHA is
+  the tag object, not the commit it points to — pinning to that would have
+  shipped a `uses:` line that parses and does not resolve. **20 of 20**
+  currently pinned, each with a `# vX.Y.Z` comment for the next version bump.
+- `oss/citegate/`'s release path + `engine/scripts/sbom_check.py` — **an SBOM
+  generated in a CLEAN venv containing only the package, never the venv
+  running the SBOM tool itself** (which would report the tool's own ~30
+  transitive dependencies as the package's). `sbom_check.py` reads the
+  generated file back and confirms it actually names the released package at
+  the released version — generating a file nothing reads is the "signed
+  artifact is not automatic production security" trap named directly in
+  Phase 2.
 - `corpus/universal-ai-os/DECISIONS.md` + `engine/scripts/node_dossier.py` —
   **all 507 nodes, each with the evidence a person needs to rule on it.**
   `nodes.json` has read `0 implemented, 0 rejected` since it was written — not

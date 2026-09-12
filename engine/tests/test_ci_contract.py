@@ -54,6 +54,12 @@ pytestmark = pytest.mark.skipif(
 #: `--noEmit` are not mistaken for files while `lib/__tests__/x.test.ts` is not
 #: missed.
 _PATHLIKE = re.compile(r"(?<![\w/.-])([A-Za-z_][\w./-]*/[\w.-]+\.[A-Za-z]{2,4})(?![\w/.-])")
+#: `-o <file>` or `--output-file <file>` names a file the SAME command is about
+#: to create, not one it expects to already exist — `release.yml` generates
+#: `dist/citegate.cdx.json` this way and reads it back three tokens later in
+#: the same block. Structural rather than an allowlist entry, so the next
+#: step that writes-then-reads its own output is covered for free.
+_DECLARED_OUTPUT = re.compile(r"(?:-o|--output-file)\s+(\S+)")
 
 
 def _run_commands(path: Path) -> list[str]:
@@ -110,13 +116,46 @@ def test_every_file_a_workflow_names_exists() -> None:
     missing: list[str] = []
     for path in sorted(WORKFLOWS.glob("*.yml")):
         base = _working_directory(path)
-        for command in _run_commands(path):
+        commands = _run_commands(path)
+        # Declared outputs are gathered across every command in the FILE, not
+        # just the one being checked: `_run_commands` yields one entry per
+        # physical line of a `run: |` block, so a `-o file \` continued onto
+        # the next line and a later line reading that same file back are two
+        # separate entries in this list, not one command a single scan sees.
+        declared_outputs = {
+            output for command in commands for output in _DECLARED_OUTPUT.findall(command)
+        }
+        for command in commands:
             for token in _PATHLIKE.findall(command):
                 if token.startswith(("http", "vercel.")) or "${{" in token:
+                    continue
+                if token in declared_outputs:
                     continue
                 if not (base / token).exists() and not (REPO / token).exists():
                     missing.append(f"{path.name}: {token}")
     assert not missing, "workflows name files that are not in the repository: " + ", ".join(missing)
+
+
+def test_a_declared_output_does_not_hide_a_genuine_phantom() -> None:
+    """The exclusion this test's sibling relies on, checked against both a real
+    generated path (release.yml's SBOM, produced by `-o` and read back later in
+    the same block) and a synthetic phantom that is never declared as an
+    output of anything -- so the exclusion is proven not to swallow the exact
+    class of bug `test_every_file_a_workflow_names_exists` exists to catch."""
+    generated = [
+        "uvx cyclonedx-py environment -o dist/citegate.cdx.json ./python",
+        "cat dist/citegate.cdx.json",
+    ]
+    declared = {output for command in generated for output in _DECLARED_OUTPUT.findall(command)}
+    assert "dist/citegate.cdx.json" in declared
+
+    phantom = ["npx vitest run lib/__tests__/agent-memory.test.ts"]
+    phantom_declared = {
+        output for command in phantom for output in _DECLARED_OUTPUT.findall(command)
+    }
+    tokens = [t for command in phantom for t in _PATHLIKE.findall(command)]
+    assert "lib/__tests__/agent-memory.test.ts" in tokens
+    assert "lib/__tests__/agent-memory.test.ts" not in phantom_declared
 
 
 # ── every test on disk must actually run ──────────────────────────────────

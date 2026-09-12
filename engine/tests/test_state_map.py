@@ -248,7 +248,7 @@ def test_the_repaired_gates_derive_their_evidence_rather_than_stating_it() -> No
 
     security = " ".join(str(e) for e in gates["6_security"]["evidence"])
     assert "dependency_audit_in_ci: True" in security, "npm audit runs in ci.yml"
-    assert "sbom_generated: False" in security, "genuinely absent, and must say so"
+    assert "sbom_generated: True" in security, "release.yml now generates and reads back an SBOM"
     assert "dependency_review_in_ci: True" in security, "dependency-review-action runs on PRs"
 
     supply = state_map.derive()["supply_chain"]

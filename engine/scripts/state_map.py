@@ -420,17 +420,19 @@ def gates(facts: dict[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "6_security": _gate(
             UNKNOWN,
-            "controls that ARE in the repository run on every pull request "
-            f"(dependency audit in CI: {supply['dependency_audit_in_ci']}, "
+            "controls that ARE in the repository run on every pull request or "
+            f"release (dependency audit in CI: {supply['dependency_audit_in_ci']}, "
             f"dependency review on PR diffs: {supply['dependency_review_in_ci']}, "
             f"Dependabot config: {supply['dependabot_config']}, build provenance "
             f"attested in the release workflow: {supply['build_provenance_attested']}, "
-            f"every GitHub Action pinned to a commit SHA: "
-            f"{supply['actions_pinned_to_sha']}/{supply['actions_total']}); "
-            f"what is absent is an SBOM ({supply['sbom_generated']}) and any signed "
-            "PUBLISHED artifact, since no release exists. CodeQL default setup and "
-            "secret scanning are GitHub settings rather than files, so a repository "
-            "scan cannot see them and this claims neither way",
+            f"an SBOM generated and read back against the package it describes in "
+            f"the release workflow: {supply['sbom_generated']}, every GitHub Action "
+            f"pinned to a commit SHA: {supply['actions_pinned_to_sha']}/"
+            f"{supply['actions_total']}); what is absent is any signed PUBLISHED "
+            "artifact, since no release exists — none of this has run for real. "
+            "CodeQL default setup and secret scanning are GitHub settings rather "
+            "than files, so a repository scan cannot see them and this claims "
+            "neither way",
             [f"{key}: {value}" for key, value in supply.items()],
         ),
         "7_observability": _gate(
