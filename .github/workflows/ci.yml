@@ -35,6 +35,18 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Supply-chain audit
+        # Dependabot found 13 open advisories on this repo the day it moved
+        # organizations (a critical Next.js RCE among them) with no CI step that
+        # would have caught any of it before merge. `npm audit` reached 0 by
+        # bumping next/vitest directly and forcing three transitive packages
+        # (qs, nanoid, brace-expansion) via `overrides` in package.json --
+        # nested copies a direct-dependency bump does not always reach. This
+        # step is what keeps that at 0 rather than a one-time cleanup: a
+        # moderate-or-worse advisory fails the build here, before it fails
+        # quietly in production.
+        run: npm audit --audit-level=moderate
+
       - name: Types
         run: npx tsc --noEmit
 

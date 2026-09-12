@@ -8,7 +8,7 @@ surface that sells access to them.
 
 ```bash
 # TypeScript — root
-npx tsc --noEmit && npx vitest run && npx next build
+npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx next build
 
 # Python — from engine/
 .venv/bin/ruff check src tests scripts \

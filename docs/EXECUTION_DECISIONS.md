@@ -676,3 +676,69 @@ courtesy GitHub can remove, not a guarantee — `git remote set-url origin
 status checks on `master` — is unchanged by any of this and remains the one
 step that pays immediately: nothing today stops a red-CI merge to the new
 canonical repository any more than it stopped one on the old.
+
+---
+
+## D-014 · 8 npm advisories to 0, and a gate that keeps it there
+
+**date:** 2026-09-12 · **status:** RESOLVED — fixed and gated · **reversible:** yes
+
+**context.** GitHub's Dependabot reported 13 open advisories (2 critical, 5
+high, 6 moderate) on `master` the same day the repository moved
+organizations. Neither `ci.yml` nor any other workflow ran a dependency audit
+of any kind, so this had been true for an unmeasured length of time before
+anyone looked.
+
+**why the count does not match.** `npm audit` reports 8 (3 moderate, 4 high,
+1 critical), not Dependabot's 13. Both are real measurements from different
+tools against possibly different advisory databases and dedup rules; neither
+number is asserted as canonical here, and the discrepancy is recorded rather
+than smoothed into agreement. `npm audit`'s 8 is what this session could
+verify directly, reproduce, and act on.
+
+**the critical one, specifically.** `next` 16.2.12 (satisfying the
+`^16.2.6` in `package.json` at the time) carried an unauthenticated RCE on
+Windows-hosted servers and a second RCE in the Image Optimization API via
+AVIF files — both patched only in `16.3.3+`. `16.2.12` was not an old,
+neglected pin; it was the version `npm install` would hand a fresh clone
+today, on a range that looked current.
+
+**what actually needed fixing, and why `npm audit fix` could not do it.**
+`npm audit fix` failed both before and after the `next` bump with
+`Cannot read properties of null (reading 'edgesOut')` — an internal npm
+error, not investigated further since a manual path was available and
+narrower. Bumping `next` alone (16.2.12 → 16.3.5) resolved the critical RCEs
+*and* a nested, independently-versioned copy of `postcss` that only existed
+inside `next`'s own dependency tree (`node_modules/next/node_modules/postcss`
+at 8.4.31, vulnerable, while the top-level `postcss` was already 8.5.24 and
+fine) — the same shape of bug this repository's own twin-splitter lesson
+already names: two copies of the same thing can diverge silently. `vitest`
+and `@vitest/mocker` went 4.1.10 → 4.1.11, a patched release inside the
+existing `^4.1.8` range. The remaining three — `qs` (via `stripe`), `nanoid`
+(via `postcss`), `brace-expansion` (via `@testcontainers/postgresql` →
+`archiver` → `glob` → `minimatch`) — are transitive with no direct entry in
+`package.json`, so a version bump has nothing to bump; `overrides` in
+`package.json` pins each to its patched release
+(`qs@^6.16.0`, `nanoid@^3.3.18`, `brace-expansion@^2.1.4`) regardless of what
+their parent originally asked for.
+
+**verified, not assumed.** `npm audit` reads 0 vulnerabilities after the
+change. `npx tsc --noEmit`, `npx vitest run` (68/68) and `npx next build`
+(11/11 routes) all run clean against the new dependency tree — a security
+fix that breaks the build is not a fix, it is a trade.
+
+**the structural half.** A one-time cleanup regresses the moment a new
+dependency lands with a fresh advisory. `ci.yml` now runs
+`npm audit --audit-level=moderate` before the type-check, so this fails the
+build the next time it happens rather than sitting unnoticed until someone
+checks the Security tab — the same reasoning `extras_check.py` and
+`release_check.py` are already built on. Added to `CLAUDE.md`'s own
+documented TypeScript gate too, so the command a developer runs locally
+matches what CI now runs, rather than the document being stricter or looser
+than CI in either direction.
+
+**reversible how.** Every change here is a version bump or a version pin;
+`git revert` undoes it cleanly. The `overrides` entries stop applying the
+moment `stripe`, `postcss` or `@testcontainers/postgresql` themselves bump
+past the vulnerable range and carry a fixed transitive version on their own
+— worth revisiting then, not before.
