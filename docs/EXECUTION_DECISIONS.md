@@ -988,3 +988,22 @@ blind.
 **reversible how.** Nothing to reverse — no tag, no release, no artifact
 exists anywhere outside this sandbox's local git store. `R-0016` records
 the attempt and this finding.
+
+**update, same day: repo-level Rulesets ruled out.** The operator checked
+`Omnex-business-technologies/omnex-factory`'s Settings → Rules → Rulesets
+directly — empty, "You haven't created any rulesets." A second push
+attempt (`GIT_CURL_VERBOSE`, same method as the first) produced the
+identical clean `HTTP 403` at the git-receive-pack layer, confirming the
+refusal does not come from a repository-level ruleset. What is left,
+untested from here: an **organization-level** ruleset (a separate setting
+from the per-repository page just checked — `Omnex-business-
+technologies`'s org settings, not the repo's), the older, separate
+**Settings → Tags → "Tag protection rules"** page (distinct UI from
+Rulesets, never checked), and the possibility that whatever GitHub App
+this session's git access runs through simply was never granted a
+permission scope covering tag-ref creation specifically — plausible
+because some integrations gate "create tag" as a higher-risk action
+separately from ordinary branch pushes, checkable only from
+`https://github.com/settings/installations` (or the org's installed
+GitHub Apps page) → the app → Permissions, which is the operator's page,
+not this session's.
