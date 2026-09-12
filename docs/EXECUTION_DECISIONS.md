@@ -1897,3 +1897,97 @@ repository already named and paid for once.
 one new test file, and additive changes to `state_map.py` (a new gate-5
 fact) and `CLAUDE.md`. `git revert` removes the two routes cleanly; nothing
 in the existing app calls either one, so nothing else changes behaviour.
+
+---
+
+## D-027: seven suites that each pass alone, proven to agree when wired together
+
+**context.** Sovereign Execution Standard, Phase 5 (INTEGRATION / E2E
+PROOF), names exactly one flow to prove: AUTH → REQUEST → VALIDATION →
+BILLING/CREDIT → PROVIDER → PERSISTENCE → EVENT → RESPONSE. `/api/copilot/
+stream` is that flow, named component for component in its own docstring
+("auth → rate limit → guard the input → run under a budget → guard the
+output → meter and bill what was actually spent").
+
+**the gap, measured before anything was built.** `grep` across
+`lib/__tests__/` for anything importing `app/api/copilot/stream/route`
+found nothing. Six suites already exist and each proves one piece of that
+route correct in isolation — `guardrails.test.ts`, `metering.test.ts`,
+`budget.test.ts`, `stream.test.ts`, `trace.test.ts`, and
+`credits.db.test.ts` against a real Postgres — but nothing had ever called
+the route handler itself and checked that the seven pieces actually agree
+about what happens when a real request arrives. This is the exact bug
+shape this repository has already paid for once, one level down: `mutate.
+py`'s own history records that `Run.margin` and `_summarise`'s total were
+independent paths that happened to agree until a mutation moved one and
+not the other. Six suites each independently correct is the same risk at
+the level of a whole HTTP route.
+
+**a real control checked before writing anything new.**
+`credits.db.test.ts`'s own docstring says it is "skipped automatically when
+Docker is unavailable." `docker info` was already confirmed to fail in
+this sandbox in D-026's investigation. Read fully before building on top of
+it: the suite is not naively skipped — its own first test independently
+re-checks `docker info` and explicitly warns and returns rather than
+silently reporting a false pass, and every other test in the file
+early-returns on the same `available` flag with a comment naming exactly
+the "vacuous pass" failure this is guarding against. Confirmed by running
+it here: 4 tests "pass," three of them true no-ops, and the suite's own
+design already treats that as correct rather than something to paper over.
+This was a genuine risk worth checking, not a gap — it turned out to
+already be handled with more care than the question deserved.
+
+**what was built.** `lib/__tests__/copilot-stream.integration.test.ts`
+calls the real `POST()` handler with a real `NextRequest`, faking only the
+systems that are genuinely external to this codebase: Supabase (`auth.
+getUser`, the `consume_credits` RPC, the `usage_events` insert) and the LLM
+provider (`complete`, `hasProvider`). Rate limiting, guardrails, the run
+budget, metering's cost math, and the SSE stream assembly all run as real
+production code, unmocked — mocking those would only prove the mocks agree
+with each other, not that the route does what its own docstring claims.
+Five paths: the full paid success path (asserting the SAME credit figure
+appears in both the `consume_credits` call and the `usage_events` row,
+never two numbers that happen to match); unauthenticated (401, before any
+provider call); a guard-blocked question (400, using the real injection
+detector, not a stub that always agrees); a failed provider call (still
+recorded, `ok: false` — "a run that spent money and then failed is
+precisely the one an operator needs to see," the route's own docstring);
+and no provider configured (the degraded zero-cost path, still recorded at
+`credits: 0`).
+
+**proven not vacuous, by sabotage — not just asserted.** The whole point
+of this suite is at risk of the exact failure it exists to catch if the
+mocks are wired wrong and every assertion passes for a reason unrelated to
+the real code path. So the route's own `spendCredits` call was commented
+out, the suite re-run, and the credit-flow test failed with exactly the
+expected assertion (`consume_credits` never called) — then the file was
+restored and the suite re-confirmed green. This is the same discipline
+`test_the_round_trip_check_can_actually_fail` already holds at the
+compiler-target level and `mutate.py` holds across the whole engine gate;
+extended here to a hand-written integration test, which needed the same
+proof and had never received it.
+
+**what was verified.** 5 new tests, all passing, with the sabotage
+regression confirmed as described above; full TypeScript gate green
+(`npm audit`, `tsc --noEmit`, `vitest run` — 82 tests, up from 77 —
+`next build`, all routes still registering correctly); full engine gate
+green (ruff/mypy, all invariants, `actions_pin_check.py` 20/20,
+`capability_map.py --check`, `state_map.py --check`, both release targets,
+claims/runs/spine, full `pytest` — 1,286 tests — `mutate.py` 29/29).
+
+**what else was considered.** Mocking `lib/core/agents/guardrails.ts` or
+`lib/core/agents/metering.ts` too, to make the test purely about wiring —
+rejected: that would remove exactly the layer most likely to disagree with
+its own unit tests under real conditions (a guard rule tuned against a
+narrow test corpus behaving differently against this test's exact prompt
+text is itself useful information, and did not happen here — but mocking
+it away would have made that unknowable). Testing against a real Postgres
+here too, extending `credits.db.test.ts`'s pattern into this file — passed
+over for this round since Docker is unavailable in this sandbox (confirmed
+in D-026); the mocked-Supabase boundary is the correct one for what is
+verifiable now, and a future session with Docker can extend this test to
+route through `credits.db.test.ts`'s real container instead.
+
+**reversible how.** One new test file, purely additive; nothing in
+`app/api/copilot/stream/route.ts` or any module it imports was changed.
+`git revert` removes the test with no effect on any other suite.

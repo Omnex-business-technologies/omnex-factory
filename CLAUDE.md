@@ -51,10 +51,10 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,286 engine tests · 77 TypeScript · 16 citegate**, all green,
+Current state: **1,286 engine tests · 82 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
-All 77 TypeScript tests now run in CI; until recently, seven of them did.
+All 82 TypeScript tests now run in CI; until recently, seven of them did.
 **All 16 citegate tests now run in CI too** — until this commit, none of them
 did: every `pytest` in every workflow inherited `working-directory: engine`.
 
@@ -391,6 +391,18 @@ because nothing grepped. A rule that is not in a gate decays at that rate.
   required variables are unset and which `any_of` group has no member set —
   **names only, never values**, the same rule `env_check.py` already
   enforces at CI time, now enforced at request time too.
+- `lib/__tests__/copilot-stream.integration.test.ts` — **the copilot route,
+  wired end to end** (Sovereign Execution Standard, Phase 5: AUTH → REQUEST
+  → VALIDATION → BILLING/CREDIT → PROVIDER → PERSISTENCE → EVENT →
+  RESPONSE, as one exercised path). Six other suites each proved one piece
+  of `/api/copilot/stream` correct alone — guardrails, metering, budget,
+  the SSE stream, the trace, the real-Postgres credit ledger — and none of
+  them had ever been proven to agree about what the route does when wired
+  together. Only the genuinely external systems are faked (Supabase, the
+  LLM provider); rate limiting, guardrails, budget, metering and SSE
+  assembly all run as real production code. Proven not vacuous by sabotage:
+  commenting out the route's `spendCredits` call was confirmed to fail the
+  test before the fix was confirmed to pass it.
 - `engine/ontology/n8n_bindings.json` + `engine/scripts/n8n_bindings_check.py` —
   **what an n8n node actually is, as data a person confirms.** Branch XI's
   `missing` field named the gap in words: without endpoint, method and credential
