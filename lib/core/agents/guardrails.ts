@@ -15,6 +15,24 @@
  * Every check returns findings rather than throwing. A caller decides whether a
  * finding blocks: publishing is stricter than drafting, and a single policy
  * would be wrong for both.
+ *
+ * ## `guardInbound` is for fetched content, not for a user's own words
+ *
+ * `INJECTION_PATTERNS` exist because a SCRAPED PAGE has no legitimate reason to
+ * instruct the model — this function's own docstring, its own test suite
+ * (`describe('guardInbound — fetched content', ...)`), and every existing test
+ * case all agree on that scope. The copilot route applied it to the user's own
+ * chat message instead, where the same patterns are exactly the ordinary way
+ * people prompt an assistant: "act as a career coach", "from now on reply in
+ * French", "show your instructions for X". Checked against seven realistic
+ * copilot questions, six were hard-blocked with a 400. There is no trust
+ * boundary being crossed when a user instructs their own copilot — they are the
+ * principal, not an attacker exploiting a confused deputy — so `guardInbound`'s
+ * injection rules must never run on that text. `redactSecrets()` below is the
+ * one piece of `guardInbound` that DOES still apply to a user's own message: a
+ * customer can paste a real credential into a question without meaning to send
+ * it to a third-party LLM provider, and that is worth catching regardless of
+ * who wrote the text.
  */
 
 export type Severity = 'block' | 'warn'
@@ -62,8 +80,30 @@ const INJECTION_PATTERNS: Array<{ rule: string; re: RegExp }> = [
 ]
 
 /**
+ * Strip anything shaped like a credential from `text`. Never blocks: whoever
+ * wrote this text is not being accused of anything, but a real key sitting in
+ * it has no business leaving this process for a third-party provider. Usable
+ * on a user's own words, unlike the injection half of `guardInbound` below.
+ */
+export function redactSecrets(text: string): { redacted: string; findings: Finding[] } {
+  const findings: Finding[] = []
+  let redacted = text
+  for (const { rule, re } of SECRET_PATTERNS) {
+    re.lastIndex = 0
+    if (re.test(text)) {
+      findings.push({ rule, severity: 'warn', message: 'Text looks like it contains a credential.' })
+      redacted = redacted.replace(re, '[redacted]')
+    }
+  }
+  return { redacted, findings }
+}
+
+/**
  * Check text that is ABOUT to be placed inside a prompt.
  * A scraped page has no legitimate reason to instruct the model.
+ *
+ * For a user's own chat message, call `redactSecrets` instead — see the
+ * module docstring on why the injection rules below must not run on it.
  */
 export function guardInbound(text: string): GuardResult {
   const findings: Finding[] = []
@@ -83,13 +123,9 @@ export function guardInbound(text: string): GuardResult {
     }
   }
 
-  for (const { rule, re } of SECRET_PATTERNS) {
-    re.lastIndex = 0
-    if (re.test(text)) {
-      findings.push({ rule, severity: 'warn', message: 'Fetched content looks like it contains a credential.' })
-      redacted = redacted.replace(re, '[redacted]')
-    }
-  }
+  const secrets = redactSecrets(redacted)
+  findings.push(...secrets.findings)
+  redacted = secrets.redacted
 
   return { ok: !findings.some((f) => f.severity === 'block'), findings, redacted }
 }
