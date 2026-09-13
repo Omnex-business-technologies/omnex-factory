@@ -8,8 +8,11 @@ savings figure downstream is then confidently, invisibly wrong.
 
 So the file carries `verified_on`, and `ModelCatalog.load()` reports staleness
 rather than silently trusting a number nobody has looked at in a year.
-`assert_fresh()` exists for the deploy path, where shipping year-old prices into
-a billing system is worth failing a build over.
+`assert_fresh()` is for the deploy path, where shipping year-old prices into a
+billing system is worth failing a build over — `scripts/catalog_check.py` is
+that caller, wired into CI, because for a long time nothing was: this method
+was only ever exercised by its own unit test against a synthetic date, never
+against the real committed catalogue as part of any gate.
 
 **The tests for the router do not use this catalogue.** They build synthetic
 models with prices chosen to make an arithmetic property obvious — a 30×
