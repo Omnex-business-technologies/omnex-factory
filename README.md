@@ -35,7 +35,7 @@ a hybrid vector store, injection/PII guardrails, multi-agent consensus with a
 hash-chained audit trail, human-in-the-loop approval, OpenTelemetry
 observability, and a compiler that turns one agent spec into a runnable graph,
 an MCP server, or an n8n workflow. It has [its own README](engine/README.md),
-1,327 tests, zero required dependencies, and is why GitHub lists this repo's
+1,330 tests, zero required dependencies, and is why GitHub lists this repo's
 primary language as Python — not because the commercial app is secondary, but
 because the engine is larger.
 
