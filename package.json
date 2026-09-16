@@ -19,10 +19,10 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.43.0",
     "next": "^16.3.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "stripe": "^17.7.0",
-    "tailwind-merge": "^3.6.0",
+    "tailwind-merge": "^3.7.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/mocker": "^5.0.0",
-    "autoprefixer": "^10.5.5",
+    "autoprefixer": "^10.6.0",
     "pg": "^8.23.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^7.0.2",
