@@ -205,6 +205,13 @@ jobs:
         # mode, on the host that is about to serve.
         run: uv run python scripts/env_check.py
 
+      - name: Model price catalogue is fresh
+        # ModelCatalog.assert_fresh() and models.json's own committed comment
+        # both claimed a deploy fails on a catalogue older than 90 days --
+        # nothing anywhere ever called it. This is that missing caller,
+        # against the real committed catalogue, not a synthetic one.
+        run: uv run python scripts/catalog_check.py
+
       - name: Tests
         run: uv run pytest tests/ -q
 

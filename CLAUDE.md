@@ -16,6 +16,7 @@ npm audit --audit-level=moderate && npx tsc --noEmit && npx vitest run && npx ne
   && .venv/bin/mypy \
   && .venv/bin/python scripts/invariant_map.py \
   && .venv/bin/python scripts/env_check.py \
+  && .venv/bin/python scripts/catalog_check.py \
   && .venv/bin/python scripts/extras_check.py \
   && .venv/bin/python scripts/release_check.py --target citegate \
   && .venv/bin/python scripts/release_check.py --target engine \
@@ -58,7 +59,7 @@ with CI and cannot see a rule that is weak on *both* sides. `ruff format --check
 omitted `scripts` here and in CI, they agreed, and only reading them together
 with fresh eyes found it.
 
-Current state: **1,327 engine tests · 116 TypeScript · 16 citegate**, all green,
+Current state: **1,330 engine tests · 116 TypeScript · 16 citegate**, all green,
 plus **29 of 29 mutations killed**, and the spine's **14 of 14 transitions
 EXECUTABLE**.
 All 100 TypeScript tests now run in CI; until recently, seven of them did.

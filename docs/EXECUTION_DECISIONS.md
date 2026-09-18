@@ -3691,3 +3691,104 @@ an existing file, one docstring correction. `git revert` restores the
 pre-fix behavior exactly — the same unbounded-anonymous-write gap this
 closes, not a break, since nothing downstream depends on the `leads`
 limiter existing.
+
+## D-045: a documented safeguard that was only ever invoked by its own unit test
+
+**context.** Seven straight rounds had found the same defect shape on the
+Next.js money path — a check that reads as protection but is misapplied,
+silently discarded, or missing (D-038 through D-044). This round widened
+the pass to the engine's Python side, which had not had a code-level fix
+in several rounds, on the theory that the same shape of gap — a mechanism
+that LOOKS wired but isn't — is not specific to one language or one half
+of this repository. Read `engine/src/omnex/guard/ratelimit.py` and
+`engine/src/omnex/mcp/server.py` in full first: both are deliberately
+designed (a GCRA limiter that takes an arbitrary caller-supplied key, and
+one limiter instance genuinely meant to be shared per *tool*, protecting
+backend capacity rather than per-caller fairness) — no defect found there,
+confirmed against their own stated intent rather than assumed correct.
+
+**what was found.** `engine/src/omnex/llm/catalog.py`'s `ModelCatalog.
+assert_fresh()` and `models.json`'s own committed comment both state, in
+prose, that a deploy fails on a price catalogue older than 90 days —
+"stale prices flow straight into routing decisions and customer bills
+where nothing about the program's behaviour reveals they are wrong."
+Grepping every script in `engine/scripts/`, every CI workflow, and every
+other module in the package for `assert_fresh`, `is_stale`, and
+`ModelCatalog` found exactly one caller: `tests/test_router.py`, which
+exercises it against a synthetic future date to prove the method itself
+raises correctly. Nothing calls it against the real, committed catalogue,
+and nothing wires it into any gate — not `release_check.py`, not
+`env_check.py`, not any workflow. A safeguard invoked only by its own unit
+test is not a safeguard in production; it is a claim about one, sitting
+in a prose comment inside a JSON file's own `_comment` array and in the
+module's docstring, both confidently describing a mechanism that had no
+path to ever actually run. The catalogue is not currently stale (verified
+2026-08-05, 38 days old against a 90-day threshold at the time of this
+finding) — the defect is not "the price data is wrong today," it is "the
+thing that was supposed to catch it going wrong has no way to fire."
+
+**what was built.** `engine/scripts/catalog_check.py` — a small script
+that loads the real committed `ModelCatalog` and calls `assert_fresh()`,
+printing the same context-carrying message `ConfigurationError.__str__`
+already produces on failure and exiting non-zero. Wired into both halves
+of the contract this repository's own `test_ci_contract.py` enforces:
+added to CLAUDE.md's fenced gate block (between `env_check.py` and
+`extras_check.py`, alongside the other deploy-path checks) and to
+`.github/workflows/engine.yml` as its own step, immediately after
+"Environment manifest" — the same pairing `test_ci_runs_every_gate_
+script_the_document_names` and its reverse test both check automatically,
+which is exactly the mechanism that would have caught this gap one level
+up if a script had ever been half-added the way this whole capability was.
+Both `catalog.py`'s module docstring and `models.json`'s own `_comment`
+were corrected to name the real caller instead of describing a deploy path
+that did not exist anywhere code could execute it.
+
+**what was verified.** `engine/tests/test_catalog_check.py` (new): the
+real committed catalogue passes both directly (`assert_fresh()` does not
+raise) and through `main()` (exit code 0); a synthetic catalogue with
+`verified_on: "2020-01-01"` — genuinely stale by the module's own
+90-day rule — makes `main()` return 1, not just `assert_fresh()` raise
+in isolation, proving this script is a real, exercised caller and not a
+second copy of the same unit test one level removed. **Sabotage-verified**:
+temporarily removed the `assert_fresh()` call from `catalog_check.main()`,
+reran the new test, confirmed it failed with the exact expected wrong
+result (`main()` returned 0 and printed "-- fresh." for a catalogue 2,446
+days old), then restored the call and reconfirmed all three tests pass.
+`test_ci_contract.py`'s full suite (11 tests, including both directions of
+the CLAUDE.md/CI gate-script contract) passes with the new script named in
+both places. Root gate green: `npm audit` (0 vulnerabilities), `tsc
+--noEmit` (clean), `vitest run` (116 tests, unchanged — no TypeScript
+touched this round), `next build` (13 routes, clean). Full Python engine
+gate green with only the two known, previously-documented, non-blocking
+failures (citegate's `[project.urls]` drift; the intermittent rate-limiter
+flake was not encountered this round); `mutate.py` still 29/29,
+`spine_check.py` still 14/14 EXECUTABLE, `readme_check.py` and `state_map.
+py --check` both re-run and current (engine test count moved 1,327 →
+1,330 with the three new tests, re-measured and re-quoted in both
+`README.md` and `CLAUDE.md` rather than hand-typed).
+
+**what else was considered.** Lowering `STALE_AFTER_DAYS` or otherwise
+changing the threshold — out of scope and unrelated: the number was never
+in question, only whether anything ever checked it. Making `catalog_check.
+py` part of `release_check.py` instead of its own script — rejected:
+`release_check.py`'s own docstring already scopes it to "what refuses a
+package before a stranger installs it" (packaging metadata, declared
+dependencies, CI coverage), a different question from "is this specific
+piece of committed pricing data older than its own stated shelf life";
+folding an unrelated freshness check into it would blur what a red
+`release_check.py` run actually means, the same reasoning that keeps
+`readme_check.py` and `n8n_bindings_check.py` as their own scripts rather
+than folded into a larger one. Backdating `models.json`'s `verified_on` to
+today without re-checking prices to make the addition land quietly —
+rejected outright: the file's own comment already says "do not bump the
+date without re-checking the numbers — the date is the whole safeguard,"
+and this round did not re-verify any provider's pricing page, so the
+honest, unchanged `2026-08-05` stays exactly as it was.
+
+**reversible how.** One new script, one new test file, two docstring/
+comment corrections naming the new caller, two gate-block additions
+(CLAUDE.md and `engine.yml`) that are themselves cross-checked by an
+existing test. `git revert` removes the caller and returns
+`assert_fresh()` to being exercised only by its own unit test — the exact
+gap this closes, not a break, since nothing downstream depends on
+`catalog_check.py` existing.
