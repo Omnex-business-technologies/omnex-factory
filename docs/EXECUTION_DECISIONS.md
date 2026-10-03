@@ -3792,3 +3792,71 @@ existing test. `git revert` removes the caller and returns
 `assert_fresh()` to being exercised only by its own unit test — the exact
 gap this closes, not a break, since nothing downstream depends on
 `catalog_check.py` existing.
+
+## D-046: three unrelated Dependabot PRs were all red for the same reason none of them caused
+
+**context.** The user reported PRs #67 (a citegate `ruff` requirement bump),
+#68 (a GitHub Actions version bump), and #69 (an npm minor/patch group bump)
+all showing CI failures, and separately that #65 and #66 — two earlier,
+now-superseded Dependabot PRs for the same `ruff` requirement — had also
+shown red before being closed. Three PRs with nothing in common except
+being opened the same day pointed at one thing: not three separate defects,
+one shared cause sitting upstream of all of them.
+
+**what was found.** Reading the actual job logs (not just the red X) for
+all three: #67's and #69's failing step was `npm audit --audit-level=
+moderate`, and #68's `CI` job failed on the identical step — none of these
+three PRs' own diffs touch `npm`, `package.json`, or anything `npm audit`
+reads, since #67 is Python-only (citegate's `ruff` pin) and #68 is a
+GitHub Actions workflow version bump. The fourth failing job, on #68's
+`Engine` workflow, was the already-documented, already-accepted
+intermittent flake (`test_a_rate_limited_tool_refuses_the_call_it_cannot_
+afford`) this repository's own CLAUDE.md lab notes already name as
+non-blocking — unrelated to this finding, confirmed by name, not assumed.
+Pulling `master` directly and running `npm audit --audit-level=moderate`
+reproduced the real, root cause: **3 vulnerabilities (2 high, 1 critical)**
+already sitting in the committed `package-lock.json` — `@grpc/grpc-js`
+(high, auth-context bypass), `brace-expansion` (high, ReDoS/stack
+exhaustion), and, worst, **`next` 16.2.0–16.3.5 itself (critical — remote
+code execution in `next/og`'s `ImageResponse`, GHSA-vcvr-r3jv-pc5j)** — the
+exact framework this entire commercial app runs on. None of this was
+caused by any Dependabot PR; `master` had drifted into this state on its
+own, and the audit gate simply makes every PR red until it is fixed,
+regardless of what that PR touches.
+
+**what was built.** `npm audit fix` on `master`, run with no flags (no
+`--force` needed — all three advisories resolved within already-declared
+semver ranges: `next` moved from `16.3.5`'s installed 16.2.0–16.3.5-range
+resolution to `16.3.8`, patched past the RCE range, under the unchanged
+`^16.3.5` constraint already in `package.json`). Only `package-lock.json`
+changed; `package.json` needed no edit.
+
+**what was verified.** `npm audit --audit-level=moderate` → `found 0
+vulnerabilities`. Full root gate re-run clean: `npx tsc --noEmit` (clean),
+`npx vitest run` (116 tests, 12 files, unchanged — confirming the dependency
+bumps changed nothing observable about the app's own code), `npx next
+build` (13 routes, clean). Python engine side re-verified unaffected
+(`ruff check`/`format --check`, `mypy`, `pytest tests/` — only the two
+known pre-existing non-blocking failures: citegate's `[project.urls]`
+drift, and the rate-limiter flake, neither touched by this change).
+`catalog_check.py`, `state_map.py --check`, and `readme_check.py --check`
+all re-confirmed current against the moved `master`.
+
+**what else was considered.** Fixing this inside one of the Dependabot
+PRs directly — rejected: the vulnerability predates and is independent of
+every one of them, so fixing it on a dependency-bump branch would
+misattribute a pre-existing gap to whichever PR happened to be open when
+somebody looked, and would leave `master` itself still vulnerable between
+merges. `npm audit fix --force` — not needed and not used: the advisories
+all resolved inside existing semver ranges, and `--force` is reserved for
+when a fix requires crossing a declared major version, which this did not.
+Waiting for Dependabot's own security-update PRs to land eventually —
+rejected: `next`'s RCE is in the framework itself, already affects
+`master` right now, and blocking on Dependabot's own cadence leaves a
+critical vulnerability live for longer than fixing it directly costs.
+
+**reversible how.** One `package-lock.json` regeneration via a standard,
+flagless `npm audit fix`; no source code changed. `git revert` restores
+the three vulnerable pins exactly — the gap this closes, not a break,
+since every test and build already confirmed nothing downstream depends
+on the specific patch versions moved.
