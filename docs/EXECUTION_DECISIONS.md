@@ -3860,3 +3860,95 @@ flagless `npm audit fix`; no source code changed. `git revert` restores
 the three vulnerable pins exactly — the gap this closes, not a break,
 since every test and build already confirmed nothing downstream depends
 on the specific patch versions moved.
+
+## D-047: a "production-grade" fetch wrapper had no caller for its entire life
+
+**context.** Continuing the standard rhythm after PR #71 merged (bringing
+`master` to `d271a39`), this round's truth pass started on the money
+path's auth boundary: grepped every server-side route in `app/` and
+`lib/` for `getSession` vs `getUser` (the well-known Supabase SSR footgun
+— `getSession()` reads a local cookie without revalidating the JWT,
+`getUser()` re-checks it against the Auth server). Every server route
+already correctly uses `getUser()`. The one `getSession()` call found,
+in `lib/core/safe-fetch.ts`, was investigated and ruled a false positive:
+the file it calls into (`lib/core/supabase/client.ts`) is genuinely
+client-side (`'use client'` + `createBrowserClient`), where `getSession()`
+is the correct pattern, not the anti-pattern this repository has fixed
+before.
+
+**what was found.** That same read turned up a different defect sitting
+right next to the false alarm. `lib/core/safe-fetch.ts` — `safeFetch`,
+`safeGet`, `safePost`, `safePatch` — is a fully built 134-line module: a
+discriminated-union result type, 401→session-refresh→retry-once, 429
+exponential backoff respecting `Retry-After`, network-error retry with
+jitter, and a configurable request timeout via `AbortController`. Its own
+docstring calls it "OMNEX safeFetch — production-grade typed fetch
+wrapper (DUG #8)." Grepping `app/`, `components/`, and all of `lib/`
+outside the file's own definitions for every export it offers
+(`safeFetch`, `safeGet`, `safePost`, `safePatch`) and for the literal
+string `safe-fetch` anywhere in the repository returned nothing. `git log`
+on the file shows one commit: `1288b85`, the original day-1 "OMNEX
+Factory skeleton" commit, 208+ commits and 45 days ago. It has never had a
+caller and never had a test file. This is the same shape of claim this
+repository's own `extras_check.py` and `every_extra_declares_what_it_
+delivers` invariant exist to catch one level up (a declared interface with
+no evidence anyone built on it) — except here nothing *declares* it as an
+extra or an intentionally-unsupported placeholder either; it reads, in its
+own words, as load-bearing production infrastructure, and isn't.
+
+**what was built.** Deleted `lib/core/safe-fetch.ts` outright. Not
+wired into a caller, and not left in place with a corrected docstring the
+way `D-045` corrected `catalog.py`'s: that fix applied because a real,
+reachable caller existed and the gap was that nothing used it yet from a
+*gate* — here there is no production call site to wire this into at all;
+every route in `app/api/` either uses `fetch` directly against its own
+provider or doesn't call out over HTTP in the shape this module assumes.
+Writing a test to hold a function to its own claims when nothing in the
+product exercises it would be decorative — the same reasoning `extras_
+check.py`'s docstring already gives for why an honestly-unsupported extra
+passes and a fabricated adapter does not.
+
+**what was verified.** Confirmed zero references with two independent
+greps before deleting: every export name across `app/`, `components/`,
+`lib/` (excluding the file's own definitions), and the literal string
+`safe-fetch` anywhere in the repository — both empty. After deletion:
+`npx tsc --noEmit` clean, `npx vitest run` 116/116 passing across 12 files
+(unchanged — the module was never imported by anything the suite
+exercises either), `npm audit --audit-level=moderate` 0 vulnerabilities,
+`npx next build` 13 routes, clean. **Sabotage framing inverted for a
+deletion**: the adversarial check here is not "revert the fix and watch a
+test fail," it is "confirm the before-state already compiled, tested, and
+built clean with the module present and unused, then confirm the after-
+state is identical" — which is exactly what the diff of the two gate runs
+shows, proving the module contributed nothing to any passing check either
+before or after. Full Python engine gate re-run and green with only the
+two known, previously-documented, non-blocking failures (citegate's
+`[project.urls]` drift; the rate-limiter flake was not encountered this
+round): `ruff check`/`format --check`, `mypy` (116 source files), `mutate.
+py` 29/29 killed, `spine_check.py` 14/14 EXECUTABLE, `claims.py --check`
+(8 SUPPORTED · 2 CONTRADICTED · 4 UNKNOWN · 2 REJECTED, unchanged),
+`runs.py --check` (93 runs, chain intact), `actions_pin_check.py` 20/20,
+`n8n_bindings_check.py` and `readme_check.py --check` both current,
+`capability_map.py`/`business_map.py`/`state_map.py --check` all agree,
+`eval_gate.py` reports no regressions against baseline.
+
+**what else was considered.** Keeping the module and adding a test file
+plus live call sites to retroactively justify it — rejected: nothing in
+the product currently needs a generic client-authenticated fetch wrapper
+with this exact retry policy, and building callers to make an unused
+module look used is the inverted version of the defect this repository's
+own lab notes already warn about (decorative architecture built to
+satisfy a checker rather than a real need). Marking it `@deprecated` and
+leaving it in place — rejected: a deprecation notice on code with zero
+callers and zero history of ever having one is not deprecating a used
+thing, it is decorating dead code instead of removing it. Folding it into
+`extras_check.py`'s declared-interface tracking — rejected: that script
+is scoped to `[tool.omnex.extras]`, a Python packaging concept with no
+TypeScript equivalent in this repository; inventing one for a single file
+would be more machinery than the finding warrants.
+
+**reversible how.** One file deleted, no other file touched. `git revert`
+restores `lib/core/safe-fetch.ts` verbatim — the exact unused, untested
+state this closes, not a break, since the deletion changed nothing any
+passing test, build, or route depends on.
+
