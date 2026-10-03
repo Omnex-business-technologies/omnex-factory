@@ -1,8 +1,8 @@
 {
   "version": 1,
   "$comment": "Derived by engine/scripts/state_map.py. Do not edit — state_check compares this against the repository in both directions. There is no generation timestamp on purpose: it would change on every run and the validator would have to learn to ignore a field. Keyed on source_commit instead.",
-  "source_commit": "6b7922a744f3cc8f48c2c265746997cbae412456",
-  "branch": "master",
+  "source_commit": "83a35e6dbcea16a51fa57948a45ef7df561c6a87",
+  "branch": "claude/production-ai-projects-bzz82l",
   "tree_clean": false,
   "corpus": {
     "figures": 509,
@@ -69,11 +69,11 @@
   },
   "run_ledger": {
     "present": true,
-    "runs": 92,
+    "runs": 93,
     "chain_intact": true,
     "by_level": {
       "L3": 2,
-      "L3_REPOSITORY": 89,
+      "L3_REPOSITORY": 90,
       "L4_EXTERNAL": 1
     },
     "above_l3": 3,
@@ -192,11 +192,11 @@
     },
     "9_autonomy": {
       "status": "UNKNOWN",
-      "why": "the run ledger holds 92 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
+      "why": "the run ledger holds 93 hash-chained run(s) (chain intact: True) at levels ['L3', 'L3_REPOSITORY', 'L4_EXTERNAL'], so actions taken here are bounded and auditable — what this gate asks for and still has no evidence of is an autonomous run against a deployment: 3 run(s) are recorded above L3 and 1 of those recorded a successful outcome",
       "evidence": [
-        "runs recorded: 92",
+        "runs recorded: 93",
         "chain intact: True",
-        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 89, 'L4_EXTERNAL': 1}"
+        "runs by autonomy level: {'L3': 2, 'L3_REPOSITORY': 90, 'L4_EXTERNAL': 1}"
       ]
     },
     "10_distribution": {
