@@ -42,7 +42,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
+import tempfile
 import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -172,47 +174,72 @@ def build(
     out.mkdir(parents=True, exist_ok=True)
     archive = out / f"omnex-{pack}.zip"
 
-    rendered: list[dict[str, object]] = []
-    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        for entry in sorted(images, key=lambda e: str(e["file"])):
-            name = str(entry["file"])
-            source = _source(pack, name, root)
-            stem = Path(name).stem
-            for label, ratio in sorted(formats.items()):
-                payload = renderer(source, ratio)
-                target = f"{label}/{stem}.png"
-                info = zipfile.ZipInfo(target, date_time=_FIXED_TIME)
-                info.compress_type = zipfile.ZIP_DEFLATED
-                bundle.writestr(info, payload)
-                rendered.append({"file": target, "bytes": len(payload)})
+    ordered_images = sorted(images, key=lambda e: str(e["file"]))
+    targets: set[str] = set()
+    for entry in ordered_images:
+        stem = Path(str(entry["file"])).stem
+        for label in formats:
+            target = f"{label}/{stem}.png"
+            if target in targets:
+                raise ValueError(
+                    f"{pack}: multiple source images map to {target!r}; "
+                    "source basenames must be unique within a pack"
+                )
+            targets.add(target)
 
-        for extra, body in (
-            ("LICENCE.txt", licence.read_bytes()),
-            ("README.txt", _readme(pack, manifest, len(images), sorted(formats)).encode()),
-            (
-                "manifest.json",
-                json.dumps(
-                    {
-                        "pack": pack,
-                        "name": manifest.get("name"),
-                        "source_images": len(images),
-                        "formats": sorted(formats),
-                        "files": rendered,
-                    },
-                    indent=2,
-                ).encode(),
-            ),
-        ):
-            info = zipfile.ZipInfo(extra, date_time=_FIXED_TIME)
-            info.compress_type = zipfile.ZIP_DEFLATED
-            bundle.writestr(info, body)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{archive.name}.", suffix=".tmp", dir=out
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+
+    rendered: list[dict[str, object]] = []
+    try:
+        with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+            for entry in ordered_images:
+                name = str(entry["file"])
+                source = _source(pack, name, root)
+                stem = Path(name).stem
+                for label, ratio in sorted(formats.items()):
+                    payload = renderer(source, ratio)
+                    target = f"{label}/{stem}.png"
+                    info = zipfile.ZipInfo(target, date_time=_FIXED_TIME)
+                    info.compress_type = zipfile.ZIP_DEFLATED
+                    bundle.writestr(info, payload)
+                    rendered.append({"file": target, "bytes": len(payload)})
+
+            for extra, body in (
+                ("LICENCE.txt", licence.read_bytes()),
+                ("README.txt", _readme(pack, manifest, len(images), sorted(formats)).encode()),
+                (
+                    "manifest.json",
+                    json.dumps(
+                        {
+                            "pack": pack,
+                            "name": manifest.get("name"),
+                            "source_images": len(images),
+                            "formats": sorted(formats),
+                            "files": rendered,
+                        },
+                        indent=2,
+                    ).encode(),
+                ),
+            ):
+                info = zipfile.ZipInfo(extra, date_time=_FIXED_TIME)
+                info.compress_type = zipfile.ZIP_DEFLATED
+                bundle.writestr(info, body)
+
+        digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+        os.replace(temporary, archive)
+    finally:
+        temporary.unlink(missing_ok=True)
 
     return Built(
         pack=pack,
         archive=archive,
         images=len(images),
         entries=len(rendered) + 3,
-        sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),
+        sha256=digest,
     )
 
 

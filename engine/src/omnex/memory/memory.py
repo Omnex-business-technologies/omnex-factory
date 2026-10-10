@@ -319,12 +319,18 @@ class LongTermMemory:
     versions: dict[str, int] = field(default_factory=dict)
 
     def remember(self, text: str, key: str = "", pinned: bool = False, **metadata: object) -> str:
-        from ..vectors.types import Chunk
-
-        chunk_id = self.ids.new("mem")
         version = self.versions.get(key, 0) + 1 if key else 1
         if key:
             self.versions[key] = version
+        return self._store_memory(text, key, pinned, version, metadata)
+
+    def _store_memory(
+        self, text: str, key: str, pinned: bool, version: int, metadata: dict[str, object]
+    ) -> str:
+        """Persist one entry at its assigned version without incrementing it."""
+        from ..vectors.types import Chunk
+
+        chunk_id = self.ids.new("mem")
         self.store.upsert(  # type: ignore[attr-defined]
             [
                 Chunk(
@@ -368,5 +374,5 @@ class LongTermMemory:
                 conflicts.append(entry.key)
                 continue
             self.versions[entry.key] = entry.version
-            self.remember(entry.text, key=entry.key, pinned=entry.pinned)
+            self._store_memory(entry.text, entry.key, entry.pinned, entry.version, {})
         return conflicts

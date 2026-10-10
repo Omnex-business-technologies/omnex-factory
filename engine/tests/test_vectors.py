@@ -423,6 +423,183 @@ def test_page_anchors_survive_persistence(tmp_path):
         assert hit.chunk.cite == "[p. 41]"
 
 
+def test_page_end_survives_persistence(tmp_path):
+    path = tmp_path / "cross-page.db"
+    embedder = HashingEmbedder()
+    with SqliteStore(path, embedder) as store:
+        store.upsert(
+            [Chunk(id="a", text="claim across page break", page=41, page_end=42, doc_id="rb")]
+        )
+    with SqliteStore(path, embedder) as reopened:
+        chunk = reopened.all_chunks()[0]
+        assert chunk.pages == (41, 42)
+        assert chunk.cite == "[pp. 41–42]"
+        assert chunk.page_end == 42
+
+
+def test_legacy_sqlite_index_migrates_page_end_without_reembedding(tmp_path):
+    """Schema v1 indexes keep their rows and vectors while gaining single-page anchors."""
+    import sqlite3
+    import struct
+
+    path = tmp_path / "legacy.db"
+    embedder = HashingEmbedder()
+    vector = embedder.embed(["legacy chunk"])[0]
+    vector_blob = struct.pack(f"<{len(vector)}f", *vector)
+    db = sqlite3.connect(path)
+    db.executescript(
+        """
+        CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        INSERT INTO meta VALUES ('model_id', 'hashing-256-v1:256');
+        INSERT INTO meta VALUES ('schema_version', '1');
+        CREATE TABLE chunks (
+            id TEXT PRIMARY KEY, doc_id TEXT NOT NULL DEFAULT '', text TEXT NOT NULL,
+            page INTEGER NOT NULL DEFAULT 0, span_start INTEGER NOT NULL DEFAULT 0,
+            span_end INTEGER NOT NULL DEFAULT 0, metadata TEXT NOT NULL DEFAULT '{}',
+            tenant TEXT NOT NULL DEFAULT '', vector BLOB NOT NULL
+        );
+        """
+    )
+    db.execute(
+        "INSERT INTO chunks (id, doc_id, text, page, span_start, span_end, vector) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ("legacy", "doc", "legacy chunk", 8, 12, 24, vector_blob),
+    )
+    db.commit()
+    db.close()
+
+    with SqliteStore(path, embedder) as migrated:
+        chunk = migrated.all_chunks()[0]
+        assert chunk.pages == (8,)
+        assert chunk.char_span == (12, 24)
+        assert struct.pack(f"<{len(vector)}f", *migrated.vector_of("legacy")) == vector_blob
+        assert migrated.stats()["chunks"] == 1
+
+
+def test_an_unsupported_future_schema_closes_the_open_connection(tmp_path, monkeypatch):
+    """A failed constructor cannot leave a database file handle behind."""
+    import sqlite3
+
+    from omnex.vectors import sqlite_store
+
+    path = tmp_path / "future-schema.db"
+    with SqliteStore(path, HashingEmbedder()):
+        pass
+    with sqlite3.connect(path) as db:
+        db.execute("UPDATE meta SET value = '3' WHERE key = 'schema_version'")
+
+    real_connect = sqlite_store.sqlite3.connect
+    opened = []
+
+    class TrackedConnection:
+        def __init__(self, *args, **kwargs):
+            object.__setattr__(self, "inner", real_connect(*args, **kwargs))
+            object.__setattr__(self, "closed", False)
+            opened.append(self)
+
+        def __getattr__(self, name):
+            return getattr(self.inner, name)
+
+        def __setattr__(self, name, value):
+            if name in {"inner", "closed"}:
+                object.__setattr__(self, name, value)
+            else:
+                setattr(self.inner, name, value)
+
+        def close(self):
+            self.inner.close()
+            self.closed = True
+
+    monkeypatch.setattr(sqlite_store.sqlite3, "connect", TrackedConnection)
+    with pytest.raises(ConfigurationError, match="newer schema"):
+        SqliteStore(path, HashingEmbedder())
+    assert len(opened) == 1 and opened[0].closed
+
+
+def test_concurrent_legacy_openers_serialize_the_schema_migration(tmp_path, monkeypatch):
+    """Both openers pass the barrier before BEGIN; only the lock winner migrates."""
+    import sqlite3
+    from threading import Barrier, Lock, Thread
+
+    from omnex.vectors import sqlite_store
+
+    path = tmp_path / "concurrent-legacy.db"
+    with sqlite3.connect(path) as db:
+        db.execute("PRAGMA journal_mode=WAL")
+        db.executescript(
+            """
+            CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+            INSERT INTO meta VALUES ('model_id', 'hashing-256-v1:256');
+            INSERT INTO meta VALUES ('schema_version', '1');
+            CREATE TABLE chunks (
+                id TEXT PRIMARY KEY, doc_id TEXT NOT NULL DEFAULT '', text TEXT NOT NULL,
+                page INTEGER NOT NULL DEFAULT 0, span_start INTEGER NOT NULL DEFAULT 0,
+                span_end INTEGER NOT NULL DEFAULT 0, metadata TEXT NOT NULL DEFAULT '{}',
+                tenant TEXT NOT NULL DEFAULT '', vector BLOB NOT NULL
+            );
+            CREATE INDEX chunks_tenant_doc ON chunks (tenant, doc_id);
+            """
+        )
+
+    real_connect = sqlite_store.sqlite3.connect
+    start_migration = Barrier(2, timeout=5)
+    begin_lock = Lock()
+    begin_attempts = 0
+
+    class SynchronizedConnection:
+        def __init__(self, *args, **kwargs):
+            self.inner = real_connect(*args, **kwargs)
+
+        def __getattr__(self, name):
+            return getattr(self.inner, name)
+
+        def __setattr__(self, name, value):
+            if name == "inner":
+                object.__setattr__(self, name, value)
+            else:
+                setattr(self.inner, name, value)
+
+        def execute(self, sql, *args, **kwargs):
+            nonlocal begin_attempts
+            if sql.strip().upper() == "BEGIN IMMEDIATE":
+                with begin_lock:
+                    begin_attempts += 1
+                # Synchronize both callers before either can take SQLite's write lock.
+                start_migration.wait()
+            return self.inner.execute(sql, *args, **kwargs)
+
+    monkeypatch.setattr(sqlite_store.sqlite3, "connect", SynchronizedConnection)
+    outcomes = []
+    result_lock = Lock()
+
+    def open_and_close():
+        try:
+            store = SqliteStore(path, HashingEmbedder())
+            store.close()
+            outcome = "opened"
+        except Exception as exc:
+            outcome = f"{type(exc).__name__}: {exc}"
+        with result_lock:
+            outcomes.append(outcome)
+
+    threads = [Thread(target=open_and_close) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=10)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert begin_attempts == 2, "both openers should reach the serialized migration boundary"
+    assert outcomes == ["opened", "opened"]
+    db = real_connect(path)
+    try:
+        assert db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0] == "2"
+        columns = {row[1] for row in db.execute("PRAGMA table_info(chunks)")}
+        assert "page_end" in columns
+    finally:
+        db.close()
+
+
 def test_stats_report_something_useful(tmp_path):
     with SqliteStore(tmp_path / "i.db", HashingEmbedder()) as store:
         store.upsert(_corpus())

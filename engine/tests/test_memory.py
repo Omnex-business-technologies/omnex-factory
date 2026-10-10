@@ -127,6 +127,17 @@ def test_a_sync_conflict_is_reported_not_silently_resolved():
     assert memory.merge([fresh]) == []  # newer version wins cleanly
 
 
+def test_merge_preserves_the_incoming_version_in_counter_and_storage():
+    store = HybridStore(embedder=HashingEmbedder())
+    memory = LongTermMemory(store=store, tenant="acme", ids=IdFactory(clock=FakeClock()))
+    incoming = MemoryEntry(id="remote", text="Deadline is 28 March.", key="deadline", version=7)
+
+    assert memory.merge([incoming]) == []
+    assert memory.versions["deadline"] == 7
+    assert store.all_chunks()[0].metadata["version"] == 7
+    assert memory.merge([incoming]) == ["deadline"]
+
+
 def test_memory_from_another_tenant_is_never_recalled():
     store = HybridStore(embedder=HashingEmbedder(), candidates=10)
     acme = LongTermMemory(store=store, tenant="acme", ids=IdFactory(clock=FakeClock()))

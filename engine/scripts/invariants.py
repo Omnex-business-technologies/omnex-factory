@@ -75,7 +75,8 @@ def _python_files(*roots: Path) -> Iterator[Path]:
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(REPO))
+    """Render repository paths in a host-independent form for registries."""
+    return path.relative_to(REPO).as_posix()
 
 
 # ── 1. money is exact ─────────────────────────────────────────────────────

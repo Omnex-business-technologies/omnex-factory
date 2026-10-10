@@ -321,3 +321,8 @@ def test_a_live_listing_that_is_short_is_refused(tmp_path: Path) -> None:
     assert len(found) == 1, "the offer that is not live was counted, or the live one was not"
     assert "Alpha Pack" in found[0].detail
     assert "39 short" in found[0].detail
+
+
+def test_repository_relative_paths_are_posix_on_every_host() -> None:
+    path = invariants.REPO / "engine" / "src" / "omnex" / "core" / "clock.py"
+    assert invariants._rel(path) == "engine/src/omnex/core/clock.py"

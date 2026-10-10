@@ -37,7 +37,7 @@ from .types import Chunk
 
 __all__ = ["SCHEMA_VERSION", "SqliteStore"]
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     doc_id     TEXT NOT NULL DEFAULT '',
     text       TEXT NOT NULL,
     page       INTEGER NOT NULL DEFAULT 0,
+    page_end   INTEGER NOT NULL DEFAULT 0,
     span_start INTEGER NOT NULL DEFAULT 0,
     span_end   INTEGER NOT NULL DEFAULT 0,
     metadata   TEXT NOT NULL DEFAULT '{}',
@@ -83,18 +84,38 @@ class SqliteStore(HybridStore):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(str(self.path))
-        self._db.row_factory = sqlite3.Row
-        # WAL so a reader during an ingest is not blocked. The default rollback
-        # journal serialises them, which turns a background reindex into an
-        # outage for the query path.
-        self._db.execute("PRAGMA journal_mode=WAL")
-        self._db.execute("PRAGMA synchronous=NORMAL")
-        self._db.executescript(_SCHEMA)
-        self._check_or_record_model()
-        self._load()
+        try:
+            self._db.row_factory = sqlite3.Row
+            # WAL so a reader during an ingest is not blocked. The default rollback
+            # journal serialises them, which turns a background reindex into an
+            # outage for the query path.
+            self._db.execute("PRAGMA journal_mode=WAL")
+            self._db.execute("PRAGMA synchronous=NORMAL")
+            self._db.executescript(_SCHEMA)
+            self._check_or_record_model()
+            self._load()
+        except BaseException:
+            # __init__ did not complete, so __exit__ cannot run; close here to
+            # release file locks on configuration, migration, or load failures.
+            self._db.close()
+            raise
 
     # ── model identity ────────────────────────────────────────────────────
     def _check_or_record_model(self) -> None:
+        """Serialize schema inspection and migration across concurrent openers."""
+        try:
+            # Acquire SQLite's writer reservation before reading the schema
+            # version. A second opener then re-reads the committed version and
+            # skips a migration the first opener already completed.
+            self._db.execute("BEGIN IMMEDIATE")
+            self._check_or_record_model_locked()
+            self._db.commit()
+        except BaseException:
+            if self._db.in_transaction:
+                self._db.rollback()
+            raise
+
+    def _check_or_record_model_locked(self) -> None:
         row = self._db.execute("SELECT value FROM meta WHERE key='model_id'").fetchone()
         current = f"{self.embedder.model_id}:{self.embedder.dimensions}"
         if row is None:
@@ -102,7 +123,6 @@ class SqliteStore(HybridStore):
                 "INSERT INTO meta (key, value) VALUES ('model_id', ?), ('schema_version', ?)",
                 (current, str(SCHEMA_VERSION)),
             )
-            self._db.commit()
             return
         if row["value"] != current:
             raise ConfigurationError(
@@ -112,6 +132,32 @@ class SqliteStore(HybridStore):
                 index_model=row["value"],
                 current_model=current,
                 path=str(self.path),
+            )
+
+        version_row = self._db.execute(
+            "SELECT value FROM meta WHERE key='schema_version'"
+        ).fetchone()
+        version = int(version_row["value"]) if version_row is not None else 1
+        if version > SCHEMA_VERSION:
+            raise ConfigurationError(
+                "this index was created by a newer schema; upgrade the engine before opening it",
+                index_schema=version,
+                current_schema=SCHEMA_VERSION,
+                path=str(self.path),
+            )
+        if version < 2:
+            columns = {row["name"] for row in self._db.execute("PRAGMA table_info(chunks)")}
+            if "page_end" not in columns:
+                self._db.execute(
+                    "ALTER TABLE chunks ADD COLUMN page_end INTEGER NOT NULL DEFAULT 0"
+                )
+                # Legacy rows only stored the starting page, so preserve that
+                # known anchor as a single-page span during the migration.
+                self._db.execute("UPDATE chunks SET page_end = page")
+            self._db.execute(
+                "INSERT INTO meta (key, value) VALUES ('schema_version', ?) "
+                "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (str(SCHEMA_VERSION),),
             )
 
     # ── persistence ───────────────────────────────────────────────────────
@@ -125,6 +171,7 @@ class SqliteStore(HybridStore):
                 text=row["text"],
                 doc_id=row["doc_id"],
                 page=row["page"],
+                page_end=row["page_end"],
                 char_span=(row["span_start"], row["span_end"]),
                 metadata=json.loads(row["metadata"]),
             )
@@ -144,6 +191,7 @@ class SqliteStore(HybridStore):
                     chunk.doc_id,
                     chunk.text,
                     chunk.page,
+                    chunk.page_end,
                     chunk.char_span[0],
                     chunk.char_span[1],
                     json.dumps(chunk.metadata, sort_keys=True),
@@ -152,10 +200,10 @@ class SqliteStore(HybridStore):
                 )
             )
         self._db.executemany(
-            "INSERT INTO chunks (id, doc_id, text, page, span_start, span_end, metadata, tenant, vector) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            "INSERT INTO chunks (id, doc_id, text, page, page_end, span_start, span_end, metadata, tenant, vector) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(id) DO UPDATE SET doc_id=excluded.doc_id, text=excluded.text, "
-            "page=excluded.page, span_start=excluded.span_start, span_end=excluded.span_end, "
+            "page=excluded.page, page_end=excluded.page_end, span_start=excluded.span_start, span_end=excluded.span_end, "
             "metadata=excluded.metadata, tenant=excluded.tenant, vector=excluded.vector",
             rows,
         )

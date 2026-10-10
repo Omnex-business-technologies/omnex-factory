@@ -30,10 +30,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import StrEnum
 from random import Random
+from threading import Lock, get_ident
 from typing import Any
 
 from ..core.clock import Clock, SystemClock
@@ -110,6 +112,55 @@ class IdempotencyStore:
 
     #: key -> (payload fingerprint, result)
     seen: dict[str, tuple[str, Any]] = field(default_factory=dict)
+    _lock_guard: Lock = field(default_factory=Lock, repr=False)
+    _key_locks: dict[str, tuple[Lock, int, int | None]] = field(default_factory=dict, repr=False)
+
+    @contextmanager
+    def serialise(self, key: str) -> Iterator[None]:
+        """Run one keyed operation at a time, sharing coordination across workers.
+
+        The reference count includes owners and waiters. Removing a lock only
+        after the last user releases it prevents a new lock for the same key
+        from being created while another caller is still waiting on the old
+        one. Empty keys remain intentionally uncoordinated. This only
+        coordinates callers sharing this store in this process; durable,
+        multi-process workers need an atomic claim in their shared store.
+        """
+        if not key:
+            yield
+            return
+
+        owner_id = get_ident()
+        with self._lock_guard:
+            entry = self._key_locks.get(key)
+            if entry is not None and entry[2] == owner_id:
+                raise PermanentError(
+                    "recursive execution with the same idempotency key would deadlock",
+                    key=key,
+                )
+            lock, users, owner = entry if entry is not None else (Lock(), 0, None)
+            self._key_locks[key] = (lock, users + 1, owner)
+
+        acquired = False
+        try:
+            lock.acquire()
+            acquired = True
+            with self._lock_guard:
+                current, users, _ = self._key_locks[key]
+                self._key_locks[key] = (current, users, owner_id)
+            yield
+        finally:
+            with self._lock_guard:
+                current, users, owner = self._key_locks[key]
+                if acquired:
+                    if owner != owner_id:
+                        raise RuntimeError("idempotency lock released by a non-owner")
+                    current.release()
+                    owner = None
+                if users == 1:
+                    del self._key_locks[key]
+                else:
+                    self._key_locks[key] = (current, users - 1, owner)
 
     def check(self, key: str, fingerprint: str) -> tuple[bool, Any]:
         """Returns (already_done, cached_result). Raises on a key/payload mismatch."""
@@ -181,6 +232,10 @@ class Worker:
         self.handlers[kind] = handler
 
     def run_once(self, job: Job) -> Job:
+        with self.idempotency.serialise(job.idempotency_key):
+            return self._run_once_serialised(job)
+
+    def _run_once_serialised(self, job: Job) -> Job:
         handler = self.handlers.get(job.kind)
         if handler is None:
             # An unregistered kind is a deploy problem, not a transient one.

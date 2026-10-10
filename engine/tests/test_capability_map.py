@@ -102,3 +102,8 @@ def test_every_capability_states_dependencies_and_risks() -> None:
 def test_capability_ids_are_unique_and_sequential() -> None:
     ids = [entry["id"] for entry in capability_map.load()]
     assert ids == [f"CAP-{i:03d}" for i in range(1, len(ids) + 1)]
+
+
+def test_integrated_reference_paths_are_posix_on_every_host() -> None:
+    path = capability_map.REPO / "engine" / "src" / "omnex" / "core" / "clock.py"
+    assert capability_map._rel(path) == "engine/src/omnex/core/clock.py"
