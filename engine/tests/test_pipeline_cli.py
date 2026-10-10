@@ -21,6 +21,7 @@ import hashlib
 import hmac
 import io
 import json
+import os
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -174,6 +175,9 @@ def test_the_claim_survives_the_process_that_made_it(tmp_path: Path) -> None:
     store = tmp_path / "claims"
     module = "omnex.pipeline"
     env = {"PYTHONPATH": str(REPO / "engine" / "src")}
+    system_root = os.environ.get("SYSTEMROOT")
+    if system_root is not None:
+        env["SystemRoot"] = system_root
     argv = [sys.executable, "-m", module, "claim", "--store", str(store), "--event-id", "evt_1"]
     first = subprocess.run(argv, capture_output=True, env=env, check=False)
     second = subprocess.run(argv, capture_output=True, env=env, check=False)

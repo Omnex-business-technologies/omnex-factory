@@ -3952,3 +3952,37 @@ restores `lib/core/safe-fetch.ts` verbatim — the exact unused, untested
 state this closes, not a break, since the deletion changed nothing any
 passing test, build, or route depends on.
 
+## Review 2026-10-10: preserve evidence and side effects across boundaries
+
+**Evidence.** Reopening a SQLite index discarded `Chunk.page_end`; merging a
+remote memory version incremented it a second time; concurrent workers sharing
+an idempotency store could execute the same job twice. A failed pack render
+truncated the previous deliverable, and duplicate source stems produced duplicate
+archive entries. Repository paths also used Windows separators where the
+invariant allowlist and committed capability map require POSIX paths.
+
+**Decision.** Persist page ranges with an in-place schema-v2 migration, retain
+incoming memory versions, and serialize check/work/record by key in the shared
+in-memory store. Refuse recursive same-key execution explicitly. Build packs in
+a temporary sibling file and replace the destination only after the complete
+archive is closed and hashed; reject output-name collisions before rendering.
+Normalize registry paths at their serialization boundary.
+
+**Limits and alternatives.** The queue guarantee is process-local; this does not
+create a distributed exactly-once worker. Legacy indexes cannot recover page
+ends they never stored, so those rows retain their known starting page. Atomic
+replacement protects against build errors but is not a crash-durability promise.
+Removing Windows sandbox restrictions was rejected: a passing test obtained by
+dropping resource limits would misrepresent the security boundary.
+
+**Verification.** Added regression, migration, concurrency, reentry and failed
+render tests. The decision records code behavior, not deployment evidence.
+Derived test counts and capability references are regenerated. The execution
+state is also regenerated from the existing evidence: expired contradictory
+evidence for C-013 now yields UNKNOWN. No evidence timestamps, human decisions,
+or confirmation fields are changed.
+
+**Reversibility.** Revert the code changes normally. Preserve a database backup
+before migration if an older engine must reopen the index; schema-v2 readers
+refuse future schema versions rather than guessing their meaning.
+

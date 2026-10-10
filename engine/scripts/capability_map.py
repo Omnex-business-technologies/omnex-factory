@@ -72,6 +72,11 @@ def load() -> list[dict[str, Any]]:
     return json.loads(SOURCE.read_text(encoding="utf-8"))["capabilities"]
 
 
+def _rel(path: Path) -> str:
+    """Render repository paths in the POSIX form used by committed artifacts."""
+    return path.relative_to(REPO).as_posix()
+
+
 def _bare_name(symbol: str) -> str:
     return symbol.rsplit(".", 1)[-1]
 
@@ -91,7 +96,7 @@ def _referencing_files(root: Path, name: str, exclude: Path | None) -> list[str]
         if exclude is not None and path == exclude:
             continue
         if pattern.search(path.read_text(encoding="utf-8")):
-            found.append(str(path.relative_to(REPO)))
+            found.append(_rel(path))
     return found
 
 
