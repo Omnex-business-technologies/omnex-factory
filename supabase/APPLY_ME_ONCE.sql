@@ -2,9 +2,10 @@
 -- OMNEX FACTORY — PASTE THIS ONCE into the Supabase SQL Editor, then press RUN.
 --   Dashboard → SQL Editor → New query → paste all → Run
 --
--- Part 1 creates exec_migration() so every FUTURE migration can be applied
--- programmatically (no more pasting). Part 2 is migration 001 (factory core).
--- Safe to re-run: everything is idempotent.
+-- Part 1 creates exec_migration() for later migrations. Parts 2–6 mirror
+-- migrations 001–005 so a first-time SQL Editor install has current billing
+-- grants, webhook retry handling, RPC privileges, and purchase idempotency.
+-- Safe to re-run: table/function setup is idempotent; purchase backfill is keyed.
 -- ════════════════════════════════════════════════════════════════════════════
 
 -- ── Part 1: migration runner ───────────────────────────────────────────────
@@ -214,5 +215,276 @@ create trigger on_auth_user_created_factory
   after insert on auth.users
   for each row execute function handle_new_factory_user();
 
--- Refresh PostgREST so the new tables/functions are visible immediately.
+-- ── Part 3: migration 002 (lead intake) ───────────────────────────────────
+-- Leads from the public portfolio brief form.
+--
+-- RLS is on with NO public select policy: an anonymous visitor may insert their own
+-- enquiry and read nothing back. Without that, the brief form would double as a
+-- customer-list endpoint for anyone who found the anon key.
+
+create table if not exists public.leads (
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz not null default now(),
+  source        text not null default 'portfolio',
+  name          text,
+  email         text not null,
+  company       text,
+  brand_site    text,
+  -- Kept as free text rather than an enum: the options on the form will change
+  -- faster than a migration should.
+  budget        text,
+  timeline      text,
+  brief         text,
+  -- Scored later by the qualification step; null means "not yet scored".
+  score         int,
+  stage         text not null default 'new',
+  meta          jsonb not null default '{}'::jsonb
+);
+
+create index if not exists leads_created_at_idx on public.leads (created_at desc);
+create index if not exists leads_stage_idx on public.leads (stage);
+
+alter table public.leads enable row level security;
+
+-- Insert-only for anonymous visitors. Service-role bypasses RLS for the owner view.
+drop policy if exists leads_public_insert on public.leads;
+create policy leads_public_insert
+  on public.leads for insert
+  to anon, authenticated
+  with check (true);
+
+
+-- ── Part 4: migration 003 (retryable webhook claims) ─────────────────────
+-- Migration 003: webhook idempotency that survives a failed first attempt.
+--
+-- Migration 001's `webhook_events` idempotency gate inserts the event id
+-- BEFORE processing, so two concurrent deliveries of the same event can never
+-- both pass a check-then-act race. That is correct for closing the duplicate
+-- race, but it has a second, unintended effect: Stripe retries a webhook on
+-- any non-2xx response, and a retry of an event whose FIRST attempt failed
+-- (a transient DB error, a timeout, anything after the row was claimed) hits
+-- the same primary-key conflict and is silently treated as "already handled"
+-- -- even though nothing was ever granted. A customer who paid and hit that
+-- window would never receive their credits, and Stripe would stop retrying
+-- because the handler answered 200. That is the exact failure §9 (Credit /
+-- Billing Integrity) names: "nepotvrđenog settlementa" that looks settled.
+--
+-- `claim_webhook_event()` distinguishes three outcomes instead of one boolean:
+--   'new'       — never seen; caller processes and marks success or failure.
+--   'retry'     — a PRIOR attempt at this exact event failed; this caller now
+--                 owns the retry and must process it again.
+--   'duplicate' — already succeeded, or another request currently owns it.
+--
+-- The insert-then-conditional-update happens inside ONE function so the
+-- atomicity is a property of the database, not of application code: two
+-- concurrent retries of the same failed event race on the UPDATE's row lock
+-- the same way `consume_credits`' `FOR UPDATE` already does, and only one can
+-- win. A mock cannot prove this; only a real Postgres constraint violation
+-- and a real concurrent UPDATE can, which is why this is tested in
+-- `credits.db.test.ts` against a container, not with a fake client.
+create or replace function claim_webhook_event(
+  p_id   text,
+  p_type text
+) returns text
+language plpgsql
+as $$
+begin
+  insert into public.webhook_events (id, type) values (p_id, p_type);
+  return 'new';
+exception when unique_violation then
+  update public.webhook_events
+  set type = p_type
+  where id = p_id and type = p_type || ':failed';
+
+  if found then
+    return 'retry';
+  end if;
+  return 'duplicate';
+end;
+$$;
+
+-- Marks a claimed event as failed so a later redelivery of the SAME event id
+-- is eligible for `claim_webhook_event` to return 'retry' rather than
+-- 'duplicate'. Never touches a row this call did not itself just fail to
+-- finish processing -- the caller only invokes it inside its own error path.
+create or replace function mark_webhook_event_failed(
+  p_id   text,
+  p_type text
+) returns void
+language plpgsql
+as $$
+begin
+  update public.webhook_events set type = p_type || ':failed' where id = p_id;
+end;
+$$;
+
+
+-- ── Part 5: migration 004 (RPC privileges) ────────────────────────────────
+-- Security boundary for service-role RPCs. PostgreSQL grants EXECUTE on new
+-- functions to PUBLIC by default; these functions accept target user ids.
+-- Keep financial mutations and webhook claims inaccessible to browser roles.
+
+alter function public.consume_credits(uuid, integer, text)
+  set search_path = public, pg_temp;
+alter function public.grant_credits(uuid, integer, text, text)
+  set search_path = public, pg_temp;
+alter function public.handle_new_factory_user()
+  set search_path = public, pg_temp;
+alter function public.claim_webhook_event(text, text)
+  set search_path = public, pg_temp;
+alter function public.mark_webhook_event_failed(text, text)
+  set search_path = public, pg_temp;
+
+revoke all on function public.consume_credits(uuid, integer, text)
+  from public, anon, authenticated;
+revoke all on function public.grant_credits(uuid, integer, text, text)
+  from public, anon, authenticated;
+revoke all on function public.handle_new_factory_user()
+  from public, anon, authenticated;
+revoke all on function public.claim_webhook_event(text, text)
+  from public, anon, authenticated;
+revoke all on function public.mark_webhook_event_failed(text, text)
+  from public, anon, authenticated;
+
+grant execute on function public.consume_credits(uuid, integer, text)
+  to service_role;
+grant execute on function public.grant_credits(uuid, integer, text, text)
+  to service_role;
+grant execute on function public.claim_webhook_event(text, text)
+  to service_role;
+grant execute on function public.mark_webhook_event_failed(text, text)
+  to service_role;
+
+-- These webhook functions run as the caller, so EXECUTE alone is insufficient.
+grant select, insert, update on public.webhook_events to service_role;
+
+
+-- ── Part 6: migration 005 (purchase grant idempotency) ────────────────────
+-- Apply while billing RPC and webhook workers are quiesced. The ledger backfill
+-- and function replacement must not race an in-flight legacy grant.
+BEGIN;
+
+-- Make Stripe credit grants safe across webhook retries, including the case
+-- where Postgres committed the grant but the HTTP response was lost.
+create table if not exists public.credit_grant_refs (
+  stripe_ref text primary key check (length(btrim(stripe_ref)) > 0),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount integer not null check (amount > 0),
+  created_at timestamptz not null default now()
+);
+
+alter table public.credit_grant_refs enable row level security;
+revoke all on public.credit_grant_refs from public, anon, authenticated;
+grant all on public.credit_grant_refs to service_role;
+
+-- Seed the idempotency keys from grants already in the append-only ledger.
+-- Fail closed if the old data cannot establish one unambiguous owner and pack
+-- amount per Stripe session. Inspect and reconcile ledger/balances before
+-- retrying a failed migration; do not delete audit rows to bypass this check.
+do $$
+begin
+  if exists (
+    select 1 from public.credit_ledger
+    where reason = 'purchase'
+      and (nullif(btrim(stripe_ref), '') is null or stripe_ref <> btrim(stripe_ref))
+  ) then
+    raise exception 'purchase ledger has rows without a usable Stripe reference; resolve before applying migration 005';
+  end if;
+
+  if exists (
+    select stripe_ref
+    from public.credit_ledger
+    where reason = 'purchase' and stripe_ref is not null
+    group by stripe_ref
+    having count(distinct user_id) > 1 or count(distinct delta) > 1 or min(delta) <= 0
+  ) then
+    raise exception 'purchase ledger has conflicting owner or amount for a Stripe reference';
+  end if;
+end;
+$$;
+
+insert into public.credit_grant_refs (stripe_ref, user_id, amount)
+select stripe_ref, min(user_id::text)::uuid, min(delta)
+from public.credit_ledger
+where reason = 'purchase' and stripe_ref is not null
+group by stripe_ref
+on conflict (stripe_ref) do nothing;
+
+create or replace function public.grant_credits(
+  p_user_id uuid,
+  p_amount integer,
+  p_reason text default 'purchase',
+  p_ref text default null
+) returns integer
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_new integer;
+  v_ref text := nullif(btrim(p_ref), '');
+  v_ref_user uuid;
+  v_ref_amount integer;
+begin
+  if p_amount <= 0 then
+    raise exception 'credit grant amount must be positive';
+  end if;
+
+  if p_reason = 'purchase' then
+    if v_ref is null then
+      raise exception 'purchase credit grant requires a Stripe reference';
+    end if;
+
+    -- The ref claim and credit mutation share this transaction. A duplicate
+    -- waits for the original insert to commit, then sees its owner and amount.
+    insert into public.credit_grant_refs (stripe_ref, user_id, amount)
+    values (v_ref, p_user_id, p_amount)
+    on conflict (stripe_ref) do nothing;
+
+    if not found then
+      select user_id, amount into v_ref_user, v_ref_amount
+      from public.credit_grant_refs
+      where stripe_ref = v_ref;
+      if v_ref_user is distinct from p_user_id or v_ref_amount is distinct from p_amount then
+        raise exception 'purchase reference conflicts with its original user or amount';
+      end if;
+      select credits into v_new
+      from public.credit_balance
+      where user_id = p_user_id;
+      if v_new is null then
+        raise exception 'purchase reference exists without a credit balance';
+      end if;
+      return v_new;
+    end if;
+  end if;
+
+  insert into public.credit_balance (user_id, credits)
+  values (p_user_id, p_amount)
+  on conflict (user_id) do update
+    set credits = public.credit_balance.credits + p_amount,
+        updated_at = now()
+  returning credits into v_new;
+
+  insert into public.credit_ledger (user_id, delta, reason, stripe_ref)
+  values (p_user_id, p_amount, p_reason, v_ref);
+
+  return v_new;
+end;
+$$;
+
+-- CREATE OR REPLACE preserves ACLs, but repeat the boundary here so migration
+-- 005 remains safe if installed independently after the privilege migration.
+revoke all on function public.grant_credits(uuid, integer, text, text)
+  from public, anon, authenticated;
+grant execute on function public.grant_credits(uuid, integer, text, text)
+  to service_role;
+
+COMMIT;
+
+
+
+
+
+
+-- ── Part 7: refresh PostgREST after all tables and RPC grants ─────────────
 notify pgrst, 'reload schema';
